@@ -1,0 +1,198 @@
+// Twendezetu data model. SQLite for zero-config dev; switch the provider to
+// "postgresql" and run a fresh migration for production. All foreign keys are
+// explicit, all owner-scoped tables index on the owner column for fast lookup.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ── Users ──────────────────────────────────────────────
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  city         String   @default("Nairobi")
+  phone        String?
+  role         String   @default("customer") // customer | vendor | admin
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  vendor       Vendor?       @relation("VendorOwner")
+  bookings     Booking[]     @relation("CustomerBookings")
+  favorites    Favorite[]
+  reviews      Review[]
+  sentMessages Message[]     @relation("MessageSender")
+  sessions     Session[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  userAgent String?
+  ipAddress String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+}
+
+// ── Vendors & packages ─────────────────────────────────
+model Vendor {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  ownerId      String?  @unique
+  name         String
+  type         String
+  category     String   // venues | catering | photo | decor | djs | mcs | packages | transport
+  city         String
+  country      String
+  description  String
+  rating       Float    @default(4.9)
+  reviewsCount Int      @default(0)
+  basePrice    Int      // in KES cents-of-cents, simplified to whole KES
+  unit         String?  // 'per guest', null = total
+  capacity     String?
+  tags         String   // comma-separated; SQLite has no string[]
+  highlights   String   // comma-separated
+  hostName     String
+  hostYears    Int      @default(3)
+  superhost    Boolean  @default(false)
+  coverImage   String
+  gallery      String   // comma-separated URLs
+  published    Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  owner     User?      @relation("VendorOwner", fields: [ownerId], references: [id])
+  packages  Package[]
+  bookings  Booking[]
+  favorites Favorite[]
+  inquiries Inquiry[]
+  reviews   Review[]
+
+  @@index([category])
+  @@index([city])
+  @@index([country])
+}
+
+model Package {
+  id          String  @id @default(cuid())
+  vendorId    String
+  name        String
+  subtitle    String
+  price       Int
+  includes    String  // comma-separated
+  featured    Boolean @default(false)
+  sortOrder   Int     @default(0)
+
+  vendor   Vendor    @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  bookings Booking[]
+
+  @@index([vendorId])
+}
+
+// ── Bookings & conversations ───────────────────────────
+model Booking {
+  id              String   @id @default(cuid())
+  customerId      String
+  vendorId        String
+  packageId       String
+  eventDate       DateTime
+  guests          Int
+  contactName     String
+  contactPhone    String
+  notes           String?
+  addOns          String   @default("") // comma-separated addon ids
+  subtotal        Int
+  serviceFee      Int
+  vat             Int
+  total           Int
+  depositAmount   Int
+  currency        String   @default("KES")
+  status          String   @default("confirmed") // pending_payment | confirmed | cancelled | completed
+  paymentStatus   String   @default("deposit_paid") // none | deposit_paid | paid_in_full | refunded
+  stripePaymentId String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  customer User    @relation("CustomerBookings", fields: [customerId], references: [id], onDelete: Cascade)
+  vendor   Vendor  @relation(fields: [vendorId], references: [id])
+  package  Package @relation(fields: [packageId], references: [id])
+  messages Message[]
+  review   Review?
+
+  @@index([customerId])
+  @@index([vendorId])
+  @@index([eventDate])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  bookingId String
+  senderId  String
+  fromRole  String   // customer | vendor | system
+  body      String
+  createdAt DateTime @default(now())
+  readAt    DateTime?
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  sender  User    @relation("MessageSender", fields: [senderId], references: [id])
+
+  @@index([bookingId])
+}
+
+// ── Marketplace state ──────────────────────────────────
+model Favorite {
+  userId    String
+  vendorId  String
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vendor Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@id([userId, vendorId])
+  @@index([userId])
+}
+
+model Inquiry {
+  id           String   @id @default(cuid())
+  vendorId     String
+  customerName String
+  customerId   String?
+  event        String
+  eventDate    DateTime
+  message      String?
+  status       String   @default("new") // new | replied | won | lost
+  createdAt    DateTime @default(now())
+
+  vendor Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@index([vendorId])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  bookingId String   @unique
+  vendorId  String
+  customerId String
+  rating    Int      // 1-5
+  body      String
+  createdAt DateTime @default(now())
+
+  booking  Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  vendor   Vendor  @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  customer User    @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([vendorId])
+}
