@@ -2,11 +2,13 @@ import './globals.css';
 import { Toaster } from '@/components/Toaster';
 import { ThemeApplier } from '@/components/ThemeApplier';
 
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://twendezetu-event-marketplace.vercel.app';
+
 export const metadata = {
   title: 'Twendezetu — Premium East African Event Marketplace',
   description: "East Africa's curated marketplace for venues, caterers, photographers, and event makers. Serving Kenya, Uganda, Tanzania, and Rwanda.",
   keywords: ['East Africa', 'wedding', 'event', 'venue', 'marketplace', 'Nairobi', 'Kampala', 'Kenya', 'Uganda'],
-  metadataBase: new URL('https://codingxperience.github.io/twendezetu-platform/'),
+  metadataBase: new URL(appUrl),
   openGraph: {
     title: 'Twendezetu — Gather beautifully.',
     description: 'From Nairobi to Kampala to Kigali.',

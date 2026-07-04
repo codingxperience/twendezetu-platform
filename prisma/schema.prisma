@@ -1,14 +1,16 @@
-// Twendezetu data model. SQLite for zero-config dev; switch the provider to
-// "postgresql" and run a fresh migration for production. All foreign keys are
-// explicit, all owner-scoped tables index on the owner column for fast lookup.
+// Twendezetu data model. Supabase Postgres is the system database; Prisma uses
+// the pooled DATABASE_URL at runtime and DIRECT_URL for migrations. All foreign
+// keys are explicit, all owner-scoped tables index on the owner column for fast
+// lookup.
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // ── Users ──────────────────────────────────────────────

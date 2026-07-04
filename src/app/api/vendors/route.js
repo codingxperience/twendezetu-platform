@@ -6,22 +6,24 @@ export async function GET(req) {
   const category = url.searchParams.get('category') || undefined;
   const city = url.searchParams.get('city') || undefined;
   const country = url.searchParams.get('country') || undefined;
-  const q = url.searchParams.get('q')?.toLowerCase() || '';
+  const q = url.searchParams.get('q')?.trim() || '';
   const sort = url.searchParams.get('sort') || 'recommended';
-  const limit = Math.min(Number(url.searchParams.get('limit')) || 50, 100);
+  const requestedLimit = Number.parseInt(url.searchParams.get('limit') || '50', 10);
+  const limit = Number.isFinite(requestedLimit) ? Math.min(Math.max(requestedLimit, 1), 100) : 50;
 
   const where = { published: true };
   if (category) where.category = category;
   if (city) where.city = city;
   if (country) where.country = country;
   if (q) {
+    const contains = { contains: q, mode: 'insensitive' };
     where.OR = [
-      { name: { contains: q } },
-      { type: { contains: q } },
-      { city: { contains: q } },
-      { country: { contains: q } },
-      { tags: { contains: q } },
-      { description: { contains: q } },
+      { name: contains },
+      { type: contains },
+      { city: contains },
+      { country: contains },
+      { tags: contains },
+      { description: contains },
     ];
   }
 

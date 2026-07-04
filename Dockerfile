@@ -12,7 +12,7 @@ WORKDIR /app
 RUN apk add --no-cache openssl libc6-compat
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN npx prisma generate && npm run build
+RUN npm run build
 
 FROM node:20-alpine AS runner
 WORKDIR /app
@@ -26,4 +26,4 @@ COPY --from=builder /app/package.json ./package.json
 RUN chown -R nextjs:nextjs /app
 USER nextjs
 EXPOSE 3000
-CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
+CMD ["npm", "start"]

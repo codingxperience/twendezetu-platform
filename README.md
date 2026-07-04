@@ -2,7 +2,7 @@
 
 A full-stack East African event marketplace. Real database, real auth, real booking flow, payment-ready.
 
-**Tech:** Next.js 15 (App Router) · Prisma · SQLite (Postgres-ready) · JWT cookies · Stripe · Zustand + SWR
+**Tech:** Next.js 15 (App Router) · Prisma · Supabase Postgres · JWT cookies · Stripe · Zustand + SWR
 
 ---
 
@@ -26,7 +26,10 @@ git clone https://github.com/codingxperience/twendezetu-platform.git
 cd twendezetu-platform
 npm install
 cp .env.example .env
-npx prisma migrate deploy
+
+# Fill DATABASE_URL and DIRECT_URL from Supabase Connect > ORM > Prisma.
+# Apply migrations when setting up or changing the schema:
+npm run db:deploy
 npm run db:seed
 npm run dev
 ```
@@ -50,9 +53,17 @@ Visit http://localhost:3000.
 
 1. Push to GitHub.
 2. Import the repo at [vercel.com/new](https://vercel.com/new).
-3. Add environment variables from `.env.example` (at minimum `AUTH_SECRET`, `DATABASE_URL`).
-4. For a managed Postgres, use [Vercel Postgres](https://vercel.com/storage/postgres) or [Neon](https://neon.tech) free tier. Change the `provider` in `prisma/schema.prisma` from `sqlite` to `postgresql`, commit, and Vercel rebuilds with the new database.
-5. Deploy. First request runs migrations automatically (see `package.json`'s `build` script).
+3. Add environment variables from `.env.example` (at minimum `AUTH_SECRET`, `DATABASE_URL`, and `DIRECT_URL`).
+4. Use Supabase's Prisma connection strings: transaction pooler for `DATABASE_URL`, session pooler for `DIRECT_URL`.
+5. Run `npm run db:deploy` before deploying schema changes, then deploy. The normal build does not need a live database connection.
+
+### GitHub Pages
+
+GitHub Pages is not a supported deployment target for this app. Twendezetu uses
+Next.js API routes, Prisma, database-backed auth, and server-rendered pages;
+GitHub Pages only serves static files. A GitHub Pages URL for this repository
+will return 404 unless you replace the app with a static export, which would
+remove the booking, auth, dashboard, and API functionality.
 
 ### Railway / Fly.io / Render
 
@@ -63,27 +74,7 @@ docker build -t twendezetu .
 docker run -p 3000:3000 -e AUTH_SECRET=... twendezetu
 ```
 
-For SQLite in production, mount a persistent volume to `/app/prisma`. For Postgres, set `DATABASE_URL` to your managed instance.
-
-### Database swap (SQLite → Postgres)
-
-```diff
-- datasource db {
--   provider = "sqlite"
--   url      = env("DATABASE_URL")
-- }
-+ datasource db {
-+   provider = "postgresql"
-+   url      = env("DATABASE_URL")
-+ }
-```
-
-Then:
-```bash
-rm -rf prisma/migrations
-npx prisma migrate dev --name init
-npm run db:seed
-```
+Set `AUTH_SECRET`, `DATABASE_URL`, and `DIRECT_URL` when running the container. `DATABASE_URL` should point at the Supabase transaction pooler; `DIRECT_URL` should point at the Supabase session pooler for migrations. Run `npm run db:deploy` as an explicit release step before deploying schema changes.
 
 ---
 
