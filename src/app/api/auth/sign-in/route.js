@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { verifyPassword, createSession } from '@/lib/auth';
-import { ok, badRequest, zodError } from '@/lib/api';
+import { ok, badRequest, zodError, serverError } from '@/lib/api';
 
 const Body = z.object({
   email: z.string().email(),
@@ -21,7 +21,13 @@ export async function POST(req) {
   const okPw = await verifyPassword(body.password, user.passwordHash);
   if (!okPw) return badRequest('Invalid email or password.');
 
-  await createSession(user.id, req);
+  try {
+    await createSession(user.id, req);
+  } catch (e) {
+    console.error(e);
+    return serverError('Could not create session.');
+  }
+
   const { passwordHash, ...safe } = user;
   return ok({ user: safe });
 }
