@@ -1,5 +1,5 @@
-import { DeviceAwareDesignPage } from '@/components/DeviceAwareHomePage';
+import { ClaudeDesignPage } from '@/components/ClaudeDesignPage';
 
 export default function AccountPage() {
-  return <DeviceAwareDesignPage desktopPage="myTwende" mobilePage="myTwende" />;
+  return <ClaudeDesignPage page="myTwende" />;
 }

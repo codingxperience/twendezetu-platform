@@ -1,5 +1,5 @@
-import { MobileWebPage } from '@/components/MobileWebPage';
+import { ClaudeDesignPage } from '@/components/ClaudeDesignPage';
 
 export default function MobileShowcasePage() {
-  return <MobileWebPage page="home" />;
+  return <ClaudeDesignPage page="mobile" />;
 }

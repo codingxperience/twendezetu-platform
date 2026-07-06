@@ -1,5 +1,5 @@
-import { DeviceAwareDesignPage } from '@/components/DeviceAwareHomePage';
+import { ClaudeDesignPage } from '@/components/ClaudeDesignPage';
 
 export default function AboutPage() {
-  return <DeviceAwareDesignPage desktopPage="home" mobilePage="home" />;
+  return <ClaudeDesignPage page="home" />;
 }

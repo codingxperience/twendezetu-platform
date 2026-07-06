@@ -1,5 +1,5 @@
-import { DeviceAwareDesignPage } from '@/components/DeviceAwareHomePage';
+import { ClaudeDesignPage } from '@/components/ClaudeDesignPage';
 
 export default function NyamaChomaEventPage() {
-  return <DeviceAwareDesignPage desktopPage="event" mobilePage="event" />;
+  return <ClaudeDesignPage page="event" />;
 }

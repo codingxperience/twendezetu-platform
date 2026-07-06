@@ -1,5 +1,5 @@
-import { DeviceAwareDesignPage } from '@/components/DeviceAwareHomePage';
+import { ClaudeDesignPage } from '@/components/ClaudeDesignPage';
 
 export default function ProviderDashboardPage() {
-  return <DeviceAwareDesignPage desktopPage="providerDashboard" mobilePage="providerDashboard" />;
+  return <ClaudeDesignPage page="providerDashboard" />;
 }
