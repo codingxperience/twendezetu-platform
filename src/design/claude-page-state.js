@@ -74,7 +74,7 @@ function homeValues(state, setPageState) {
     eventCount: 24,
     services: [
       {
-        href: 'Twendezetu Home.dc.html',
+        href: 'Provider Listing.dc.html',
         img: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=1400&q=80',
         kicker: 'WITH SPECIAL CARE',
         title: 'Weddings & harusi',
@@ -88,7 +88,7 @@ function homeValues(state, setPageState) {
         desc: 'Nyama choma festivals, harambees, faith gatherings — every rika.',
       },
       {
-        href: 'Twendezetu Home.dc.html',
+        href: 'Checkout.dc.html',
         img: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=1400&q=80',
         kicker: 'FIND YOUR VIBE',
         title: 'Music & DJs',

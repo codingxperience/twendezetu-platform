@@ -63,6 +63,15 @@ function addClassToTag(tag, className) {
 function createImageSlot(match) {
   const style = readAttribute(match, 'style');
   const placeholder = readAttribute(match, 'placeholder') || 'Image placeholder';
+  const src = readAttribute(match, 'src');
+  const credit = readAttribute(match, 'credit');
+
+  if (src) {
+    const image = `<img src="${escapeHtml(src)}" alt="${escapeHtml(placeholder)}">`;
+    const caption = credit ? `<figcaption>${escapeHtml(credit)}</figcaption>` : '';
+    return `<figure class="tw-image-slot tw-image-slot--photo" style="${style}">${image}${caption}</figure>`;
+  }
+
   return `<div class="tw-image-slot" style="${style}"><span>${escapeHtml(placeholder)}</span></div>`;
 }
 
@@ -131,6 +140,8 @@ function renderTemplate(template, values, registerAction) {
       if (typeof value === 'function') return '';
       return escapeHtml(value);
     });
+
+    html = html.replace(/\ssrc="([^"]+)"/g, (_match, src) => ` src="${escapeHtml(src)}"`);
 
     return html;
   }
