@@ -1,5 +1,5 @@
 import { DeviceAwareDesignPage } from '@/components/DeviceAwareHomePage';
 
-export default function VendorPage() {
+export default function KatoProviderPage() {
   return <DeviceAwareDesignPage desktopPage="provider" mobilePage="provider" />;
 }
