@@ -15,6 +15,8 @@ const ROUTES = {
   'Points Wallet.dc.html': '/points-wallet',
   'My Twende.dc.html': '/my-twende',
   'Messages.dc.html': '/messages',
+  'Admin.dc.html': '/admin',
+  'Finance.dc.html': '/finance',
   'Mobile.dc.html': '/mobile',
 };
 
@@ -128,6 +130,12 @@ function renderTemplate(template, values, registerAction) {
       return ` data-change-action-id="${registerAction(action)}"`;
     });
 
+    html = html.replace(/\sonKeyDown="\{\{\s*([^}]+?)\s*\}\}"/g, (_match, expr) => {
+      const action = resolveExpression(expr, scope);
+      if (typeof action !== 'function') return '';
+      return ` data-key-action-id="${registerAction(action)}"`;
+    });
+
     html = html.replace(/\shref="\{\{\s*([^}]+?)\s*\}\}"/g, (_match, expr) => {
       const href = resolveExpression(expr, scope);
       return ` href="${escapeHtml(mapHref(String(href ?? '#')))}"`;
@@ -189,6 +197,8 @@ export function ClaudeDesignPage({ page }) {
       className="claude-design"
       onClick={(event) => runAction(event, 'data-action-id')}
       onChange={(event) => runAction(event, 'data-change-action-id')}
+      onKeyDown={(event) => runAction(event, 'data-key-action-id')}
+      suppressHydrationWarning
       dangerouslySetInnerHTML={{ __html: rendered.html }}
     />
   );
