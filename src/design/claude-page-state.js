@@ -23,7 +23,14 @@ const initialState = {
     prefs: { rsvp: true, offers: true, friends: true, digest: false },
   },
   messages: { active: 0, accepted: false },
-  wallet: {},
+  wallet: {
+    balance: 1250,
+    toppedUp: false,
+    sendOpen: false,
+    recipient: '',
+    amount: '250',
+    sendNote: 'Send points to family, friends, or event pools. No phone number is shown until you choose to share it.',
+  },
   provider: { copied: false },
   providerDashboard: {
     bellOpen: false,
@@ -611,8 +618,77 @@ function messagesValues(state, setPageState) {
   };
 }
 
-function walletValues() {
+function walletValues(state, setPageState) {
+  const balance = Number(state.balance ?? 0);
+  const usd = balance / 100;
+  const fmt = (amount) => Math.round(amount).toLocaleString();
+  const resetTopUp = () => {
+    window.setTimeout(() => {
+      setPageState((current) => ({ ...current, toppedUp: false }));
+    }, 1800);
+  };
+
   return {
+    balanceFmt: balance.toLocaleString(),
+    equivalents: `Approx. $${usd.toFixed(2)} - KES ${fmt(usd * 129)} - UGX ${fmt(usd * 3720)} - TZS ${fmt(usd * 2680)}`,
+    topUpLabel: state.toppedUp ? '+500 added' : 'Top up',
+    topUp: () => {
+      setPageState((current) => ({
+        ...current,
+        balance: Number(current.balance ?? 0) + 500,
+        toppedUp: true,
+        sendNote: 'Top-up added 500 PTS. Your updated balance is ready.',
+      }));
+      resetTopUp();
+    },
+    sendOpen: state.sendOpen,
+    sendBg: state.sendOpen ? '#A85A23' : 'transparent',
+    toggleSend: () =>
+      setPageState((current) => ({
+        ...current,
+        sendOpen: !current.sendOpen,
+      })),
+    recipient: state.recipient,
+    amount: state.amount,
+    setRecipient: (event) =>
+      setPageState((current) => ({
+        ...current,
+        recipient: event.target.value,
+      })),
+    setAmount: (event) =>
+      setPageState((current) => ({
+        ...current,
+        amount: event.target.value,
+      })),
+    confirmSend: () => {
+      setPageState((current) => {
+        const amount = Math.floor(Number(current.amount));
+        const recipient = String(current.recipient ?? '').trim();
+        const currentBalance = Number(current.balance ?? 0);
+
+        if (!recipient) {
+          return { ...current, sendOpen: true, sendNote: 'Add a recipient before sending points.' };
+        }
+
+        if (!Number.isFinite(amount) || amount <= 0) {
+          return { ...current, sendOpen: true, sendNote: 'Enter a positive points amount to send.' };
+        }
+
+        if (amount > currentBalance) {
+          return { ...current, sendOpen: true, sendNote: 'That amount is above your available points balance.' };
+        }
+
+        return {
+          ...current,
+          amount: '250',
+          balance: currentBalance - amount,
+          recipient: '',
+          sendOpen: true,
+          sendNote: `Sent ${amount.toLocaleString()} PTS to ${recipient}.`,
+        };
+      });
+    },
+    sendNote: state.sendNote,
     activity: [
       { icon: '↓', title: 'Top-up from card', meta: 'YESTERDAY · $10.00 → 1,000 PTS', amount: '+1,000', color: '#4a7c4a' },
       { icon: '🎟', title: 'Afrogroove Night — early bird', meta: '3 AUG · TICKET #TW-8841', amount: '−400', color: '#B8463A' },
@@ -819,7 +895,7 @@ export function createClaudePageValues(page, state, setPageState) {
     case 'messages':
       return messagesValues(state, setPageState);
     case 'wallet':
-      return walletValues();
+      return walletValues(state, setPageState);
     case 'provider':
       return providerValues(state, setPageState);
     case 'providerDashboard':
