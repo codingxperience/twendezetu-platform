@@ -138,10 +138,6 @@ function ScreenCard({ screen, status = false }) {
         <p>{screen.headline}</p>
       </div>
 
-      <div className={styles.signature} aria-label="Designed by Fred Okorio">
-        <span>@</span>Fred Okorio
-      </div>
-
       {status ? (
         <div className={styles.securitySeal} aria-label="Original concept protected mark">
           <span>Original concept</span>
