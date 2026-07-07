@@ -1,11 +1,16 @@
 const CURRENCIES = ['USD', 'KES', 'UGX', 'TZS', 'RWF'];
 
 const initialState = {
-  home: { currency: 'USD' },
-  event: { rsvped: false, copied: false },
+  home: { currency: 'USD', lang: 'en' },
+  event: { rsvpStep: 'idle', copied: false, gName: '', gEmail: '', gParty: 1, gError: null },
   create: {
     step: 1,
     kind: 'need',
+    ticketMode: 'free',
+    tiers: [
+      { name: 'Early bird', price: 'UGX 20,000', qty: '150' },
+      { name: 'VIP lounge', price: 'UGX 45,000', qty: '40' },
+    ],
     copied: false,
     toggles: { reveal: false, offers: true, digest: true, comments: false },
   },
@@ -21,6 +26,7 @@ const initialState = {
     tab: 'upcoming',
     copied: false,
     prefs: { rsvp: true, offers: true, friends: true, digest: false },
+    pausedPosts: {},
     bellOpen: false,
     profileOpen: false,
     referOpen: {},
@@ -82,6 +88,15 @@ const initialState = {
     toastKind: 'ok',
     activity: null,
   },
+  providerVerification: {
+    idDone: false,
+    bizDone: false,
+    otp: 'idle',
+    otpValue: '',
+    otpError: false,
+    submitted: false,
+    toast: null,
+  },
   settings: {
     section: 'profile',
     toast: null,
@@ -95,6 +110,7 @@ const initialState = {
   admin: {
     section: 'overview',
     toast: null,
+    adminMenuOpen: false,
     reportState: {},
     userState: {},
     verifyState: {},
@@ -104,6 +120,8 @@ const initialState = {
   finance: {
     range: '30d',
     filter: 'ALL',
+    finMenuOpen: false,
+    finSection: 'OVERVIEW',
     payoutDone: false,
     released: {},
     toast: null,
@@ -157,7 +175,13 @@ function moneyFormatter(currency) {
 }
 
 function homeValues(state, setPageState) {
+  const sw = state.lang === 'sw';
+
   return {
+    isEn: !sw,
+    isSw: sw,
+    langLabel: sw ? 'SW -> EN' : 'EN -> SW',
+    toggleLang: () => setPageState((current) => ({ ...current, lang: current.lang === 'en' ? 'sw' : 'en' })),
     currency: state.currency,
     cycleCurrency: () => setPageState((current) => ({ ...current, currency: cycleCurrency(current.currency) })),
     cityLabel: 'NEW JERSEY / NEW YORK',
@@ -192,13 +216,21 @@ function homeValues(state, setPageState) {
         desc: 'Drivers, tents, chefs, escorts — post the need, compare the offers.',
       },
     ],
-    process: [
-      { num: '01', title: 'Post', desc: 'An event or a need — free, in minutes. Your contacts are masked from day one.' },
-      { num: '02', title: 'Share', desc: 'Every post gets a link built for WhatsApp and Facebook. Your circle spreads it for you.' },
-      { num: '03', title: 'Match', desc: 'Providers in that city get notified and respond with offers, in-platform.' },
-      { num: '04', title: 'Gather', desc: 'RSVP and tickets sync to calendars with reminders — 7 days, 1 day, 2 hours before.' },
-      { num: '05', title: 'Settle', desc: 'Pay online, at the door, or pool points across borders. Fees only when money moves.' },
-    ],
+    process: sw
+      ? [
+          { num: '01', title: 'Tangaza', desc: 'Tukio au hitaji - bure, kwa dakika chache. Mawasiliano yako yamefichwa tangu mwanzo.' },
+          { num: '02', title: 'Sambaza', desc: 'Kila tangazo lina link ya WhatsApp na Facebook. Mtandao wako unakusambazia.' },
+          { num: '03', title: 'Unganishwa', desc: 'Watoa huduma wa mji huo wanapata taarifa na kujibu na ofa, ndani ya jukwaa.' },
+          { num: '04', title: 'Kusanyika', desc: 'RSVP na tiketi zinaingia kalenda zenye vikumbusho - siku 7, siku 1, saa 2 kabla.' },
+          { num: '05', title: 'Lipana', desc: 'Lipa mtandaoni, mlangoni, au changishana pointi kuvuka mipaka. Ada ni pale pesa inapohamia tu.' },
+        ]
+      : [
+          { num: '01', title: 'Post', desc: 'An event or a need - free, in minutes. Your contacts are masked from day one.' },
+          { num: '02', title: 'Share', desc: 'Every post gets a link built for WhatsApp and Facebook. Your circle spreads it for you.' },
+          { num: '03', title: 'Match', desc: 'Providers in that city get notified and respond with offers, in-platform.' },
+          { num: '04', title: 'Gather', desc: 'RSVP and tickets sync to calendars with reminders - 7 days, 1 day, 2 hours before.' },
+          { num: '05', title: 'Settle', desc: 'Pay online, at the door, or pool points across borders. Fees only when money moves.' },
+        ],
     categories: [
       { label: 'All (24)', bg: '#1F3A38', fg: '#F7F1E6' },
       { label: 'Nyama choma', bg: '#F7F1E6', fg: '#14201F' },
@@ -231,7 +263,7 @@ function homeValues(state, setPageState) {
         badge: 'TICKETS',
       },
       {
-        href: '#',
+        href: 'Checkout.dc.html',
         img: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=600&q=80',
         title: 'Umoja Cultural Day',
         city: 'Kampala, UG',
@@ -241,7 +273,7 @@ function homeValues(state, setPageState) {
         badge: false,
       },
       {
-        href: '#',
+        href: 'Checkout.dc.html',
         img: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600&q=80',
         title: 'Swahili Food Fair',
         city: 'Nairobi, KE',
@@ -251,7 +283,7 @@ function homeValues(state, setPageState) {
         badge: false,
       },
       {
-        href: '#',
+        href: 'Event Nyama Choma.dc.html',
         img: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=600&q=80',
         title: 'Diaspora Connect Mixer',
         city: 'Newark, NJ',
@@ -261,7 +293,7 @@ function homeValues(state, setPageState) {
         badge: 'NEW',
       },
       {
-        href: '#',
+        href: 'Checkout.dc.html',
         img: 'https://images.unsplash.com/photo-1547036967-23d11aacaee0?w=600&q=80',
         title: 'Harusi Expo',
         city: 'Dar es Salaam, TZ',
@@ -271,7 +303,7 @@ function homeValues(state, setPageState) {
         badge: false,
       },
       {
-        href: '#',
+        href: 'Checkout.dc.html',
         img: 'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=600&q=80',
         title: 'Kigali Open-Air Sessions',
         city: 'Kigali, RW',
@@ -281,7 +313,7 @@ function homeValues(state, setPageState) {
         badge: false,
       },
       {
-        href: '#',
+        href: 'Event Nyama Choma.dc.html',
         img: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=600&q=80',
         title: 'Sunday Family Picnic',
         city: 'Hartford, CT',
@@ -300,12 +332,49 @@ function homeValues(state, setPageState) {
 }
 
 function eventValues(state, setPageState) {
+  const done = state.rsvpStep === 'done';
+  const party = state.gParty || 1;
+
   return {
-    rsvped: state.rsvped,
-    rsvpLabel: state.rsvped ? '✓ You are going' : 'RSVP — I am going',
-    rsvpBg: state.rsvped ? '#1F3A38' : '#D97A3B',
-    rsvpFg: state.rsvped ? '#F7F1E6' : '#1F3A38',
-    toggleRsvp: () => setPageState((current) => ({ ...current, rsvped: !current.rsvped })),
+    rsvped: done,
+    rsvpForm: state.rsvpStep === 'form',
+    rsvpLabel: done ? 'You are going' : state.rsvpStep === 'form' ? 'Finish below' : 'RSVP - I am going',
+    rsvpBg: done ? '#1F3A38' : '#D97A3B',
+    rsvpFg: done ? '#F7F1E6' : '#1F3A38',
+    toggleRsvp: () =>
+      setPageState((current) => ({
+        ...current,
+        rsvpStep: current.rsvpStep === 'idle' ? 'form' : 'idle',
+        gError: null,
+      })),
+    gName: state.gName || '',
+    setGName: (event) => setPageState((current) => ({ ...current, gName: event.target.value, gError: null })),
+    gEmail: state.gEmail || '',
+    setGEmail: (event) => setPageState((current) => ({ ...current, gEmail: event.target.value, gError: null })),
+    partyOpts: [1, 2, 3, 4].map((count) => ({
+      label: count === 4 ? '4+ GUESTS' : `${count} ${count === 1 ? 'GUEST' : 'GUESTS'}`,
+      pick: () => setPageState((current) => ({ ...current, gParty: count })),
+      bg: party === count ? '#1F3A38' : '#FFFDF8',
+      fg: party === count ? '#F7F1E6' : '#14201F',
+    })),
+    gError: state.gError,
+    confirmRsvp: () => {
+      const name = String(state.gName || '').trim();
+      const email = String(state.gEmail || '').trim();
+      if (!name) {
+        setPageState((current) => ({ ...current, gError: 'Please add your name.' }));
+        return;
+      }
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+        setPageState((current) => ({ ...current, gError: 'That email does not look right - we need it for your invite.' }));
+        return;
+      }
+      setPageState((current) => ({ ...current, rsvpStep: 'done', gError: null }));
+    },
+    cancelRsvp: () => setPageState((current) => ({ ...current, rsvpStep: 'idle', gError: null })),
+    gNameShown: String(state.gName || '').split(' ')[0] || 'rafiki',
+    gEmailShown: state.gEmail || '',
+    gPartyShown: party === 4 ? '4+ guests' : `${party} ${party === 1 ? 'guest' : 'guests'}`,
     copyLabel: state.copied ? '✓ COPIED' : 'COPY',
     copyLink: () => {
       copyText('https://twende.to/nyama-nanenane');
@@ -361,9 +430,27 @@ function createValues(state, setPageState) {
     knobLeft: state.toggles[key] ? '30px' : '2px',
     toggle: () => toggle(key),
   });
+  const tiers = state.tiers || [];
 
   return {
     kind: state.kind,
+    isEventKind: state.kind === 'event',
+    isPaid: state.ticketMode === 'paid',
+    pickFree: () => setPageState((current) => ({ ...current, ticketMode: 'free' })),
+    pickPaid: () => setPageState((current) => ({ ...current, ticketMode: 'paid' })),
+    freeBg: state.ticketMode === 'free' ? '#1F3A38' : '#FFFDF8',
+    freeFg: state.ticketMode === 'free' ? '#F7F1E6' : '#14201F',
+    paidBg: state.ticketMode === 'paid' ? '#1F3A38' : '#FFFDF8',
+    paidFg: state.ticketMode === 'paid' ? '#F7F1E6' : '#14201F',
+    tierRows: tiers.map((tier, index) => ({
+      ...tier,
+      remove: () => setPageState((current) => ({ ...current, tiers: (current.tiers || []).filter((_item, itemIndex) => itemIndex !== index) })),
+    })),
+    addTier: () =>
+      setPageState((current) => ({
+        ...current,
+        tiers: [...(current.tiers || []), { name: 'New tier', price: 'UGX 25,000', qty: '100' }],
+      })),
     isStep1: state.step === 1,
     isStep2: state.step === 2,
     isStep3: state.step === 3,
@@ -1112,8 +1199,68 @@ function myTwendeValuesV5(state, setPageState) {
     toggleProfile: () => setPageState((current) => ({ ...current, profileOpen: !current.profileOpen, bellOpen: false })),
     toggleBellFromMenu: () => setPageState((current) => ({ ...current, bellOpen: true, profileOpen: false })),
     toastProfile: () => showToast(setPageState, 'Profile editor opens here: name, city, photo and notification language.'),
-    tabs: [mkTab('upcoming', 'Upcoming'), mkTab('saved', 'Saved'), mkTab('calendar', 'Calendar'), mkTab('offers', 'Offers')],
-    showUpcoming: state.tab === 'upcoming' || state.tab === 'offers',
+    tabs: [mkTab('upcoming', 'Upcoming'), mkTab('posts', 'My Posts'), mkTab('saved', 'Saved'), mkTab('calendar', 'Calendar')],
+    showUpcoming: state.tab === 'upcoming',
+    showPosts: state.tab === 'posts',
+    myPosts: [
+      {
+        kind: 'NEED',
+        title: '3 canopy tents + chairs',
+        meta: 'JERSEY CITY, NJ - FOR: NYTC NYAMA CHOMA - 8 AUG - LINK: twende.to/n/tents-nytc',
+        stageIdx: 2,
+        stage: 'OFFERS IN',
+        offers: 9,
+        stats: '412 VIEWS - 38 SHARES - 9 OFFERS - POSTED 3 DAYS AGO',
+      },
+      {
+        kind: 'NEED',
+        title: 'Driver + 4x4, Kampala to Jinja',
+        meta: 'KAMPALA, UG - 12-14 SEP - LINK: twende.to/n/driver-kla-jinja',
+        stageIdx: 3,
+        stage: 'ACCEPTED - KATO 4X4',
+        offers: 6,
+        stats: '218 VIEWS - 12 SHARES - 6 OFFERS - ESCROW HELD',
+      },
+      {
+        kind: 'EVENT',
+        title: 'Sunday family picnic',
+        meta: 'HARTFORD, CT - 30 AUG - FREE RSVP - LINK: twende.to/e/family-picnic',
+        stageIdx: 1,
+        stage: 'LIVE ON THE GUIDE',
+        offers: 0,
+        stats: '58 GOING - 96 VIEWS - REMINDERS SCHEDULED',
+      },
+    ].map((post, index) => {
+      const stages = ['DRAFT', 'LIVE', 'OFFERS', 'ACCEPTED', 'DONE'];
+      const paused = !!(state.pausedPosts || {})[index];
+      return {
+        ...post,
+        stageBg: post.stageIdx >= 3 ? '#7B8B6E' : post.stageIdx === 2 ? '#D97A3B' : '#F7F1E6',
+        stageFg: post.stageIdx >= 3 ? '#F7F1E6' : '#14201F',
+        hasOffers: post.offers > 0,
+        pipeline: stages.map((label, stageIndex) => ({
+          label,
+          bg: stageIndex <= post.stageIdx ? (stageIndex === post.stageIdx ? '#D97A3B' : '#1F3A38') : '#EFE7D6',
+          fg: stageIndex <= post.stageIdx ? '#14201F' : '#8C7F6F',
+        })),
+        edit: () => showToast(setPageState, 'Edit re-opens the post form pre-filled; changes go live instantly and watchers are notified.'),
+        pauseLabel: paused ? 'RESUME' : 'PAUSE',
+        pauseBg: paused ? '#D97A3B' : '#F7F1E6',
+        pause: () => {
+          setPageState((current) => ({
+            ...current,
+            pausedPosts: { ...(current.pausedPosts || {}), [index]: !paused },
+          }));
+          showToast(setPageState, paused ? `"${post.title}" is live again on the public boards.` : `"${post.title}" paused - hidden from boards, existing offers stay open.`);
+        },
+        share: () => {
+          const link = post.meta.split('LINK: ')[1] || 'twende.to';
+          copyText(`https://${link}`);
+          showToast(setPageState, 'Public link copied - anyone can view without an account.');
+        },
+        close: () => showToast(setPageState, 'Closing asks for a reason, notifies offerers, and archives the post.'),
+      };
+    }),
     showSaved: state.tab === 'saved',
     showCalendar: state.tab === 'calendar',
     notices: [
@@ -1600,6 +1747,10 @@ function providerValuesV5(state, setPageState) {
   const galleryIdx = state.galleryIdx || 0;
   const dirIdx = state.dirIdx || 0;
   return {
+    galleryIs0: galleryIdx === 0,
+    galleryIs1: galleryIdx === 1,
+    galleryIs2: galleryIdx === 2,
+    galleryIs3: galleryIdx === 3,
     galleryImg: gallery[galleryIdx][0],
     galleryAlt: gallery[galleryIdx][1],
     galleryCount: `${galleryIdx + 1} / ${gallery.length}`,
@@ -1869,6 +2020,84 @@ function providerWalletValues(state, setPageState) {
   };
 }
 
+function providerVerificationValues(state, setPageState) {
+  const otpDone = state.otp === 'done';
+  const allDone = state.idDone && state.bizDone && otpDone;
+  const chip = (done) => (done ? 'DONE' : 'REQUIRED');
+  const chipBg = (done) => (done ? '#7B8B6E' : '#F6DCC0');
+  const stepStyle = (done) => ({
+    bg: done ? '#1F3A38' : '#F7F1E6',
+    fg: done ? '#F7F1E6' : '#1F3A38',
+  });
+
+  return {
+    s1Num: state.idDone ? 'OK' : '1',
+    s1Bg: stepStyle(state.idDone).bg,
+    s1Fg: stepStyle(state.idDone).fg,
+    s1Chip: chip(state.idDone),
+    s1ChipBg: chipBg(state.idDone),
+    s2Num: state.bizDone ? 'OK' : '2',
+    s2Bg: stepStyle(state.bizDone).bg,
+    s2Fg: stepStyle(state.bizDone).fg,
+    s2Chip: chip(state.bizDone),
+    s2ChipBg: chipBg(state.bizDone),
+    s3Num: otpDone ? 'OK' : '3',
+    s3Bg: stepStyle(otpDone).bg,
+    s3Fg: stepStyle(otpDone).fg,
+    s3Chip: chip(otpDone),
+    s3ChipBg: chipBg(otpDone),
+    idBtnLabel: state.idDone ? 'national-id.jpg uploaded - replace' : 'Upload ID document',
+    idBtnBg: state.idDone ? '#DCE8D9' : '#F7F1E6',
+    idBtnFg: '#14201F',
+    uploadId: () => {
+      setPageState((current) => ({ ...current, idDone: true }));
+      showToast(setPageState, 'national-id.jpg uploaded and encrypted. Name auto-matched to Ssemakula Kato.');
+    },
+    bizBtnLabel: state.bizDone ? 'trading-licence.pdf uploaded - replace' : 'Upload permit / licence',
+    bizBtnBg: state.bizDone ? '#DCE8D9' : '#F7F1E6',
+    bizBtnFg: '#14201F',
+    uploadBiz: () => {
+      setPageState((current) => ({ ...current, bizDone: true }));
+      showToast(setPageState, 'trading-licence.pdf uploaded and queued for registry check.');
+    },
+    useRefs: () => {
+      setPageState((current) => ({ ...current, bizDone: true }));
+      showToast(setPageState, 'Portfolio + references route selected. Trust team follows up within 48h.');
+    },
+    otpIdle: state.otp === 'idle',
+    otpSent: state.otp === 'sent',
+    otpDone,
+    otpError: state.otpError,
+    sendOtp: () => {
+      setPageState((current) => ({ ...current, otp: 'sent', otpError: false }));
+      showToast(setPageState, 'SMS code sent to +256 7** *** 214. Demo code: 254254.');
+    },
+    otpValue: state.otpValue,
+    setOtp: (event) => setPageState((current) => ({ ...current, otpValue: event.target.value, otpError: false })),
+    checkOtp: () => {
+      if (String(state.otpValue || '').trim() === '254254') {
+        setPageState((current) => ({ ...current, otp: 'done', otpError: false }));
+        showToast(setPageState, 'Phone verified.');
+        return;
+      }
+      setPageState((current) => ({ ...current, otpError: true }));
+    },
+    submitLabel: state.submitted ? 'In review - decision within 48h' : allDone ? 'Submit for review ->' : 'Complete the 3 steps above first',
+    submitBg: state.submitted ? '#7B8B6E' : allDone ? '#1F3A38' : '#EFE7D6',
+    submitFg: state.submitted || allDone ? '#F7F1E6' : '#8C7F6F',
+    submitted: state.submitted,
+    submit: () => {
+      if (state.submitted) return;
+      if (!allDone) {
+        showToast(setPageState, !state.idDone ? 'ID document missing.' : !state.bizDone ? 'Business proof missing.' : 'Phone not verified.');
+        return;
+      }
+      setPageState((current) => ({ ...current, submitted: true }));
+    },
+    toast: state.toast,
+  };
+}
+
 function settingsValues(state, setPageState) {
   const provider = state.role === 'provider';
   const fields = state.fields || (provider
@@ -2072,6 +2301,10 @@ function adminValues(state, setPageState) {
     toggle: () => setPageState((current) => ({ ...current, settings: { ...current.settings, [key]: !current.settings[key] }, toast: `Setting updated: ${title}.` })),
   });
   return {
+    adminMenuOpen: state.adminMenuOpen,
+    toggleAdminMenu: () => setPageState((current) => ({ ...current, adminMenuOpen: !current.adminMenuOpen })),
+    adminSettings: () => setPageState((current) => ({ ...current, adminMenuOpen: false, section: 'settings' })),
+    broadcast: () => showToast(setPageState, 'Broadcast composer opens with audience, channels and schedule. Second-admin approval is required before sending.'),
     navItems: navDefs.map(([id, label, badge]) => ({ label, badge, go: go(id), bg: state.section === id ? '#F7F1E6' : 'transparent', fg: state.section === id ? '#14201F' : 'rgba(247,241,230,0.8)' })),
     isOverview: state.section === 'overview',
     isModeration: state.section === 'moderation',
@@ -2114,6 +2347,14 @@ function financeValues(state, setPageState) {
   const scales = { '7d': 0.28, '30d': 1, '90d': 2.6 };
   const scale = scales[state.range] || 1;
   const usd = (amount) => '$' + Math.round(amount * scale).toLocaleString('en-US');
+  const finNavDefs = [
+    ['OVERVIEW', 'M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z', null],
+    ['LEDGER', 'M4 5h16M4 12h16M4 19h10', 'ALL'],
+    ['TICKETS', 'M4 8a2 2 0 0 0 2-2h12a2 2 0 0 0 2 2v8a2 2 0 0 0-2 2H6a2 2 0 0 0-2-2zM12 6v12', 'TICKETS'],
+    ['BOOKINGS', 'M8 3v4M16 3v4M4 7h16v14H4zM4 11h16', 'BOOKINGS'],
+    ['MEMBERSHIPS', 'M12 3l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9 5.5-.8z', 'MEMBERSHIPS'],
+    ['REFUNDS', 'M9 14l-4-4 4-4M5 10h11a4 4 0 0 1 0 8h-3', 'REFUNDS'],
+  ];
   const ledgerRows = [
     { icon: 'T', type: 'TICKETS', iconBg: '#D97A3B', title: 'Umoja Cultural Day - 42 tickets', meta: 'TXN #TX-99120 - UGX 1,050,000 - MTN MOMO', status: 'SETTLED', statusColor: '#7B8B6E', gross: '$282', fee: '$14.10 (5%)' },
     { icon: 'B', type: 'BOOKINGS', iconBg: '#E8A472', title: 'Booking: Kato 4x4 - 2-day trip', meta: 'TXN #TX-99114 - UGX 760,000 - ESCROW', status: 'IN ESCROW', statusColor: '#E8A472', gross: '$204', fee: '$14.28 (7%)' },
@@ -2122,6 +2363,22 @@ function financeValues(state, setPageState) {
     { icon: 'R', type: 'REFUNDS', iconBg: '#B8463A', title: 'Refund: duplicate ticket purchase', meta: 'TXN #TX-99071 - KES 1,000 - REVERSAL', status: 'REFUNDED', statusColor: '#E8A472', gross: '-$7.75', fee: '$0' },
   ];
   return {
+    finMenuOpen: state.finMenuOpen,
+    toggleFinMenu: () => setPageState((current) => ({ ...current, finMenuOpen: !current.finMenuOpen })),
+    finSettings: () => {
+      setPageState((current) => ({ ...current, finMenuOpen: false }));
+      showToast(setPageState, 'Finance settings: approval limits, payout schedule, FX margin and statement recipients.');
+    },
+    finNav: finNavDefs.map(([label, iconPath, filter]) => ({
+      label,
+      iconPath,
+      go: () => {
+        setPageState((current) => ({ ...current, finSection: label, filter: filter || 'ALL' }));
+        if (filter) showToast(setPageState, `Ledger filtered to ${label}.`);
+      },
+      bg: state.finSection === label ? '#F7F1E6' : 'transparent',
+      fg: state.finSection === label ? '#14201F' : 'rgba(247,241,230,0.8)',
+    })),
     ranges: ['7d', '30d', '90d'].map((range) => ({
       label: range.toUpperCase(),
       pick: () => setPageState((current) => ({ ...current, range })),
@@ -2203,6 +2460,8 @@ export function createClaudePageValues(page, state, setPageState) {
       return providerValuesV5(state, setPageState);
     case 'providerDashboard':
       return providerDashboardValuesV5(state, setPageState);
+    case 'providerVerification':
+      return providerVerificationValues(state, setPageState);
     case 'providerWallet':
       return providerWalletValues(state, setPageState);
     case 'admin':

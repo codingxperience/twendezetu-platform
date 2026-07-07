@@ -12,6 +12,7 @@ const ROUTES = {
   'Sign In.dc.html': '/sign-in',
   'Provider Listing.dc.html': '/providers/kato-4x4',
   'Provider Dashboard.dc.html': '/provider-dashboard',
+  'Provider Verification.dc.html': '/provider-verification',
   'Provider Wallet.dc.html': '/provider-wallet',
   'Points Wallet.dc.html': '/points-wallet',
   'My Twende.dc.html': '/my-twende',
@@ -33,6 +34,16 @@ function escapeHtml(value) {
 
 function readAttribute(attrs, name) {
   return attrs.match(new RegExp(`${name}="([^"]*)"`))?.[1] ?? '';
+}
+
+const UPLOAD_IMAGE_FALLBACK_SRC = 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=1200&q=85';
+
+function normalizeImageSrc(src) {
+  if (/^uploads\//i.test(src)) {
+    return UPLOAD_IMAGE_FALLBACK_SRC;
+  }
+
+  return src;
 }
 
 function expressionFromTemplate(value) {
@@ -74,7 +85,7 @@ function createImageSlot(match) {
   const credit = readAttribute(match, 'credit');
 
   if (src) {
-    const image = `<img src="${escapeHtml(src)}" alt="${escapeHtml(placeholder)}">`;
+    const image = `<img src="${escapeHtml(normalizeImageSrc(src))}" alt="${escapeHtml(placeholder)}">`;
     const caption = credit ? `<figcaption>${escapeHtml(credit)}</figcaption>` : '';
     return `<figure class="tw-image-slot tw-image-slot--photo" style="${style}">${image}${caption}</figure>`;
   }
@@ -207,7 +218,7 @@ function renderTemplate(template, values, registerAction) {
       return escapeHtml(value);
     });
 
-    html = html.replace(/\ssrc="([^"]+)"/g, (_match, src) => ` src="${escapeHtml(src)}"`);
+    html = html.replace(/\ssrc="([^"]+)"/g, (_match, src) => ` src="${escapeHtml(normalizeImageSrc(src))}"`);
 
     return html;
   }
