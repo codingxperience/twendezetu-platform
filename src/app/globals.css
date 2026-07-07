@@ -384,6 +384,16 @@ a { color: inherit; }
 }
 
 @media (max-width: 560px) {
+  .claude-design,
+  .claude-design > div,
+  .claude-design > div > header,
+  .claude-design > div > nav,
+  .claude-design > div > section,
+  .claude-design > div > footer,
+  .claude-design > div > div {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
   .claude-design .tw-4col { grid-template-columns: 1fr !important; }
   .claude-design .tw-pad {
     padding-left: 16px !important;
@@ -407,6 +417,34 @@ a { color: inherit; }
   .claude-design [style*="display: flex"][style*="gap:"] {
     flex-wrap: wrap !important;
   }
+  .claude-design [style*="display: flex"][style*="justify-content: space-between"] {
+    gap: 8px !important;
+    justify-content: flex-start !important;
+  }
+  .claude-design [style*="white-space: nowrap"] {
+    white-space: normal !important;
+  }
+  .claude-design [style*="grid-template-columns: 110px 1fr 190px"] {
+    grid-template-columns: 1fr !important;
+  }
+  .claude-design [style*="padding: 48px 24px"],
+  .claude-design [style*="padding: 56px 24px"],
+  .claude-design [style*="padding: 64px 24px"],
+  .claude-design [style*="padding: 72px 24px"],
+  .claude-design [style*="padding: 96px 24px"],
+  .claude-design [style*="padding: 40px 24px"],
+  .claude-design [style*="padding: 20px 24px"],
+  .claude-design [style*="padding: 18px 24px"],
+  .claude-design [style*="padding: 8px 24px"] {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+  .claude-design [style*="text-align: right"] {
+    text-align: left !important;
+  }
+  .claude-design [style*="max-width: 340px"] {
+    max-width: 100% !important;
+  }
   .claude-design [style*="flex-shrink: 0"] {
     flex-shrink: 1 !important;
   }
@@ -426,7 +464,7 @@ a { color: inherit; }
     min-width: 0 !important;
   }
   .claude-design header > div:last-child {
-    justify-content: space-between !important;
+    justify-content: flex-start !important;
     width: 100% !important;
   }
   .claude-design header,

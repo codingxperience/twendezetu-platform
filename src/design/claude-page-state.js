@@ -1,7 +1,7 @@
 const CURRENCIES = ['USD', 'KES', 'UGX', 'TZS', 'RWF'];
 
 const initialState = {
-  home: { currency: 'USD', lang: 'en' },
+  home: { currency: 'USD', lang: 'en', cat: 'All' },
   event: { rsvpStep: 'idle', copied: false, gName: '', gEmail: '', gParty: 1, gError: null },
   create: {
     step: 1,
@@ -23,7 +23,8 @@ const initialState = {
   },
   signin: { mode: 'register', role: 'advertiser' },
   myTwende: {
-    tab: 'upcoming',
+    tab: 'foryou',
+    following: { 0: true, 1: false, 2: false, 3: true },
     copied: false,
     prefs: { rsvp: true, offers: true, friends: true, digest: false },
     pausedPosts: {},
@@ -31,8 +32,8 @@ const initialState = {
     profileOpen: false,
     referOpen: {},
     editOpen: {},
-    calendarOn: { 0: true, 1: false },
-    reminders: { 0: '7d - 1d - 2h', 1: '1d' },
+    calAdded: { 0: true, 1: false },
+    reminders: { 0: '7d · 1d · 2h', 1: '1d' },
     acceptedOffer: null,
     monthIdx: 0,
     selected: null,
@@ -89,8 +90,29 @@ const initialState = {
     activity: null,
   },
   providerVerification: {
-    idDone: false,
-    bizDone: false,
+    section: 'business',
+    savedAt: 'AUTOSAVE ON',
+    f: {
+      bizName: 'Kato 4x4 & Tours',
+      bizCat: 'Transport & drivers',
+      bizCities: 'Kampala, Jinja, Entebbe',
+      bizYears: '10',
+      bizDesc: '',
+      idName: '',
+      idNumber: '',
+      idUploaded: false,
+      proofRoute: 'formal',
+      proofUploaded: false,
+      proofNum: '',
+      portUploaded: false,
+      ref1: '',
+      ref2: '',
+      phone: '+256 7•• ••• 214',
+      otp: 'idle',
+      otpValue: '',
+      payoutMethod: 0,
+      payoutNum: '',
+    },
     otp: 'idle',
     otpValue: '',
     otpError: false,
@@ -176,6 +198,97 @@ function moneyFormatter(currency) {
 
 function homeValues(state, setPageState) {
   const sw = state.lang === 'sw';
+  const allEvents = [
+    {
+      href: 'Event Nyama Choma.dc.html',
+      cat: 'Nyama choma',
+      img: 'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=600&q=80',
+      title: 'NYTC Nyama Choma Festival',
+      city: 'Lincoln Park · Jersey City, NJ',
+      date: 'SAT · 8 AUG',
+      price: 'FREE',
+      going: 214,
+      badge: 'FEATURED',
+    },
+    {
+      href: 'Checkout.dc.html',
+      cat: 'Music + DJs',
+      img: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&q=80',
+      title: 'Afrogroove Night',
+      city: 'Brooklyn, NY',
+      date: 'FRI · 14 AUG',
+      price: 'FROM $20',
+      going: 96,
+      badge: 'TICKETS',
+    },
+    {
+      href: 'Checkout.dc.html',
+      cat: 'Community',
+      img: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=600&q=80',
+      title: 'Umoja Cultural Day',
+      city: 'Kampala, UG',
+      date: 'SAT · 15 AUG',
+      price: 'UGX 25,000',
+      going: 310,
+      badge: false,
+    },
+    {
+      href: 'Checkout.dc.html',
+      cat: 'Nyama choma',
+      img: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600&q=80',
+      title: 'Swahili Food Fair',
+      city: 'Nairobi, KE',
+      date: 'SUN · 16 AUG',
+      price: 'KES 500',
+      going: 152,
+      badge: false,
+    },
+    {
+      href: 'Event Nyama Choma.dc.html',
+      cat: 'Community',
+      img: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=600&q=80',
+      title: 'Diaspora Connect Mixer',
+      city: 'Newark, NJ',
+      date: 'FRI · 21 AUG',
+      price: 'FREE',
+      going: 74,
+      badge: 'NEW',
+    },
+    {
+      href: 'Checkout.dc.html',
+      cat: 'Weddings',
+      img: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=600&q=80',
+      title: 'Harusi Expo',
+      city: 'Dar es Salaam, TZ',
+      date: 'SAT · 22 AUG',
+      price: 'TZS 10,000',
+      going: 188,
+      badge: false,
+    },
+    {
+      href: 'Checkout.dc.html',
+      cat: 'Music + DJs',
+      img: 'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=600&q=80',
+      title: 'Kigali Open-Air Sessions',
+      city: 'Kigali, RW',
+      date: 'SAT · 29 AUG',
+      price: 'RWF 5,000',
+      going: 120,
+      badge: false,
+    },
+    {
+      href: 'Event Nyama Choma.dc.html',
+      cat: 'Faith',
+      img: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=600&q=80',
+      title: 'Gospel Sunday Picnic',
+      city: 'Hartford, CT',
+      date: 'SUN · 30 AUG',
+      price: 'FREE',
+      going: 58,
+      badge: false,
+    },
+  ];
+  const shownEvents = state.cat === 'All' ? allEvents : allEvents.filter((event) => event.cat === state.cat);
 
   return {
     isEn: !sw,
@@ -185,7 +298,7 @@ function homeValues(state, setPageState) {
     currency: state.currency,
     cycleCurrency: () => setPageState((current) => ({ ...current, currency: cycleCurrency(current.currency) })),
     cityLabel: 'NEW JERSEY / NEW YORK',
-    eventCount: 24,
+    eventCount: shownEvents.length,
     services: [
       {
         href: 'Provider Listing.dc.html',
@@ -231,96 +344,55 @@ function homeValues(state, setPageState) {
           { num: '04', title: 'Gather', desc: 'RSVP and tickets sync to calendars with reminders - 7 days, 1 day, 2 hours before.' },
           { num: '05', title: 'Settle', desc: 'Pay online, at the door, or pool points across borders. Fees only when money moves.' },
         ],
-    categories: [
-      { label: 'All (24)', bg: '#1F3A38', fg: '#F7F1E6' },
-      { label: 'Nyama choma', bg: '#F7F1E6', fg: '#14201F' },
-      { label: 'Music + DJs', bg: '#F7F1E6', fg: '#14201F' },
-      { label: 'Community', bg: '#F7F1E6', fg: '#14201F' },
-      { label: 'Weddings', bg: '#F7F1E6', fg: '#14201F' },
-      { label: 'Faith', bg: '#F7F1E6', fg: '#14201F' },
-      { label: 'Sports', bg: '#F7F1E6', fg: '#14201F' },
-      { label: 'Needs board', bg: '#D97A3B', fg: '#14201F' },
-    ],
-    events: [
+    categories: ['All', 'Nyama choma', 'Music + DJs', 'Community', 'Weddings', 'Faith', 'Sports']
+      .map((category) => {
+        const count = category === 'All' ? allEvents.length : allEvents.filter((event) => event.cat === category).length;
+        const active = state.cat === category;
+        return {
+          label: `${category} (${count})`,
+          pick: () => setPageState((current) => ({ ...current, cat: category })),
+          bg: active ? '#1F3A38' : '#F7F1E6',
+          fg: active ? '#F7F1E6' : '#14201F',
+        };
+      })
+      .concat({
+        label: 'Needs board ↓',
+        pick: () => {
+          const board = document.querySelector('[data-needs-board]');
+          if (board) window.scrollTo({ top: board.offsetTop - 80, behavior: 'smooth' });
+        },
+        bg: '#D97A3B',
+        fg: '#14201F',
+      }),
+    events: shownEvents,
+    moreStories: [
       {
         href: 'Event Nyama Choma.dc.html',
-        img: 'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=600&q=80',
-        title: 'NYTC Nyama Choma Festival',
-        city: 'Lincoln Park · Jersey City, NJ',
-        date: 'SAT · 8 AUG',
-        price: 'FREE',
-        going: 214,
-        badge: 'FEATURED',
+        when: '2 HRS AGO',
+        title: 'NYTC confirms the Communipaw Ave side for Nanenane',
+        desc: 'Parking details posted; the grill masters start at 2:30 PM. Hii si ya kukosa.',
+        img: 'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=500&q=80',
       },
       {
-        href: 'Checkout.dc.html',
-        img: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&q=80',
-        title: 'Afrogroove Night',
-        city: 'Brooklyn, NY',
-        date: 'FRI · 14 AUG',
-        price: 'FROM $20',
-        going: 96,
-        badge: 'TICKETS',
+        href: 'Provider Listing.dc.html',
+        when: '11 HRS AGO',
+        title: 'Kato 4x4 hits 61 jobs with a 4.9 rating',
+        desc: 'The village-road specialist on why late-night airport runs made his reputation.',
+        img: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=500&q=80',
       },
       {
-        href: 'Checkout.dc.html',
-        img: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=600&q=80',
-        title: 'Umoja Cultural Day',
-        city: 'Kampala, UG',
-        date: 'SAT · 15 AUG',
-        price: 'UGX 25,000',
-        going: 310,
-        badge: false,
+        href: 'Points Wallet.dc.html',
+        when: '1 DAY AGO',
+        title: 'Harambee pools: 23 contributors, 4 countries, one set of tents',
+        desc: 'How the NYTC tents pool funded itself in 72 hours - and what it means for cross-border giving.',
+        img: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=500&q=80',
       },
       {
-        href: 'Checkout.dc.html',
-        img: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600&q=80',
-        title: 'Swahili Food Fair',
-        city: 'Nairobi, KE',
-        date: 'SUN · 16 AUG',
-        price: 'KES 500',
-        going: 152,
-        badge: false,
-      },
-      {
-        href: 'Event Nyama Choma.dc.html',
-        img: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=600&q=80',
-        title: 'Diaspora Connect Mixer',
-        city: 'Newark, NJ',
-        date: 'FRI · 21 AUG',
-        price: 'FREE',
-        going: 74,
-        badge: 'NEW',
-      },
-      {
-        href: 'Checkout.dc.html',
-        img: 'https://images.unsplash.com/photo-1547036967-23d11aacaee0?w=600&q=80',
-        title: 'Harusi Expo',
-        city: 'Dar es Salaam, TZ',
-        date: 'SAT · 22 AUG',
-        price: 'TZS 10,000',
-        going: 188,
-        badge: false,
-      },
-      {
-        href: 'Checkout.dc.html',
-        img: 'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=600&q=80',
-        title: 'Kigali Open-Air Sessions',
-        city: 'Kigali, RW',
-        date: 'SAT · 29 AUG',
-        price: 'RWF 5,000',
-        going: 120,
-        badge: false,
-      },
-      {
-        href: 'Event Nyama Choma.dc.html',
-        img: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=600&q=80',
-        title: 'Sunday Family Picnic',
-        city: 'Hartford, CT',
-        date: 'SUN · 30 AUG',
-        price: 'FREE',
-        going: 58,
-        badge: false,
+        href: 'Create Event.dc.html',
+        when: '2 DAYS AGO',
+        title: 'Posting a need is free - and your number stays yours',
+        desc: 'A walkthrough of masked contacts, offers, and escrow for first-time posters.',
+        img: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500&q=80',
       },
     ],
     needs: [
@@ -1061,7 +1133,7 @@ function myTwendeValuesV5(state, setPageState) {
         prefs: { ...current.prefs, [key]: !current.prefs[key] },
       })),
   });
-  const reminderOptions = ['7d - 1d - 2h', '1d - 2h', '1d', 'Off'];
+  const reminderOptions = ['7d · 1d · 2h', '1d · 2h', '1d', 'Off'];
   const events = [
     {
       img: 'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=400&q=80',
@@ -1099,13 +1171,13 @@ function myTwendeValuesV5(state, setPageState) {
     shareWa: () => showToast(setPageState, `WhatsApp share ready for ${event.title}.`),
     shareFb: () => showToast(setPageState, `Facebook share ready for ${event.title}.`),
     shareEm: () => showToast(setPageState, `Email invite draft ready for ${event.title}.`),
-    calLabel: state.calendarOn[index] ? 'CALENDAR ON' : 'ADD TO CAL',
-    calBg: state.calendarOn[index] ? '#7B8B6E' : '#F7F1E6',
-    calFg: state.calendarOn[index] ? '#F7F1E6' : '#14201F',
+    calLabel: state.calAdded[index] ? '🗓 IN CALENDAR ✓' : '🗓 ADD TO CALENDAR',
+    calBg: state.calAdded[index] ? '#1F3A38' : '#F7F1E6',
+    calFg: state.calAdded[index] ? '#F7F1E6' : '#14201F',
     toggleCal: () =>
       setPageState((current) => ({
         ...current,
-        calendarOn: { ...current.calendarOn, [index]: !current.calendarOn[index] },
+        calAdded: { ...current.calAdded, [index]: !current.calAdded[index] },
       })),
     reminders: state.reminders[index] || 'Off',
     editOpen: !!state.editOpen[index],
@@ -1147,10 +1219,10 @@ function myTwendeValuesV5(state, setPageState) {
       })),
   }));
   const saved = [
-    { img: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80', title: 'Afrogroove Night', city: 'Brooklyn, NY', date: 'FRI - 14 AUG', href: 'Checkout.dc.html' },
-    { img: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=500&q=80', title: 'Umoja Cultural Day', city: 'Kampala, UG', date: 'SAT - 15 AUG', href: 'Twendezetu Home.dc.html' },
-    { img: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500&q=80', title: 'Swahili Food Fair', city: 'Nairobi, KE', date: 'SUN - 16 AUG', href: 'Twendezetu Home.dc.html' },
-    { img: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=500&q=80', title: 'Sunday Family Picnic', city: 'Hartford, CT', date: 'SUN - 30 AUG', href: 'Twendezetu Home.dc.html' },
+    { img: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80', title: 'Afrogroove Night', city: 'Brooklyn, NY', date: 'FRI · 14 AUG', href: 'Checkout.dc.html', action: 'tickets from $20' },
+    { img: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=500&q=80', title: 'Umoja Cultural Day', city: 'Kampala, UG', date: 'SAT · 15 AUG', href: 'Checkout.dc.html', action: 'UGX 25,000' },
+    { img: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500&q=80', title: 'Swahili Food Fair', city: 'Nairobi, KE', date: 'SUN · 16 AUG', href: 'Checkout.dc.html', action: 'KES 500' },
+    { img: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=500&q=80', title: 'Sunday Family Picnic', city: 'Hartford, CT', date: 'SUN · 30 AUG', href: 'Event Nyama Choma.dc.html', action: 'free RSVP' },
   ];
   const months = [
     {
@@ -1199,7 +1271,45 @@ function myTwendeValuesV5(state, setPageState) {
     toggleProfile: () => setPageState((current) => ({ ...current, profileOpen: !current.profileOpen, bellOpen: false })),
     toggleBellFromMenu: () => setPageState((current) => ({ ...current, bellOpen: true, profileOpen: false })),
     toastProfile: () => showToast(setPageState, 'Profile editor opens here: name, city, photo and notification language.'),
-    tabs: [mkTab('upcoming', 'Upcoming'), mkTab('posts', 'My Posts'), mkTab('saved', 'Saved'), mkTab('calendar', 'Calendar')],
+    tabs: [mkTab('foryou', 'For You'), mkTab('upcoming', 'Upcoming'), mkTab('posts', 'My Posts'), mkTab('saved', 'Saved'), mkTab('calendar', 'Calendar')],
+    showForYou: state.tab === 'foryou',
+    fyOrganizers: [
+      { init: 'NY', name: 'UONGOZI NYTC', bg: '#1F3A38', fg: '#F7F1E6' },
+      { init: 'AG', name: 'Afrogroove', bg: '#D97A3B', fg: '#1F3A38' },
+      { init: 'UM', name: 'Umoja Day', bg: '#7B8B6E', fg: '#F7F1E6' },
+      { init: 'SF', name: 'Swahili Fair', bg: '#1F3A38', fg: '#F7F1E6' },
+      { init: 'KG', name: 'Kigali Sessions', bg: '#D97A3B', fg: '#1F3A38' },
+      { init: 'DC', name: 'Diaspora Connect', bg: '#7B8B6E', fg: '#F7F1E6' },
+    ],
+    fyEvents: [
+      { href: 'Event Nyama Choma.dc.html', img: 'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=500&q=80', title: 'Nyama Choma Festival', by: 'UONGOZI - NYTC', date: 'SAT · 8 AUG' },
+      { href: 'Checkout.dc.html', img: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80', title: 'Afrogroove Night', by: 'Afrogroove Collective', date: 'FRI · 14 AUG' },
+      { href: 'Twendezetu Home.dc.html', img: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=500&q=80', title: 'Umoja Cultural Day', by: 'Umoja Day Committee', date: 'SAT · 15 AUG' },
+      { href: 'Twendezetu Home.dc.html', img: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=500&q=80', title: 'Diaspora Connect Mixer', by: 'Diaspora Connect', date: 'FRI · 21 AUG' },
+    ],
+    fyNeeds: [
+      { title: '3 canopy tents + chairs (yours)', meta: 'JERSEY CITY · CLOSES 18 AUG · 9 OFFERS', chip: 'CLOSING SOON' },
+      { title: 'Photographer for gospel picnic', meta: 'HARTFORD, CT · 30 AUG · BUDGET $250', chip: '2 OFFERS' },
+    ],
+    fyFollow: [
+      { init: 'K4', name: 'Kato 4x4 & Tours', meta: '★ 4.9 · KAMPALA', bg: '#1F3A38', fg: '#F7F1E6' },
+      { init: 'MT', name: 'Mama T Events Co.', meta: '★ 5.0 · JERSEY CITY', bg: '#D97A3B', fg: '#1F3A38' },
+      { init: 'DZ', name: 'DJ Zawadi', meta: '★ 4.7 · JINJA', bg: '#7B8B6E', fg: '#F7F1E6' },
+      { init: 'CH', name: 'Chef Halima Catering', meta: '★ 4.8 · DAR', bg: '#1F3A38', fg: '#F7F1E6' },
+    ].map((follow, index) => {
+      const on = !!state.following[index];
+      return {
+        ...follow,
+        btnLabel: on ? '✓ FOLLOWING' : '+ FOLLOW',
+        btnBg: on ? '#1F3A38' : '#F7F1E6',
+        btnFg: on ? '#F7F1E6' : '#14201F',
+        toggle: () =>
+          setPageState((current) => ({
+            ...current,
+            following: { ...current.following, [index]: !on },
+          })),
+      };
+    }),
     showUpcoming: state.tab === 'upcoming',
     showPosts: state.tab === 'posts',
     myPosts: [
@@ -2021,78 +2131,176 @@ function providerWalletValues(state, setPageState) {
 }
 
 function providerVerificationValues(state, setPageState) {
-  const otpDone = state.otp === 'done';
-  const allDone = state.idDone && state.bizDone && otpDone;
-  const chip = (done) => (done ? 'DONE' : 'REQUIRED');
-  const chipBg = (done) => (done ? '#7B8B6E' : '#F6DCC0');
-  const stepStyle = (done) => ({
-    bg: done ? '#1F3A38' : '#F7F1E6',
-    fg: done ? '#F7F1E6' : '#1F3A38',
-  });
+  const f = state.f || {};
+  const section = state.section || 'business';
+  const payouts = [
+    ['MTN MoMo', 'Instant, Uganda-wide', 'POPULAR'],
+    ['M-Pesa', 'Kenya & Tanzania', 'INSTANT'],
+    ['Bank account', 'Any East African bank, 24h', 'SECURE'],
+  ];
+  const save = (patch) =>
+    setPageState((current) => ({
+      ...current,
+      f: { ...(current.f || {}), ...patch },
+      savedAt: 'SAVED JUST NOW ✓',
+    }));
+  const go = (id) => () =>
+    setPageState((current) => ({
+      ...current,
+      section: id,
+      savedAt: 'SAVED JUST NOW ✓',
+    }));
+  const field = (key) => (event) => save({ [key]: event.target.value });
+  const done = {
+    business: !!(f.bizName && f.bizCities && f.bizDesc),
+    identity: !!(f.idName && f.idNumber && f.idUploaded),
+    proof: f.proofRoute === 'formal' ? !!(f.proofUploaded && f.proofNum) : !!(f.portUploaded && f.ref1 && f.ref2),
+    phone: f.otp === 'done',
+    payout: !!f.payoutNum,
+  };
+  const doneCount = Object.values(done).filter(Boolean).length;
+  const allDone = doneCount === 5;
+  const nav = [
+    ['business', '1 · BUSINESS INFO'],
+    ['identity', '2 · IDENTITY'],
+    ['proof', '3 · BUSINESS PROOF'],
+    ['phone', '4 · PHONE'],
+    ['payout', '5 · PAYOUT'],
+    ['review', '6 · REVIEW & SUBMIT'],
+  ];
 
   return {
-    s1Num: state.idDone ? 'OK' : '1',
-    s1Bg: stepStyle(state.idDone).bg,
-    s1Fg: stepStyle(state.idDone).fg,
-    s1Chip: chip(state.idDone),
-    s1ChipBg: chipBg(state.idDone),
-    s2Num: state.bizDone ? 'OK' : '2',
-    s2Bg: stepStyle(state.bizDone).bg,
-    s2Fg: stepStyle(state.bizDone).fg,
-    s2Chip: chip(state.bizDone),
-    s2ChipBg: chipBg(state.bizDone),
-    s3Num: otpDone ? 'OK' : '3',
-    s3Bg: stepStyle(otpDone).bg,
-    s3Fg: stepStyle(otpDone).fg,
-    s3Chip: chip(otpDone),
-    s3ChipBg: chipBg(otpDone),
-    idBtnLabel: state.idDone ? 'national-id.jpg uploaded - replace' : 'Upload ID document',
-    idBtnBg: state.idDone ? '#DCE8D9' : '#F7F1E6',
-    idBtnFg: '#14201F',
+    saveStamp: state.savedAt || 'AUTOSAVE ON',
+    pct: `${Math.round((doneCount / 5) * 100)}%`,
+    navItems: nav.map(([id, label]) => ({
+      label,
+      go: go(id),
+      bg: section === id ? '#1F3A38' : 'transparent',
+      fg: section === id ? '#F7F1E6' : '#3A2F25',
+      chip: id === 'review' ? (state.submitted ? 'SENT ✓' : '') : done[id] ? '✓ DONE' : '…',
+      chipColor: done[id] || (id === 'review' && state.submitted) ? '#7B8B6E' : '#A85A23',
+    })),
+    isBusiness: section === 'business',
+    isIdentity: section === 'identity',
+    isProof: section === 'proof',
+    isPhone: section === 'phone',
+    isPayout: section === 'payout',
+    isReview: section === 'review',
+    goIdentity: go('identity'),
+    goProof: go('proof'),
+    goPhone: go('phone'),
+    goPayout: go('payout'),
+    goReview: go('review'),
+    fBizName: f.bizName || '',
+    setBizName: field('bizName'),
+    setBizCat: field('bizCat'),
+    fBizCities: f.bizCities || '',
+    setBizCities: field('bizCities'),
+    fBizYears: f.bizYears || '',
+    setBizYears: field('bizYears'),
+    fBizDesc: f.bizDesc || '',
+    setBizDesc: field('bizDesc'),
+    fIdName: f.idName || '',
+    setIdName: field('idName'),
+    fIdNumber: f.idNumber || '',
+    setIdNumber: field('idNumber'),
+    idBtnLabel: f.idUploaded ? '✓ national-id.jpg - REPLACE' : '↑ UPLOAD ID DOCUMENT',
+    idBtnBg: f.idUploaded ? '#DCE8D9' : '#F7F1E6',
     uploadId: () => {
-      setPageState((current) => ({ ...current, idDone: true }));
-      showToast(setPageState, 'national-id.jpg uploaded and encrypted. Name auto-matched to Ssemakula Kato.');
+      save({ idUploaded: true });
+      showToast(setPageState, '✓ ID uploaded, encrypted, and saved to your draft.');
     },
-    bizBtnLabel: state.bizDone ? 'trading-licence.pdf uploaded - replace' : 'Upload permit / licence',
-    bizBtnBg: state.bizDone ? '#DCE8D9' : '#F7F1E6',
-    bizBtnFg: '#14201F',
-    uploadBiz: () => {
-      setPageState((current) => ({ ...current, bizDone: true }));
-      showToast(setPageState, 'trading-licence.pdf uploaded and queued for registry check.');
+    isFormalRoute: f.proofRoute === 'formal',
+    isInformalRoute: f.proofRoute === 'informal',
+    pickFormal: () => save({ proofRoute: 'formal' }),
+    pickInformal: () => save({ proofRoute: 'informal' }),
+    formalBg: f.proofRoute === 'formal' ? '#1F3A38' : '#FFFDF8',
+    formalFg: f.proofRoute === 'formal' ? '#F7F1E6' : '#14201F',
+    informalBg: f.proofRoute === 'informal' ? '#1F3A38' : '#FFFDF8',
+    informalFg: f.proofRoute === 'informal' ? '#F7F1E6' : '#14201F',
+    proofBtnLabel: f.proofUploaded ? '✓ trading-licence.pdf - REPLACE' : '↑ UPLOAD LICENCE / PERMIT / TIN',
+    proofBtnBg: f.proofUploaded ? '#DCE8D9' : '#F7F1E6',
+    uploadProof: () => {
+      save({ proofUploaded: true });
+      showToast(setPageState, '✓ Document uploaded and saved to your draft.');
     },
-    useRefs: () => {
-      setPageState((current) => ({ ...current, bizDone: true }));
-      showToast(setPageState, 'Portfolio + references route selected. Trust team follows up within 48h.');
+    fProofNum: f.proofNum || '',
+    setProofNum: field('proofNum'),
+    portBtnLabel: f.portUploaded ? '✓ 6 PHOTOS UPLOADED - ADD MORE' : '↑ UPLOAD 5+ PHOTOS OF PAST WORK',
+    portBtnBg: f.portUploaded ? '#DCE8D9' : '#F7F1E6',
+    uploadPortfolio: () => {
+      save({ portUploaded: true });
+      showToast(setPageState, '✓ Portfolio photos saved to your draft.');
     },
-    otpIdle: state.otp === 'idle',
-    otpSent: state.otp === 'sent',
-    otpDone,
+    fRef1: f.ref1 || '',
+    setRef1: field('ref1'),
+    fRef2: f.ref2 || '',
+    setRef2: field('ref2'),
+    fPhone: f.phone || '',
+    setPhone: field('phone'),
+    otpIdle: f.otp === 'idle',
+    otpSent: f.otp === 'sent',
+    otpDone: f.otp === 'done',
     otpError: state.otpError,
     sendOtp: () => {
-      setPageState((current) => ({ ...current, otp: 'sent', otpError: false }));
-      showToast(setPageState, 'SMS code sent to +256 7** *** 214. Demo code: 254254.');
+      save({ otp: 'sent' });
+      showToast(setPageState, '✓ SMS code sent. Valid 10 minutes.');
     },
-    otpValue: state.otpValue,
-    setOtp: (event) => setPageState((current) => ({ ...current, otpValue: event.target.value, otpError: false })),
+    otpValue: f.otpValue || '',
+    setOtp: (event) => {
+      setPageState((current) => ({ ...current, otpError: false }));
+      save({ otpValue: event.target.value });
+    },
     checkOtp: () => {
-      if (String(state.otpValue || '').trim() === '254254') {
-        setPageState((current) => ({ ...current, otp: 'done', otpError: false }));
-        showToast(setPageState, 'Phone verified.');
+      if (String(f.otpValue || '').trim() === '254254') {
+        save({ otp: 'done' });
+        showToast(setPageState, '✓ Phone verified and saved.');
         return;
       }
       setPageState((current) => ({ ...current, otpError: true }));
     },
-    submitLabel: state.submitted ? 'In review - decision within 48h' : allDone ? 'Submit for review ->' : 'Complete the 3 steps above first',
+    payoutOpts: payouts.map(([title, desc, chip], index) => ({
+      title,
+      desc,
+      chip,
+      pick: () => save({ payoutMethod: index }),
+      bg: f.payoutMethod === index ? '#1F3A38' : '#FFFDF8',
+      fg: f.payoutMethod === index ? '#F7F1E6' : '#14201F',
+    })),
+    fPayoutNum: f.payoutNum || '',
+    setPayoutNum: field('payoutNum'),
+    reviewRows: [
+      ['BUSINESS', `${f.bizName || '—'} · ${f.bizCat || '—'} · ${f.bizCities || '—'}`, done.business, 'business'],
+      ['IDENTITY', `${f.idName || '—'} · ${f.idNumber || 'no ID number'}${f.idUploaded ? ' · doc ✓' : ' · doc missing'}`, done.identity, 'identity'],
+      [
+        'PROOF',
+        f.proofRoute === 'formal'
+          ? `Document route · ${f.proofNum || 'no number'}`
+          : `Portfolio route · refs: ${f.ref1 ? '✓' : '—'}/${f.ref2 ? '✓' : '—'}`,
+        done.proof,
+        'proof',
+      ],
+      ['PHONE', `${f.phone || '—'}${f.otp === 'done' ? ' · verified ✓' : ' · not verified'}`, done.phone, 'phone'],
+      ['PAYOUT', `${payouts[f.payoutMethod || 0][0]} · ${f.payoutNum || 'no account'}`, done.payout, 'payout'],
+    ].map(([label, value, ok, id]) => ({
+      label,
+      value,
+      chip: ok ? '✓ COMPLETE' : 'INCOMPLETE - FIX',
+      chipColor: ok ? '#7B8B6E' : '#B8463A',
+      go: go(id),
+    })),
+    submitLabel: state.submitted ? '✓ In review - decision within 48h' : allDone ? 'Submit for review →' : `${doneCount} of 5 sections complete - finish the rest`,
     submitBg: state.submitted ? '#7B8B6E' : allDone ? '#1F3A38' : '#EFE7D6',
     submitFg: state.submitted || allDone ? '#F7F1E6' : '#8C7F6F',
     submitted: state.submitted,
     submit: () => {
       if (state.submitted) return;
       if (!allDone) {
-        showToast(setPageState, !state.idDone ? 'ID document missing.' : !state.bizDone ? 'Business proof missing.' : 'Phone not verified.');
+        showToast(setPageState, `✕ ${5 - doneCount} section(s) still incomplete - tap the red rows above to jump there.`);
         return;
       }
       setPageState((current) => ({ ...current, submitted: true }));
+      showToast(setPageState, '✓ Submitted. Your draft is locked for review; the trust team responds within 48h.');
     },
     toast: state.toast,
   };
