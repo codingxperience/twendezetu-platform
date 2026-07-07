@@ -47,12 +47,16 @@ const initialState = {
     toppedUp: false,
     sendOpen: false,
     topUpOpen: false,
+    pendingTopUp: null,
+    cashOpen: false,
+    cashAmount: '500',
+    cashDest: 0,
     newPoolOpen: false,
     recipient: '',
-    amount: '250',
+    amount: '200',
     sendNoteVal: '',
     poolName: '',
-    poolGoal: '75000',
+    poolGoal: '5000',
     toast: null,
     toastKind: 'ok',
     sendNote: 'Send points to family, friends, or event pools. No phone number is shown until you choose to share it.',
@@ -66,6 +70,27 @@ const initialState = {
     monthIdx: 0,
     renewed: false,
     toast: null,
+  },
+  providerWallet: {
+    avail: 2400,
+    withdrawOpen: false,
+    confirmOpen: false,
+    wAmount: '2400',
+    dest: 0,
+    filter: 'ALL',
+    toast: null,
+    toastKind: 'ok',
+    activity: null,
+  },
+  settings: {
+    section: 'profile',
+    toast: null,
+    saved: false,
+    role: 'user',
+    fields: { name: 'Amina Mushi', biz: 'Amina M.', email: 'amina@gmail.com', phone: '+1 (9**) *** 4412' },
+    notifs: null,
+    defaultPay: 0,
+    twoFa: false,
   },
   admin: {
     section: 'overview',
@@ -99,7 +124,11 @@ function setLater(setPageState, value, delay = 1800) {
 }
 
 function showToast(setPageState, message, delay = 3400, extra = {}) {
-  setPageState((state) => ({ ...state, ...extra, toast: message }));
+  setPageState((state) => {
+    const next = { ...state, ...extra, toast: message };
+    if ('toastKind' in state && !('toastKind' in extra)) next.toastKind = 'ok';
+    return next;
+  });
   window.setTimeout(() => {
     setPageState((state) => ({ ...state, toast: null }));
   }, delay);
@@ -1423,23 +1452,69 @@ function walletValuesV5(state, setPageState) {
     equivalents: `Approx. $${(Number(state.balance || 0) / 100).toFixed(2)} - KES ${fmt(Number(state.balance || 0) * 1.29)} - UGX ${fmt(Number(state.balance || 0) * 37.2)} - TZS ${fmt(Number(state.balance || 0) * 26.8)}`,
     topUpOpen: state.topUpOpen,
     topUpBg: state.topUpOpen ? '#E8A472' : '#D97A3B',
-    toggleTopUp: () => setPageState((current) => ({ ...current, topUpOpen: !current.topUpOpen, sendOpen: false })),
+    toggleTopUp: () => setPageState((current) => ({ ...current, topUpOpen: !current.topUpOpen, sendOpen: false, cashOpen: false, pendingTopUp: null })),
+    topUpPending: !!state.pendingTopUp,
+    topUpSummary: state.pendingTopUp
+      ? `Top up $${state.pendingTopUp.usd}.00 for +${fmt(state.pendingTopUp.pts)} points. Nothing is charged until you confirm.`
+      : '',
     topUpOpts: [5, 10, 25, 50].map((usd) => ({
       label: `$${usd}`,
       pts: `+${fmt(usd * 100)} PTS`,
-      buy: () => {
-        setPageState((current) => ({
-          ...current,
-          balance: Number(current.balance || 0) + usd * 100,
-          topUpOpen: false,
-          activity: [{ icon: 'v', iconBg: '#7B8B6E', iconFg: '#F7F1E6', title: 'Top-up from card', meta: `JUST NOW - $${usd}.00 -> ${fmt(usd * 100)} PTS`, amount: `+${fmt(usd * 100)}`, color: '#4a7c4a' }, ...(current.activity || activity)],
-        }));
-        showToast(setPageState, `Top-up complete: +${fmt(usd * 100)} points.`);
-      },
+      buy: () => setPageState((current) => ({ ...current, pendingTopUp: { usd, pts: usd * 100 } })),
     })),
+    confirmTopUp: () => {
+      const pending = state.pendingTopUp;
+      if (!pending) {
+        showToast(setPageState, 'Choose a top-up amount first.', 3400, { toastKind: 'err' });
+        return;
+      }
+      setPageState((current) => ({
+        ...current,
+        balance: Number(current.balance || 0) + pending.pts,
+        topUpOpen: false,
+        pendingTopUp: null,
+        activity: [{ icon: 'v', iconBg: '#7B8B6E', iconFg: '#F7F1E6', title: 'Top-up from card', meta: `JUST NOW - $${pending.usd}.00 -> ${fmt(pending.pts)} PTS`, amount: `+${fmt(pending.pts)}`, color: '#4a7c4a' }, ...(current.activity || activity)],
+      }));
+      showToast(setPageState, `Top-up complete: +${fmt(pending.pts)} points.`);
+    },
+    cancelTopUp: () => setPageState((current) => ({ ...current, pendingTopUp: null })),
     sendOpen: state.sendOpen,
     sendBg: state.sendOpen ? 'rgba(247,241,230,0.15)' : 'none',
-    toggleSend: () => setPageState((current) => ({ ...current, sendOpen: !current.sendOpen, topUpOpen: false })),
+    toggleSend: () => setPageState((current) => ({ ...current, sendOpen: !current.sendOpen, topUpOpen: false, cashOpen: false, pendingTopUp: null })),
+    cashOpen: state.cashOpen,
+    cashBg: state.cashOpen ? 'rgba(217,122,59,0.22)' : 'none',
+    toggleCashOut: () => setPageState((current) => ({ ...current, cashOpen: !current.cashOpen, topUpOpen: false, sendOpen: false, pendingTopUp: null })),
+    cashAmount: state.cashAmount,
+    setCashAmount: (event) => setPageState((current) => ({ ...current, cashAmount: event.target.value })),
+    cashDests: ['M-Pesa **2210', 'Visa **4412', 'Bank transfer'].map((label, index) => ({
+      label,
+      pick: () => setPageState((current) => ({ ...current, cashDest: index })),
+      bg: state.cashDest === index ? 'rgba(217,122,59,0.25)' : 'rgba(247,241,230,0.08)',
+      border: state.cashDest === index ? '#D97A3B' : 'rgba(247,241,230,0.4)',
+    })),
+    cashConfirmLabel: `Cash out ${fmt(state.cashAmount)} pts ->`,
+    confirmCashOut: () => {
+      const amount = Math.floor(Number(state.cashAmount));
+      const fee = 50;
+      const destinations = ['M-Pesa **2210', 'Visa **4412', 'Bank transfer'];
+      if (!Number.isFinite(amount) || amount <= fee) {
+        showToast(setPageState, `Enter more than ${fee} points to cash out.`, 3400, { toastKind: 'err' });
+        return;
+      }
+      if (amount > Number(state.balance || 0)) {
+        showToast(setPageState, `Insufficient balance. You have ${fmt(state.balance)} pts.`, 3400, { toastKind: 'err' });
+        return;
+      }
+      const dest = destinations[state.cashDest] || destinations[0];
+      setPageState((current) => ({
+        ...current,
+        balance: Number(current.balance || 0) - amount,
+        cashOpen: false,
+        cashAmount: '500',
+        activity: [{ icon: '<', iconBg: '#F6DCC0', iconFg: '#1F3A38', title: `Cash-out to ${dest}`, meta: `JUST NOW - flat fee ${fee} pts`, amount: `-${fmt(amount)}`, color: '#B8463A' }, ...(current.activity || activity)],
+      }));
+      showToast(setPageState, `Cash-out queued: ${fmt(amount - fee)} pts value to ${dest}.`);
+    },
     recipient: state.recipient,
     sendNoteVal: state.sendNoteVal,
     amount: state.amount,
@@ -1502,6 +1577,7 @@ function walletValuesV5(state, setPageState) {
     },
     activity,
     pools,
+    exportStmt: () => showToast(setPageState, 'Full personal wallet statement queued as PDF and CSV.'),
     toast: state.toast,
     toastBg: state.toastKind === 'err' ? '#B8463A' : '#1F3A38',
     toastFg: '#F7F1E6',
@@ -1712,6 +1788,199 @@ function providerDashboardValuesV5(state, setPageState) {
       copyText('https://twende.to/p/kato-4x4');
       showToast(setPageState, 'Listing link copied.');
     },
+    toast: state.toast,
+  };
+}
+
+function providerWalletValues(state, setPageState) {
+  const fmt = (amount) => Number(amount || 0).toLocaleString('en-US');
+  const activity = state.activity || [
+    { icon: 'J', type: 'JOBS', title: 'Job payout: City tour (BK-7031)', meta: '17 SEP - GROSS 380K - FEE 26.6K', amount: '+353K', in: true },
+    { icon: 'E', type: 'ESCROW', title: 'Escrow hold: Jinja trip (BK-5521)', meta: '12-14 SEP - RELEASES ON CONFIRM', amount: '760K', in: null },
+    { icon: 'J', type: 'JOBS', title: 'Job payout: Airport run (BK-6988)', meta: '9 SEP - GROSS 180K - FEE 12.6K', amount: '+167K', in: true },
+    { icon: 'W', type: 'PAYOUTS', title: 'Withdrawal to MTN MoMo **7214', meta: '1 SEP - FEE 2.5K - REF WD-2210', amount: '-500K', in: false },
+    { icon: 'M', type: 'FEES', title: 'Membership renewal (12 months)', meta: '28 AUG - SAVED 15% EARLY', amount: '-17K', in: false },
+    { icon: 'J', type: 'JOBS', title: 'Job payout: Wedding convoy (BK-6754)', meta: '22 AUG - GROSS 900K - FEE 63K', amount: '+837K', in: true },
+    { icon: 'W', type: 'PAYOUTS', title: 'Withdrawal to Stanbic **8867', meta: '15 AUG - FEE 2.5K - REF WD-2141', amount: '-1.2M', in: false },
+    { icon: 'J', type: 'JOBS', title: 'Job payout: Up-country 2 days (BK-6702)', meta: '11 AUG - GROSS 800K - FEE 56K', amount: '+744K', in: true },
+  ];
+  const destinations = ['MTN MoMo **7214', 'Stanbic Bank **8867', 'Airtel Money (new)'];
+  const destLabel = destinations[state.dest] || destinations[0];
+  const amount = Number(state.wAmount || 0);
+  const shown = activity.filter((item) => state.filter === 'ALL' || item.type === state.filter);
+
+  return {
+    availFmt: 'UGX ' + (Number(state.avail || 0) >= 1000 ? (Number(state.avail || 0) / 1000).toFixed(1) + 'M' : Number(state.avail || 0) + 'K'),
+    availUsd: '$' + Math.round(Number(state.avail || 0) * 0.269).toLocaleString('en-US'),
+    withdrawOpen: !!state.withdrawOpen && !state.confirmOpen,
+    toggleWithdraw: () => setPageState((current) => ({ ...current, withdrawOpen: !current.withdrawOpen, confirmOpen: false })),
+    wAmount: state.wAmount,
+    setWAmount: (event) => setPageState((current) => ({ ...current, wAmount: event.target.value })),
+    destinations: destinations.map((label, index) => ({
+      label,
+      pick: () => setPageState((current) => ({ ...current, dest: index })),
+      bg: state.dest === index ? 'rgba(217,122,59,0.25)' : 'rgba(247,241,230,0.08)',
+      border: state.dest === index ? '#D97A3B' : 'rgba(247,241,230,0.4)',
+    })),
+    reviewWithdraw: () => {
+      if (!Number.isFinite(amount) || amount <= 0) {
+        showToast(setPageState, 'Enter an amount above 0.', 3400, { toastKind: 'err' });
+        return;
+      }
+      if (amount > Number(state.avail || 0)) {
+        showToast(setPageState, `Insufficient: available balance is UGX ${fmt(state.avail)}K. Escrow cannot be withdrawn until release.`, 4200, { toastKind: 'err' });
+        return;
+      }
+      setPageState((current) => ({ ...current, confirmOpen: true, withdrawOpen: false }));
+    },
+    confirmOpen: !!state.confirmOpen,
+    confirmSummary: `Withdraw UGX ${fmt(amount)}K -> ${destLabel}. You receive UGX ${fmt(Math.max(0, amount - 2.5))}K after the flat fee.`,
+    confirmWithdraw: () => {
+      if (!Number.isFinite(amount) || amount <= 0 || amount > Number(state.avail || 0)) {
+        showToast(setPageState, 'Review the withdrawal amount before confirming.', 3400, { toastKind: 'err' });
+        return;
+      }
+      setPageState((current) => ({
+        ...current,
+        avail: Number(current.avail || 0) - amount,
+        confirmOpen: false,
+        withdrawOpen: false,
+        activity: [{ icon: 'W', type: 'PAYOUTS', title: `Withdrawal to ${destLabel}`, meta: 'JUST NOW - FEE 2.5K - REF WD-2301', amount: '-' + fmt(amount) + 'K', in: false }, ...(current.activity || activity)],
+      }));
+      showToast(setPageState, `Withdrawal confirmed after 2FA. UGX ${fmt(amount)}K -> ${destLabel}, arriving within 24h.`);
+    },
+    cancelWithdraw: () => setPageState((current) => ({ ...current, confirmOpen: false, withdrawOpen: true })),
+    toPoints: () => showToast(setPageState, 'Move earnings to personal points at 1 UGX = 0.0269 pts. Confirmation dialog opens with the exact quote.'),
+    filters: ['ALL', 'JOBS', 'PAYOUTS', 'ESCROW', 'FEES'].map((filter) => ({
+      label: filter,
+      pick: () => setPageState((current) => ({ ...current, filter })),
+      bg: state.filter === filter ? '#1F3A38' : '#F7F1E6',
+      fg: state.filter === filter ? '#F7F1E6' : '#14201F',
+    })),
+    activity: shown.map((item) => ({
+      ...item,
+      iconBg: item.in === true ? '#DCE8D9' : item.in === false ? '#F6DCC0' : '#EFE7D6',
+      color: item.in === true ? '#4a7c4a' : item.in === false ? '#B8463A' : '#6E6155',
+    })),
+    shownCount: shown.length,
+    exportStmt: () => showToast(setPageState, 'Statement queued with itemised fees. PDF and CSV will be emailed in about one minute.'),
+    toast: state.toast,
+    toastBg: state.toastKind === 'err' ? '#B8463A' : '#1F3A38',
+  };
+}
+
+function settingsValues(state, setPageState) {
+  const provider = state.role === 'provider';
+  const fields = state.fields || (provider
+    ? { name: 'Ssemakula Kato', biz: 'Kato 4x4 & Tours', email: 'kato@gmail.com', phone: '+256 7** *** 214' }
+    : { name: 'Amina Mushi', biz: 'Amina M.', email: 'amina@gmail.com', phone: '+1 (9**) *** 4412' });
+  const defaultNotifs = [
+    { title: 'Reminders (7d - 1d - 2h)', desc: "Events you RSVP'd or booked", app: true, email: true, sms: false },
+    { title: 'Offers & replies', desc: 'On your needs and threads', app: true, email: true, sms: true },
+    { title: 'Matched leads', desc: provider ? 'New needs in your categories and cities' : 'Providers matching your posts', app: true, email: true, sms: false },
+    { title: 'Money movement', desc: 'Top-ups, sends, escrow, payouts', app: true, email: true, sms: true },
+    { title: 'Comments & referrals', desc: 'Activity on your posts and links', app: true, email: false, sms: false },
+    { title: 'Twendezetu news', desc: 'Product updates, city launches', app: false, email: true, sms: false },
+  ];
+  const notifs = state.notifs || defaultNotifs;
+  const go = (section) => () => setPageState((current) => ({ ...current, section }));
+  const knob = (on) => (on ? '19px' : '1px');
+  const bg = (on) => (on ? '#D97A3B' : '#EFE7D6');
+  const setField = (key) => (event) =>
+    setPageState((current) => ({ ...current, saved: false, fields: { ...(current.fields || fields), [key]: event.target.value } }));
+  const toggleNotif = (index, channel) => () =>
+    setPageState((current) => ({
+      ...current,
+      notifs: (current.notifs || defaultNotifs).map((item, itemIndex) => (itemIndex === index ? { ...item, [channel]: !item[channel] } : item)),
+    }));
+  const payDefs = provider
+    ? [
+        { icon: 'MOMO', iconBg: '#FFCB05', iconFg: '#14201F', label: 'MTN MoMo **7214', meta: 'UGANDA - PAYOUTS + BILLING' },
+        { icon: 'VISA', iconBg: '#1F3A38', iconFg: '#F7F1E6', label: 'Visa **4412', meta: 'EXPIRES 08/28' },
+        { icon: 'BANK', iconBg: '#EFE7D6', iconFg: '#14201F', label: 'Stanbic **8867', meta: 'UGX ACCOUNT - WITHDRAWALS' },
+      ]
+    : [
+        { icon: 'VISA', iconBg: '#1F3A38', iconFg: '#F7F1E6', label: 'Visa **4412', meta: 'EXPIRES 08/28' },
+        { icon: 'MPSA', iconBg: '#4a7c4a', iconFg: '#F7F1E6', label: 'M-Pesa **2210', meta: 'KENYA - TOP-UPS + WITHDRAWALS' },
+        { icon: 'MOMO', iconBg: '#FFCB05', iconFg: '#14201F', label: 'MTN MoMo **5521', meta: 'UGANDA - FAMILY SENDS' },
+      ];
+
+  return {
+    backHref: provider ? 'Provider Dashboard.dc.html' : 'My Twende.dc.html',
+    backLabel: provider ? 'DASHBOARD' : 'MY TWENDE',
+    initials: provider ? 'SK' : 'AM',
+    navItems: [
+      ['profile', 'P', 'PROFILE'],
+      ['notifs', 'N', 'NOTIFICATIONS'],
+      ['payments', '$', 'PAYMENT METHODS'],
+      ['security', 'S', 'SECURITY'],
+    ].map(([id, icon, label]) => ({
+      icon,
+      label,
+      go: go(id),
+      bg: state.section === id ? '#1F3A38' : 'transparent',
+      fg: state.section === id ? '#F7F1E6' : '#3A2F25',
+    })),
+    isProfile: state.section === 'profile',
+    isNotifs: state.section === 'notifs',
+    isPayments: state.section === 'payments',
+    isSecurity: state.section === 'security',
+    fName: fields.name,
+    fBiz: fields.biz,
+    fEmail: fields.email,
+    fPhone: fields.phone,
+    setFName: setField('name'),
+    setFBiz: setField('biz'),
+    setFEmail: setField('email'),
+    setFPhone: setField('phone'),
+    changePhoto: () => showToast(setPageState, 'Photo picker opens here with square crop and a 5MB limit.'),
+    saveLabel: state.saved ? 'Saved' : 'Save changes',
+    saveProfile: () => {
+      setPageState((current) => ({ ...current, saved: true }));
+      showToast(setPageState, 'Profile saved and synced to listings, threads and posts.');
+    },
+    notifRows: notifs.map((item, index) => ({
+      title: item.title,
+      desc: item.desc,
+      appBg: bg(item.app),
+      appKnob: knob(item.app),
+      tApp: toggleNotif(index, 'app'),
+      emailBg: bg(item.email),
+      emailKnob: knob(item.email),
+      tEmail: toggleNotif(index, 'email'),
+      smsBg: bg(item.sms),
+      smsKnob: knob(item.sms),
+      tSms: toggleNotif(index, 'sms'),
+    })),
+    digestAll: () => showToast(setPageState, 'All non-urgent notifications will now bundle into one Friday digest.'),
+    muteAll: () => showToast(setPageState, 'Muted for 7 days. Money-movement alerts stay on for account protection.'),
+    payMethods: payDefs.map((method, index) => ({
+      ...method,
+      isDefault: state.defaultPay === index,
+      notDefault: state.defaultPay !== index,
+      makeDefault: () => {
+        setPageState((current) => ({ ...current, defaultPay: index }));
+        showToast(setPageState, `${method.label} is now your default for payments and withdrawals.`);
+      },
+      remove: () => showToast(setPageState, 'Removal requires re-entering your password. Confirmation dialog opens here.'),
+    })),
+    addMethod: () => showToast(setPageState, 'Secure add-method form opens for card, M-Pesa, MTN MoMo or Airtel.'),
+    securityRows: [
+      { title: 'Password', desc: 'Last changed 3 months ago', btn: 'CHANGE', btnBg: '#F7F1E6', btnFg: '#14201F', action: () => showToast(setPageState, 'Password change form opens and can sign out other sessions.') },
+      {
+        title: 'Two-factor authentication',
+        desc: state.twoFa ? 'ON - via SMS to **4412' : 'Off - recommended for wallet holders',
+        btn: state.twoFa ? 'ON' : 'ENABLE',
+        btnBg: state.twoFa ? '#7B8B6E' : '#D97A3B',
+        btnFg: state.twoFa ? '#F7F1E6' : '#14201F',
+        action: () => {
+          setPageState((current) => ({ ...current, twoFa: !current.twoFa }));
+          showToast(setPageState, state.twoFa ? '2FA disabled. We recommend keeping it on.' : '2FA enabled for sign-in, sends and withdrawals.');
+        },
+      },
+      { title: 'Active sessions', desc: '2 devices - this one + iPhone (Jersey City)', btn: 'REVIEW', btnBg: '#F7F1E6', btnFg: '#14201F', action: () => showToast(setPageState, 'Session list opens with device, city and last active time.') },
+      { title: 'Download my data / delete account', desc: 'GDPR-style export or full deletion', btn: 'OPTIONS', btnBg: '#F7F1E6', btnFg: '#14201F', action: () => showToast(setPageState, 'Export or deletion options open. Escrow must be empty before deletion.') },
+    ],
     toast: state.toast,
   };
 }
@@ -1934,10 +2203,14 @@ export function createClaudePageValues(page, state, setPageState) {
       return providerValuesV5(state, setPageState);
     case 'providerDashboard':
       return providerDashboardValuesV5(state, setPageState);
+    case 'providerWallet':
+      return providerWalletValues(state, setPageState);
     case 'admin':
       return adminValues(state, setPageState);
     case 'finance':
       return financeValues(state, setPageState);
+    case 'settings':
+      return settingsValues(state, setPageState);
     case 'mobile':
       return {};
     default:

@@ -12,9 +12,11 @@ const ROUTES = {
   'Sign In.dc.html': '/sign-in',
   'Provider Listing.dc.html': '/providers/kato-4x4',
   'Provider Dashboard.dc.html': '/provider-dashboard',
+  'Provider Wallet.dc.html': '/provider-wallet',
   'Points Wallet.dc.html': '/points-wallet',
   'My Twende.dc.html': '/my-twende',
   'Messages.dc.html': '/messages',
+  'Settings.dc.html': '/settings',
   'Admin.dc.html': '/admin',
   'Finance.dc.html': '/finance',
   'Mobile.dc.html': '/mobile',
@@ -51,7 +53,10 @@ function resolveExpression(expr, scope) {
 }
 
 function mapHref(href) {
-  return ROUTES[href] ?? href;
+  const match = href.match(/^([^?#]+\.dc\.html)([?#].*)?$/);
+  if (!match) return ROUTES[href] ?? href;
+
+  return ROUTES[match[1]] ? `${ROUTES[match[1]]}${match[2] ?? ''}` : href;
 }
 
 function addClassToTag(tag, className) {
@@ -141,7 +146,7 @@ function renderTemplate(template, values, registerAction) {
       return ` href="${escapeHtml(mapHref(String(href ?? '#')))}"`;
     });
 
-    html = html.replace(/\shref="([^"]+\.dc\.html)"/g, (_match, href) => ` href="${mapHref(href)}"`);
+    html = html.replace(/\shref="([^"]+\.dc\.html(?:[?#][^"]*)?)"/g, (_match, href) => ` href="${mapHref(href)}"`);
 
     html = html.replace(/\{\{\s*([^}]+?)\s*\}\}/g, (_match, expr) => {
       const value = resolveExpression(expr, scope);
@@ -158,14 +163,19 @@ function renderTemplate(template, values, registerAction) {
   return `<style>${hoverRules.join('\n')}</style>${body}`;
 }
 
-export function ClaudeDesignPage({ page }) {
-  const [pageState, setPageState] = useState(() => getInitialClaudePageState(page));
+export function ClaudeDesignPage({ page, initialState = {} }) {
+  const initialStateKey = JSON.stringify(initialState);
+  const initialPageState = useMemo(
+    () => ({ ...getInitialClaudePageState(page), ...JSON.parse(initialStateKey || '{}') }),
+    [page, initialStateKey],
+  );
+  const [pageState, setPageState] = useState(() => initialPageState);
   const actionsRef = useRef(new Map());
   const template = claudePageTemplates[page];
 
   useEffect(() => {
-    setPageState(getInitialClaudePageState(page));
-  }, [page]);
+    setPageState(initialPageState);
+  }, [initialPageState]);
 
   const rendered = useMemo(() => {
     const actions = new Map();
