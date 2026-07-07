@@ -1,0 +1,879 @@
+.page {
+  background: #1f3a38;
+  color: #f7f1e6;
+  font-family: "Geist", ui-sans-serif, system-ui, sans-serif;
+  min-height: 100vh;
+  padding: clamp(28px, 4vw, 48px) clamp(16px, 3vw, 24px) 72px;
+}
+
+.intro {
+  align-items: flex-end;
+  display: flex;
+  gap: 24px;
+  justify-content: space-between;
+  margin: 0 auto;
+  max-width: 1360px;
+}
+
+.eyebrow,
+.captionKicker {
+  color: #e8a472;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+.intro h1 {
+  font-family: "Anton", Impact, sans-serif;
+  font-size: clamp(42px, 5.2vw, 72px);
+  font-weight: 400;
+  line-height: 0.94;
+  margin: 10px 0 0;
+  text-transform: uppercase;
+}
+
+.intro h1 span {
+  color: #d97a3b;
+}
+
+.intro a {
+  border-bottom: 2px solid #d97a3b;
+  color: #e8a472;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 12px;
+  padding-bottom: 4px;
+  text-decoration: none;
+}
+
+.showcaseGrid {
+  align-items: flex-start;
+  display: grid;
+  gap: 42px;
+  grid-template-columns: repeat(3, minmax(300px, 390px));
+  justify-content: center;
+  margin: 46px auto 0;
+  max-width: 1360px;
+}
+
+.screenCard {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  width: 100%;
+}
+
+.phone {
+  aspect-ratio: 390 / 844;
+  background: #101010;
+  border: 12px solid #101010;
+  border-radius: 48px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.36);
+  max-width: calc(100vw - 48px);
+  padding: 18px 10px 16px;
+  position: relative;
+  width: 390px;
+}
+
+.phoneSpeaker {
+  background: #101010;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  height: 22px;
+  left: 50%;
+  position: absolute;
+  top: 12px;
+  transform: translateX(-50%);
+  width: 94px;
+  z-index: 2;
+}
+
+.phoneScreen {
+  background: #f7f1e6;
+  border-radius: 34px;
+  color: #14201f;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+
+.phoneScreenDark {
+  background: #1f3a38;
+  color: #f7f1e6;
+}
+
+.screenStack {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.phoneStatusBar {
+  align-items: center;
+  color: #14201f;
+  display: flex;
+  flex-shrink: 0;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 10.5px;
+  font-weight: 700;
+  justify-content: space-between;
+  line-height: 1;
+  padding: 14px 22px 0;
+}
+
+.phoneStatusBarDark {
+  color: #f7f1e6;
+}
+
+.statusItems {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+}
+
+.statusItems span {
+  font-size: 9.5px;
+  letter-spacing: -0.02em;
+}
+
+.signalBars {
+  align-items: flex-end;
+  display: flex;
+  gap: 2px;
+  height: 11px;
+}
+
+.signalBars b {
+  background: currentColor;
+  border-radius: 999px;
+  display: block;
+  width: 3px;
+}
+
+.signalBars b:nth-child(1) {
+  height: 4px;
+}
+
+.signalBars b:nth-child(2) {
+  height: 6px;
+}
+
+.signalBars b:nth-child(3) {
+  height: 8px;
+}
+
+.signalBars b:nth-child(4) {
+  height: 10px;
+}
+
+.wifiIcon {
+  border-color: currentColor transparent transparent;
+  border-radius: 50% 50% 0 0;
+  border-style: solid;
+  border-width: 2px 2px 0;
+  height: 8px;
+  position: relative;
+  width: 13px;
+}
+
+.wifiIcon::after {
+  background: currentColor;
+  border-radius: 999px;
+  bottom: 0;
+  content: "";
+  height: 3px;
+  left: 50%;
+  position: absolute;
+  transform: translateX(-50%);
+  width: 3px;
+}
+
+.batteryIcon {
+  border: 1.6px solid currentColor;
+  border-radius: 3px;
+  display: block;
+  height: 9px;
+  padding: 1.5px;
+  position: relative;
+  width: 19px;
+}
+
+.batteryIcon::after {
+  background: currentColor;
+  border-radius: 0 2px 2px 0;
+  content: "";
+  height: 5px;
+  position: absolute;
+  right: -4px;
+  top: 1px;
+  width: 2px;
+}
+
+.batteryIcon b {
+  background: #d97a3b;
+  display: block;
+  height: 100%;
+  width: 72%;
+}
+
+.phoneTopBar {
+  align-items: center;
+  display: flex;
+  flex-shrink: 0;
+  justify-content: space-between;
+  padding: 17px 18px 12px;
+}
+
+.phoneTopBarDark {
+  color: #f7f1e6;
+}
+
+.wordmark {
+  color: #14201f;
+  font-family: "Anton", Impact, sans-serif;
+  font-size: 19px;
+  letter-spacing: 0.01em;
+  line-height: 0.88;
+  text-transform: uppercase;
+}
+
+.wordmarkDark {
+  color: #f7f1e6;
+}
+
+.wordmark span {
+  color: #d97a3b;
+}
+
+.phoneTopActions {
+  align-items: center;
+  display: flex;
+  gap: 7px;
+}
+
+.phoneTopActions span {
+  background: #1f3a38;
+  border: 2px solid #1f3a38;
+  color: #f7f1e6;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 10px;
+  line-height: 1;
+  padding: 6px 8px;
+}
+
+.phoneTopBarDark .phoneTopActions span {
+  background: #f7f1e6;
+  border-color: #f7f1e6;
+  color: #14201f;
+}
+
+.phoneTopActions span:last-child {
+  background: #d97a3b;
+  color: #14201f;
+}
+
+.phoneContent {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.bottomNav {
+  background: #1f3a38;
+  color: rgba(247, 241, 230, 0.68);
+  display: grid;
+  flex-shrink: 0;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 8.5px;
+  grid-template-columns: repeat(4, 1fr);
+  line-height: 1.25;
+  margin-top: auto;
+  padding: 10px 0 8px;
+  text-align: center;
+}
+
+.bottomNavDark {
+  background: #f7f1e6;
+  color: rgba(20, 32, 31, 0.64);
+}
+
+.bottomNav span {
+  display: grid;
+  gap: 2px;
+  justify-items: center;
+  min-width: 0;
+}
+
+.bottomNav strong {
+  color: inherit;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.bottomNavActive {
+  color: #d97a3b;
+}
+
+.bottomNavDark .bottomNavActive {
+  color: #a85a23;
+}
+
+.homeScreen,
+.eventScreen,
+.notificationsScreen {
+  height: 100%;
+}
+
+.homeScreen {
+  padding: 0 18px 14px;
+}
+
+.displayTitle {
+  background-clip: text;
+  background-image: url("https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=900&q=80");
+  background-position: center 30%;
+  background-size: cover;
+  color: transparent;
+  font-family: "Anton", Impact, sans-serif;
+  font-size: 39px;
+  line-height: 0.94;
+  text-transform: uppercase;
+  -webkit-background-clip: text;
+}
+
+.searchBox {
+  align-items: center;
+  background: #fffdf8;
+  border: 2px solid #1f3a38;
+  display: flex;
+  font-size: 12px;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+
+.searchBox span {
+  color: #6e6155;
+  padding: 11px 12px;
+}
+
+.searchBox strong {
+  align-self: stretch;
+  background: #d97a3b;
+  display: grid;
+  font-family: "Anton", Impact, sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  padding: 0 14px;
+  place-items: center;
+}
+
+.filterRow {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+  overflow: hidden;
+}
+
+.filterRow span {
+  border: 2px solid #1f3a38;
+  font-family: "Anton", Impact, sans-serif;
+  font-size: 10.5px;
+  line-height: 1;
+  padding: 6px 9px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.filterActive {
+  background: #1f3a38;
+  color: #f7f1e6;
+}
+
+.eventGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr 1fr;
+  margin-top: 14px;
+}
+
+.miniEvent {
+  background: #fffdf8;
+  border: 2px solid #1f3a38;
+  min-width: 0;
+}
+
+.miniEvent img {
+  aspect-ratio: 4 / 5;
+  border-bottom: 2px solid #1f3a38;
+  display: block;
+  object-fit: cover;
+  width: 100%;
+}
+
+.imageWrap {
+  position: relative;
+}
+
+.imageWrap span {
+  background: #d97a3b;
+  border: 1px solid #1f3a38;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 8px;
+  left: 6px;
+  padding: 3px 5px;
+  position: absolute;
+  top: 6px;
+}
+
+.miniEvent div:last-child {
+  padding: 9px 10px 10px;
+}
+
+.miniEvent small,
+.eventBody small,
+.notificationsTitle small,
+.noticeList small {
+  color: #a85a23;
+  display: block;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 8.6px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.miniEvent strong {
+  display: block;
+  font-family: "Anton", Impact, sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.05;
+  margin-top: 3px;
+  text-transform: uppercase;
+}
+
+.miniEvent p {
+  color: #6e6155;
+  font-size: 10px;
+  margin: 4px 0 0;
+}
+
+.needStrip {
+  align-items: center;
+  background: #efe7d6;
+  border: 2px solid #1f3a38;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding: 12px 13px;
+}
+
+.needStrip strong {
+  display: block;
+  font-family: "Anton", Impact, sans-serif;
+  font-size: 12.5px;
+  font-weight: 400;
+  text-transform: uppercase;
+}
+
+.needStrip span {
+  color: #6e6155;
+  display: block;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 8.8px;
+  margin-top: 2px;
+}
+
+.needStrip b {
+  background: #f6dcc0;
+  border: 1px solid #a85a23;
+  color: #7a3e0f;
+  flex-shrink: 0;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 8.8px;
+  padding: 5px 7px;
+}
+
+.eventScreen {
+  display: flex;
+  flex-direction: column;
+}
+
+.heroPhoto {
+  border-bottom: 2px solid #1f3a38;
+  height: 218px;
+  position: relative;
+}
+
+.heroPhoto img {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.heroBack,
+.heroShare {
+  background: #f7f1e6;
+  border: 2px solid #1f3a38;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 9.8px;
+  padding: 5px 8px;
+  position: absolute;
+  top: 12px;
+}
+
+.heroBack {
+  left: 12px;
+}
+
+.heroShare {
+  background: #d97a3b;
+  right: 12px;
+}
+
+.eventBody {
+  padding: 14px 18px 16px;
+}
+
+.eventBody h2,
+.notificationsTitle h2 {
+  font-family: "Anton", Impact, sans-serif;
+  font-size: 27px;
+  font-weight: 400;
+  line-height: 0.95;
+  margin: 5px 0 0;
+  text-transform: uppercase;
+}
+
+.eventBody h2 span,
+.notificationsTitle h2::after {
+  color: #d97a3b;
+}
+
+.metaPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 9px;
+}
+
+.metaPills span {
+  border: 1.5px solid #1f3a38;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 8.8px;
+  padding: 4px 7px;
+}
+
+.metaPills span:first-child,
+.metaPills span:last-child {
+  background: #1f3a38;
+  color: #f7f1e6;
+}
+
+.metaPills span:last-child {
+  background: #d97a3b;
+  color: #14201f;
+}
+
+.eventBody p {
+  color: #3a2f25;
+  font-size: 12.3px;
+  line-height: 1.48;
+  margin: 11px 0 0;
+}
+
+.rsvpPanel {
+  align-items: center;
+  background: #fffdf8;
+  border: 2px solid #1f3a38;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding: 11px 13px;
+}
+
+.rsvpPanel strong {
+  display: block;
+  font-family: "Anton", Impact, sans-serif;
+  font-size: 21px;
+  font-weight: 400;
+}
+
+.rsvpPanel span,
+.reminderNote {
+  color: #6e6155;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 8.6px;
+}
+
+.rsvpPanel button,
+.actionRow button {
+  background: #d97a3b;
+  border: 2px solid #1f3a38;
+  color: #14201f;
+  font-family: "Anton", Impact, sans-serif;
+  font-size: 12.5px;
+  padding: 9px 14px;
+}
+
+.reminderNote {
+  background: #fbeed8;
+  border: 1px dashed #a85a23;
+  color: #7a3e0f;
+  line-height: 1.45;
+  margin-top: 9px;
+  padding: 9px 10px;
+}
+
+.actionRow {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: 10px;
+}
+
+.actionRow button {
+  background: #f7f1e6;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 8.8px;
+  padding: 8px 3px;
+}
+
+.notificationsScreen {
+  padding: 0 18px 16px;
+}
+
+.notificationsTitle {
+  align-items: flex-start;
+  display: flex;
+  justify-content: space-between;
+}
+
+.notificationsTitle small,
+.noticeList small {
+  color: #e8a472;
+}
+
+.notificationsTitle h2::after {
+  content: ".";
+}
+
+.notificationsTitle span {
+  border: 1px solid rgba(247, 241, 230, 0.45);
+  color: #f7f1e6;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 9px;
+  padding: 5px 7px;
+}
+
+.noticeList {
+  display: grid;
+  gap: 9px;
+  margin-top: 14px;
+}
+
+.noticeList article {
+  background: #f7f1e6;
+  border: 2px solid #f7f1e6;
+  color: #14201f;
+  padding: 11px 12px;
+}
+
+.noticeList article > div {
+  display: flex;
+  justify-content: space-between;
+}
+
+.noticeList p {
+  font-size: 12px;
+  line-height: 1.42;
+  margin: 5px 0 0;
+}
+
+.noticeList footer {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.noticeList footer span {
+  border: 1px solid #1f3a38;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 8.7px;
+  padding: 4px 7px;
+}
+
+.noticeList footer span:first-child {
+  background: #d97a3b;
+}
+
+.digestCard {
+  align-items: center;
+  background: rgba(247, 241, 230, 0.08) !important;
+  border: 1px dashed rgba(247, 241, 230, 0.35) !important;
+  color: rgba(247, 241, 230, 0.88) !important;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.digestCard span {
+  border: 2px solid #f7f1e6;
+  display: block;
+  flex-shrink: 0;
+  height: 24px;
+  position: relative;
+  width: 46px;
+}
+
+.digestCard i {
+  background: #d97a3b;
+  height: 16px;
+  position: absolute;
+  right: 2px;
+  top: 2px;
+  width: 18px;
+}
+
+.caption {
+  margin-top: 16px;
+  text-align: center;
+}
+
+.caption p {
+  color: rgba(247, 241, 230, 0.84);
+  font-size: 14px;
+  line-height: 1.45;
+  margin: 7px auto 0;
+  max-width: 320px;
+}
+
+.signature {
+  color: #f7f1e6;
+  font-family: "Instrument Serif", Georgia, serif;
+  font-size: 34px;
+  font-style: italic;
+  line-height: 1;
+  margin-top: 10px;
+  text-shadow: 2px 2px 0 #d97a3b;
+}
+
+.statusPage {
+  background: #14201f;
+  display: grid;
+  gap: 72px;
+  justify-content: center;
+  margin: 0;
+  min-height: 100vh;
+  padding: 72px;
+}
+
+.statusPageSingle {
+  min-height: 2560px;
+  padding: 0;
+}
+
+.statusCard {
+  background:
+    linear-gradient(135deg, rgba(217, 122, 59, 0.98) 0 16px, transparent 16px 100%),
+    linear-gradient(180deg, #1f3a38 0%, #14201f 100%);
+  border: 0;
+  height: 2560px;
+  justify-content: center;
+  overflow: hidden;
+  padding: 116px 96px 96px;
+  position: relative;
+  width: 1440px;
+}
+
+.statusCard::before {
+  color: rgba(247, 241, 230, 0.07);
+  content: "TWENDEZETU";
+  font-family: "Anton", Impact, sans-serif;
+  font-size: 250px;
+  left: 50%;
+  letter-spacing: 0.02em;
+  line-height: 0.85;
+  position: absolute;
+  text-align: center;
+  top: 52px;
+  transform: translateX(-50%);
+  z-index: 0;
+}
+
+.statusCard > * {
+  position: relative;
+  z-index: 1;
+}
+
+.statusCard .phone {
+  max-width: none;
+  width: 390px;
+  zoom: 2.2;
+}
+
+.statusCard .caption {
+  margin-top: 54px;
+}
+
+.statusCard .captionKicker {
+  color: #e8a472;
+  font-size: 29px;
+}
+
+.statusCard .caption p {
+  color: #f7f1e6;
+  font-size: 45px;
+  font-weight: 600;
+  line-height: 1.16;
+  margin-top: 18px;
+  max-width: 920px;
+}
+
+.statusCard .signature {
+  color: #f7f1e6;
+  font-size: 96px;
+  margin-top: 36px;
+  text-shadow: 6px 6px 0 #d97a3b, 0 0 40px rgba(217, 122, 59, 0.3);
+}
+
+@media (max-width: 1180px) {
+  .showcaseGrid {
+    grid-template-columns: repeat(2, minmax(300px, 390px));
+  }
+}
+
+@media (max-width: 760px) {
+  .intro {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .showcaseGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .screenCard {
+    margin-inline: auto;
+    max-width: 430px;
+  }
+}
+
+@media (max-width: 460px) {
+  .page {
+    padding-inline: 14px;
+  }
+
+  .phone {
+    border-width: 10px;
+    max-width: calc(100vw - 28px);
+    padding: 16px 8px 14px;
+  }
+
+  .phoneTopBar {
+    padding-inline: 16px;
+  }
+}
