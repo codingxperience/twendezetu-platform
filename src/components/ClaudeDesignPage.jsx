@@ -88,6 +88,59 @@ function createIosFrame(match, inner, renderInner) {
   return `<div class="tw-ios-device${themeClass}"><div class="tw-ios-device__speaker"></div><div class="tw-ios-device__screen">${renderInner(inner)}</div></div>`;
 }
 
+function replaceCustomTag(segment, tagName, renderTag) {
+  const openPattern = new RegExp(`<${tagName}\\s+([^>]*)>`, 'i');
+  let output = '';
+  let cursor = 0;
+
+  while (cursor < segment.length) {
+    const rest = segment.slice(cursor);
+    const open = openPattern.exec(rest);
+
+    if (!open) {
+      output += rest;
+      break;
+    }
+
+    const openStart = cursor + open.index;
+    const openEnd = openStart + open[0].length;
+    const tokenPattern = new RegExp(`<${tagName}\\s+[^>]*>|</${tagName}>`, 'gi');
+    let depth = 1;
+    let closeStart = -1;
+    let closeEnd = -1;
+
+    tokenPattern.lastIndex = openEnd;
+    output += segment.slice(cursor, openStart);
+
+    let token = tokenPattern.exec(segment);
+    while (token) {
+      if (token[0].toLowerCase().startsWith(`</${tagName}`)) {
+        depth -= 1;
+      } else {
+        depth += 1;
+      }
+
+      if (depth === 0) {
+        closeStart = token.index;
+        closeEnd = tokenPattern.lastIndex;
+        break;
+      }
+
+      token = tokenPattern.exec(segment);
+    }
+
+    if (closeStart === -1) {
+      output += segment.slice(openStart);
+      break;
+    }
+
+    output += renderTag(open[1], segment.slice(openEnd, closeStart));
+    cursor = closeEnd;
+  }
+
+  return output;
+}
+
 function renderTemplate(template, values, registerAction) {
   const hoverRules = [];
   let hoverCount = 0;
@@ -95,7 +148,7 @@ function renderTemplate(template, values, registerAction) {
   function renderSegment(segment, scope) {
     let html = segment;
 
-    html = html.replace(/<sc-for\s+([^>]*)>([\s\S]*?)<\/sc-for>/g, (_match, attrs, inner) => {
+    html = replaceCustomTag(html, 'sc-for', (attrs, inner) => {
       const list = resolveExpression(expressionFromTemplate(readAttribute(attrs, 'list')), scope) ?? [];
       const as = readAttribute(attrs, 'as');
       if (!Array.isArray(list) || !as) return '';
@@ -105,7 +158,7 @@ function renderTemplate(template, values, registerAction) {
         .join('');
     });
 
-    html = html.replace(/<sc-if\s+([^>]*)>([\s\S]*?)<\/sc-if>/g, (_match, attrs, inner) => {
+    html = replaceCustomTag(html, 'sc-if', (attrs, inner) => {
       const value = resolveExpression(expressionFromTemplate(readAttribute(attrs, 'value')), scope);
       return value ? renderSegment(inner, scope) : '';
     });
