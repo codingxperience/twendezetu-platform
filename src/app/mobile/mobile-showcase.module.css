@@ -752,13 +752,33 @@
 }
 
 .signature {
-  color: #f7f1e6;
+  align-items: baseline;
+  color: #e8a472;
+  display: inline-flex;
   font-family: "Instrument Serif", Georgia, serif;
-  font-size: 34px;
+  font-size: 32px;
   font-style: italic;
+  gap: 3px;
   line-height: 1;
   margin-top: 10px;
-  text-shadow: 2px 2px 0 #d97a3b;
+  position: relative;
+  text-shadow: 0 1px 0 rgba(20, 32, 31, 0.38);
+}
+
+.signature span {
+  font-size: 0.72em;
+  transform: translateY(-0.08em);
+}
+
+.signature::after {
+  background: currentColor;
+  bottom: -8px;
+  content: "";
+  height: 2px;
+  left: 8%;
+  position: absolute;
+  transform: rotate(-2deg);
+  width: 84%;
 }
 
 .statusPage {
@@ -782,6 +802,7 @@
     linear-gradient(180deg, #1f3a38 0%, #14201f 100%);
   border: 0;
   height: 2560px;
+  isolation: isolate;
   justify-content: center;
   overflow: hidden;
   padding: 116px 96px 96px;
@@ -806,7 +827,32 @@
 
 .statusCard > * {
   position: relative;
+  z-index: 2;
+}
+
+.securityPattern {
+  bottom: 340px;
+  color: rgba(247, 241, 230, 0.07);
+  display: grid;
+  gap: 34px;
+  left: -220px;
+  pointer-events: none;
+  position: absolute;
+  right: -220px;
+  top: 210px;
+  transform: rotate(-18deg);
   z-index: 1;
+}
+
+.securityPattern span {
+  border-top: 1px solid rgba(232, 164, 114, 0.1);
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 22px;
+  letter-spacing: 0.2em;
+  padding-top: 12px;
+  text-align: center;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .statusCard .phone {
@@ -816,28 +862,55 @@
 }
 
 .statusCard .caption {
-  margin-top: 54px;
+  margin-top: 62px;
 }
 
 .statusCard .captionKicker {
   color: #e8a472;
-  font-size: 29px;
+  font-size: 32px;
+  letter-spacing: 0.16em;
 }
 
 .statusCard .caption p {
-  color: #f7f1e6;
-  font-size: 45px;
-  font-weight: 600;
-  line-height: 1.16;
-  margin-top: 18px;
-  max-width: 920px;
+  display: none;
 }
 
 .statusCard .signature {
-  color: #f7f1e6;
-  font-size: 96px;
+  color: #e8a472;
+  font-size: 82px;
+  letter-spacing: 0.01em;
   margin-top: 36px;
-  text-shadow: 6px 6px 0 #d97a3b, 0 0 40px rgba(217, 122, 59, 0.3);
+  text-shadow: 0 4px 0 rgba(20, 32, 31, 0.52), 0 0 34px rgba(232, 164, 114, 0.2);
+  transform: rotate(-2deg);
+}
+
+.statusCard .signature::after {
+  bottom: -16px;
+  height: 4px;
+}
+
+.securitySeal {
+  align-items: center;
+  border: 1px solid rgba(232, 164, 114, 0.56);
+  color: rgba(247, 241, 230, 0.68);
+  display: flex;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-size: 18px;
+  gap: 18px;
+  letter-spacing: 0.12em;
+  margin-top: 34px;
+  padding: 13px 20px;
+  text-transform: uppercase;
+}
+
+.securitySeal strong {
+  color: #f7f1e6;
+  font-weight: 600;
+}
+
+.securitySeal em {
+  color: #e8a472;
+  font-style: normal;
 }
 
 @media (max-width: 1180px) {

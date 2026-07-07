@@ -119,6 +119,14 @@ function ScreenCard({ screen, status = false }) {
       data-status-card={screen.id}
       aria-label={`${screen.number} ${screen.label}`}
     >
+      {status ? (
+        <div className={styles.securityPattern} aria-hidden="true">
+          {Array.from({ length: 10 }, (_, index) => (
+            <span key={index}>FRED OKORIO / TWENDEZETU ORIGINAL / TZ-FOK-2026</span>
+          ))}
+        </div>
+      ) : null}
+
       <PhoneShell theme={screen.theme} active={screen.active}>
         {screen.render}
       </PhoneShell>
@@ -131,8 +139,16 @@ function ScreenCard({ screen, status = false }) {
       </div>
 
       <div className={styles.signature} aria-label="Designed by Fred Okorio">
-        @Fred Okorio
+        <span>@</span>Fred Okorio
       </div>
+
+      {status ? (
+        <div className={styles.securitySeal} aria-label="Original concept protected mark">
+          <span>Original concept</span>
+          <strong>Fred Okorio</strong>
+          <em>TZ-FOK-2026</em>
+        </div>
+      ) : null}
     </article>
   );
 }
