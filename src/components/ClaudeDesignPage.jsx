@@ -21,6 +21,12 @@ const ROUTES = {
   'Admin.dc.html': '/admin',
   'Finance.dc.html': '/finance',
   'Mobile.dc.html': '/mobile',
+  'Checkin.dc.html': '/checkin',
+  'Disputes.dc.html': '/disputes',
+  'Organizer Analytics.dc.html': '/organizer-analytics',
+  'Organizer Payouts.dc.html': '/organizer-payouts',
+  'Referral Rewards.dc.html': '/referral-rewards',
+  'Split Pay.dc.html': '/split-pay',
 };
 
 function escapeHtml(value) {

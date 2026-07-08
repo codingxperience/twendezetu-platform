@@ -20,6 +20,13 @@ const initialState = {
     currency: 'USD',
     promoValue: 'NANE20',
     promoApplied: false,
+    buyerName: '',
+    buyerEmail: '',
+    paid: false,
+    payError: null,
+    waitlisted: false,
+    group: false,
+    guests: ['', ''],
   },
   signin: { mode: 'register', role: 'advertiser' },
   myTwende: {
@@ -31,6 +38,7 @@ const initialState = {
     bellOpen: false,
     profileOpen: false,
     referOpen: {},
+    qrOpen: {},
     editOpen: {},
     calAdded: { 0: true, 1: false },
     reminders: { 0: '7d · 1d · 2h', 1: '1d' },
@@ -68,7 +76,7 @@ const initialState = {
     toastKind: 'ok',
     sendNote: 'Send points to family, friends, or event pools. No phone number is shown until you choose to share it.',
   },
-  provider: { copied: false, galleryIdx: 0, dirIdx: 0, askOpen: false, question: '', toast: null },
+  provider: { copied: false, galleryIdx: 0, dirIdx: 0, askOpen: false, question: '', toast: null, writeOpen: false, starSel: 5, jobSel: '', draft: '', posted: false, reviewError: null },
   providerDashboard: {
     bellOpen: false,
     profileOpen: false,
@@ -128,6 +136,7 @@ const initialState = {
     notifs: null,
     defaultPay: 0,
     twoFa: false,
+    quiet: true,
   },
   admin: {
     section: 'overview',
@@ -149,6 +158,12 @@ const initialState = {
     toast: null,
   },
   mobile: {},
+  checkin: { admitted: 186, blocked: 3, seen: {}, result: null, manual: '', log: [] },
+  disputes: { purchase: 0, reason: null, detail: '', evidence: false, submitted: false, formError: null, toast: null },
+  organizerAnalytics: {},
+  organizerPayouts: { withdrawn: false, toast: null },
+  referralRewards: { copied: false, toast: null },
+  splitPay: { paid: { 0: true, 1: true }, reminded: {}, copied: false, toast: null },
 };
 
 function clone(value) {
@@ -222,28 +237,6 @@ function homeValues(state, setPageState) {
       badge: 'TICKETS',
     },
     {
-      href: 'Checkout.dc.html',
-      cat: 'Community',
-      img: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=600&q=80',
-      title: 'Umoja Cultural Day',
-      city: 'Kampala, UG',
-      date: 'SAT · 15 AUG',
-      price: 'UGX 25,000',
-      going: 310,
-      badge: false,
-    },
-    {
-      href: 'Checkout.dc.html',
-      cat: 'Nyama choma',
-      img: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600&q=80',
-      title: 'Swahili Food Fair',
-      city: 'Nairobi, KE',
-      date: 'SUN · 16 AUG',
-      price: 'KES 500',
-      going: 152,
-      badge: false,
-    },
-    {
       href: 'Event Nyama Choma.dc.html',
       cat: 'Community',
       img: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=600&q=80',
@@ -254,40 +247,44 @@ function homeValues(state, setPageState) {
       going: 74,
       badge: 'NEW',
     },
-    {
-      href: 'Checkout.dc.html',
-      cat: 'Weddings',
-      img: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=600&q=80',
-      title: 'Harusi Expo',
-      city: 'Dar es Salaam, TZ',
-      date: 'SAT · 22 AUG',
-      price: 'TZS 10,000',
-      going: 188,
-      badge: false,
-    },
-    {
-      href: 'Checkout.dc.html',
-      cat: 'Music + DJs',
-      img: 'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=600&q=80',
-      title: 'Kigali Open-Air Sessions',
-      city: 'Kigali, RW',
-      date: 'SAT · 29 AUG',
-      price: 'RWF 5,000',
-      going: 120,
-      badge: false,
-    },
-    {
-      href: 'Event Nyama Choma.dc.html',
-      cat: 'Faith',
-      img: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=600&q=80',
-      title: 'Gospel Sunday Picnic',
-      city: 'Hartford, CT',
-      date: 'SUN · 30 AUG',
-      price: 'FREE',
-      going: 58,
-      badge: false,
-    },
   ];
+  const catalogImages = {
+    'Nyama choma': ['photo-1529193591184-b1d58069ecdd', 'photo-1555939594-58d7cb561ad1', 'photo-1544025162-d76694265947', 'photo-1600891964092-4316c288032e', 'photo-1432139555190-58524dae6a55'],
+    'Music + DJs': ['photo-1470225620780-dba8ba36b745', 'photo-1429962714451-bb934ecdc4ec', 'photo-1493225457124-a3eb161ffa5f', 'photo-1516280440614-37939bbacd81', 'photo-1501386761578-eac5c94b800a'],
+    'Community': ['photo-1533174072545-7a4b6ad7a6c3', 'photo-1501281668745-f7f57925c3b4', 'photo-1528605248644-14dd04022da1', 'photo-1511578314322-379afb476865', 'photo-1523580494863-6f3031224c94'],
+    'Weddings': ['photo-1519741497674-611481863552', 'photo-1465495976277-4387d4b0b4c6', 'photo-1511285560929-80b456fea0bc', 'photo-1606216794074-735e91aa2c92', 'photo-1522673607200-164d1b6ce486'],
+    'Faith': ['photo-1511795409834-ef04bbd61622', 'photo-1438232992991-995b7058bbb3', 'photo-1507692049790-de58290a4334', 'photo-1519491050282-cf00c82424b4', 'photo-1445019980597-93fa8acb246c'],
+    'Sports': ['photo-1517649763962-0c623066013b', 'photo-1543351611-58f69d7c1781', 'photo-1571019613454-1cb2f99b2d8b', 'photo-1461896836934-ffe607ba8211', 'photo-1526232761682-d26e03ac148e'],
+  };
+  const catalogCities = ['Nairobi, KE', 'Kampala, UG', 'Dar es Salaam, TZ', 'Kigali, RW', 'Mombasa, KE', 'Jinja, UG', 'Arusha, TZ', 'Brooklyn, NY', 'Newark, NJ', 'Hartford, CT', 'Boston, MA', 'Dallas, TX'];
+  const catalogDates = ['FRI · 5 SEP', 'SAT · 6 SEP', 'SUN · 7 SEP', 'SAT · 13 SEP', 'FRI · 19 SEP', 'SAT · 20 SEP', 'SUN · 21 SEP', 'SAT · 27 SEP', 'FRI · 3 OCT', 'SAT · 4 OCT', 'SUN · 12 OCT', 'SAT · 18 OCT', 'SAT · 25 OCT', 'FRI · 31 OCT'];
+  const catalogTitles = {
+    'Nyama choma': ['Nyama Choma Sundowner', 'Mishkaki Night Market', 'Grill & Chill Cookout', 'Choma Fest', 'Kuku & Ugali Fair', 'Diaspora BBQ Reunion', 'Weekend Braai', 'Village Roast Festival'],
+    'Music + DJs': ['Bongo Flava Live', 'Amapiano Rooftop', 'Gengetone Takeover', 'Afrobeat Night', 'Rhumba Legends', 'Taarab Evening', 'Benga Revival', 'DJ Clash Live'],
+    'Community': ['Umoja Cultural Day', 'Diaspora Connect Mixer', 'Swahili Language Meetup', 'Ubuntu Family Day', 'Newcomers Welcome', 'Elders Appreciation', 'Youth Mentorship Fair', 'Neighbourhood Harambee'],
+    'Weddings': ['Harusi Expo', 'Bridal Showcase', 'Send-off Planning Fair', 'Ruracio Celebration', 'Engagement Soirée', 'Wedding Vendors Market', 'Kesho Bridal Fair', 'Traditional Wedding Day'],
+    'Faith': ['Gospel Sunday Picnic', 'Praise & Worship Night', 'Kesha Overnight', 'Youth Revival', 'Interfaith Gathering', 'Thanksgiving Service', 'Choir Festival', 'Prayer Breakfast'],
+    'Sports': ['Community 5K Run', 'Diaspora Football Cup', 'Netball Tournament', 'Athletics Meet', 'Boda Riders Rally', 'Marathon Fundraiser', 'Basketball Jam', 'Cricket Sunday'],
+  };
+  const catalogPrices = ['FREE', 'FROM $15', 'KES 500', 'UGX 20,000', 'TZS 10,000', 'RWF 5,000', 'FROM $25'];
+  const catalogCats = ['Nyama choma', 'Music + DJs', 'Community', 'Weddings', 'Faith', 'Sports'];
+  catalogCats.forEach((cat, ci) => {
+    for (let i = 0; i < 30; i++) {
+      const imgs = catalogImages[cat];
+      const titles = catalogTitles[cat];
+      allEvents.push({
+        href: i % 3 === 0 ? 'Event Nyama Choma.dc.html' : 'Checkout.dc.html',
+        cat,
+        img: `https://images.unsplash.com/${imgs[i % imgs.length]}?w=600&q=80`,
+        title: titles[i % titles.length] + (i >= titles.length ? ` ${Math.floor(i / titles.length) + 1}` : ''),
+        city: catalogCities[(i + ci * 2) % catalogCities.length],
+        date: catalogDates[(i + ci) % catalogDates.length],
+        price: catalogPrices[(i + ci) % catalogPrices.length],
+        going: 24 + ((i * 37 + ci * 53) % 380),
+        badge: i === 1 ? 'NEW' : false,
+      });
+    }
+  });
   const shownEvents = state.cat === 'All' ? allEvents : allEvents.filter((event) => event.cat === state.cat);
 
   return {
@@ -364,7 +361,7 @@ function homeValues(state, setPageState) {
         bg: '#D97A3B',
         fg: '#14201F',
       }),
-    events: shownEvents,
+    events: shownEvents.slice(0, 32),
     moreStories: [
       {
         href: 'Event Nyama Choma.dc.html',
@@ -459,20 +456,25 @@ function eventValues(state, setPageState) {
       { time: '5:00 PM', title: 'Burudani + DJ', desc: 'Live entertainment, bongo flava & amapiano sets', tag: 'MUSIC' },
       { time: '7:00 PM', title: 'Connection hour', desc: 'Community services, vendors, meet the leadership', tag: 'COMMUNITY' },
     ],
+    icsHref: 'data:text/calendar;charset=utf-8,' + encodeURIComponent(
+      'BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Twendezetu//EN\nBEGIN:VEVENT\nUID:nyama-nanenane-2026@twende.to\nDTSTART:20260808T180000Z\nDTEND:20260809T010000Z\nSUMMARY:NYTC Nyama Choma Festival Nanenane\nLOCATION:Lincoln Park\\, 1 Country Road 605\\, Jersey City\\, NJ 07304\nDESCRIPTION:Hii si ya kukosa! Communipaw Ave side. https://twende.to/nyama-nanenane\nBEGIN:VALARM\nTRIGGER:-P1D\nACTION:DISPLAY\nDESCRIPTION:Nyama Choma is tomorrow!\nEND:VALARM\nEND:VEVENT\nEND:VCALENDAR'),
     similar: [
       {
+        href: 'Checkout.dc.html',
         img: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&q=80',
         title: 'Afrogroove Night',
         city: 'Brooklyn, NY',
         date: 'FRI · 14 AUG',
       },
       {
+        href: 'Twendezetu Home.dc.html',
         img: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=600&q=80',
         title: 'Diaspora Connect Mixer',
         city: 'Newark, NJ',
         date: 'FRI · 21 AUG',
       },
       {
+        href: 'Twendezetu Home.dc.html',
         img: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=600&q=80',
         title: 'Sunday Family Picnic',
         city: 'Hartford, CT',
@@ -579,6 +581,7 @@ function checkoutValues(state, setPageState) {
       },
     }));
   };
+  const joinWaitlist = () => setPageState((current) => ({ ...current, waitlisted: true }));
   const mkTier = (id, name, tag, desc, was, soldOut) => ({
     name,
     tag,
@@ -586,6 +589,10 @@ function checkoutValues(state, setPageState) {
     was,
     soldOut,
     available: !soldOut,
+    wlLabel: state.waitlisted ? '✓ ON WAITLIST' : 'JOIN WAITLIST',
+    wlBg: state.waitlisted ? '#7B8B6E' : '#D97A3B',
+    wlFg: state.waitlisted ? '#F7F1E6' : '#14201F',
+    waitlist: joinWaitlist,
     price: fmt(prices[id] ?? 0),
     qty: state.qty[id] ?? 0,
     plus: setQty(id, 1),
@@ -614,7 +621,7 @@ function checkoutValues(state, setPageState) {
       {
         name: 'Door price',
         tag: false,
-        desc: 'Cash or card at the gate, if not sold out',
+        desc: 'SOLD OUT online — join the waitlist for released seats',
         was: false,
         price: fmt(25),
         soldOut: true,
@@ -622,7 +629,11 @@ function checkoutValues(state, setPageState) {
         qty: 0,
         plus: () => {},
         minus: () => {},
-        opacity: 0.45,
+        opacity: 0.7,
+        wlLabel: state.waitlisted ? '✓ ON WAITLIST' : 'JOIN WAITLIST',
+        wlBg: state.waitlisted ? '#7B8B6E' : '#D97A3B',
+        wlFg: state.waitlisted ? '#F7F1E6' : '#14201F',
+        waitlist: joinWaitlist,
       },
     ],
     methods: [
@@ -652,6 +663,53 @@ function checkoutValues(state, setPageState) {
         : state.method === 'points'
           ? 'Pay with points →'
           : `Pay ${fmt(total)} →`,
+    notPaid: !state.paid,
+    paid: state.paid,
+    groupOpen: state.group,
+    groupBg: state.group ? '#D97A3B' : '#EFE7D6',
+    groupKnob: state.group ? '26px' : '2px',
+    toggleGroup: () => setPageState((current) => ({ ...current, group: !current.group })),
+    guestCount: state.guests.filter((g) => g.trim()).length || state.guests.length,
+    guestRows: state.guests.map((name, i) => ({
+      n: i + 1,
+      name,
+      ph: i === 0 ? 'Guest 1 (you)' : `Guest ${i + 1} — name for their QR`,
+      set: (event) =>
+        setPageState((current) => ({
+          ...current,
+          guests: current.guests.map((g, gi) => (gi === i ? event.target.value : g)),
+        })),
+    })),
+    splitPay: () => {
+      try {
+        navigator.clipboard.writeText('https://twende.to/split/tw-8841');
+      } catch (error) {}
+      setPageState((current) => ({
+        ...current,
+        payError: '✓ Split-pay link copied — each guest pays their share, tickets issue as they do.',
+      }));
+    },
+    buyerName: state.buyerName,
+    setBuyerName: (event) => setPageState((current) => ({ ...current, buyerName: event.target.value, payError: null })),
+    buyerEmail: state.buyerEmail,
+    setBuyerEmail: (event) => setPageState((current) => ({ ...current, buyerEmail: event.target.value, payError: null })),
+    buyerFirst: state.buyerName.split(' ')[0] || 'rafiki',
+    payError: state.payError,
+    pay: () => {
+      if (subtotal <= 0) {
+        setPageState((current) => ({ ...current, payError: '✕ Pick at least one ticket above.' }));
+        return;
+      }
+      if (!state.buyerName.trim()) {
+        setPageState((current) => ({ ...current, payError: '✕ Add your name — it goes on the ticket.' }));
+        return;
+      }
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(state.buyerEmail)) {
+        setPageState((current) => ({ ...current, payError: '✕ We need a valid email to send your QR ticket.' }));
+        return;
+      }
+      setPageState((current) => ({ ...current, paid: true }));
+    },
   };
 }
 
@@ -1144,6 +1202,7 @@ function myTwendeValuesV5(state, setPageState) {
       badgeBg: '#D97A3B',
       href: 'Event Nyama Choma.dc.html',
       link: 'twende.to/nyama-nanenane?r=amina',
+      owned: true,
     },
     {
       img: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=400&q=80',
@@ -1159,6 +1218,16 @@ function myTwendeValuesV5(state, setPageState) {
   const upcoming = events.map((event, index) => ({
     ...event,
     referOpen: !!state.referOpen[index],
+    qrOpen: !!state.qrOpen[index],
+    qrBg: state.qrOpen[index] ? '#1F3A38' : '#F7F1E6',
+    qrFg: state.qrOpen[index] ? '#F7F1E6' : '#14201F',
+    toggleQr: () =>
+      setPageState((current) => ({
+        ...current,
+        qrOpen: { ...current.qrOpen, [index]: !current.qrOpen[index] },
+      })),
+    ticketCode: `TW-88${41 + index}`,
+    qrCells: Array.from({ length: 49 }, (_, k) => ((k * 7 + index * 13 + (k % 5) * 3) % 3 === 0 ? '#F7F1E6' : '#14201F')),
     refer: () =>
       setPageState((current) => ({
         ...current,
@@ -1274,12 +1343,18 @@ function myTwendeValuesV5(state, setPageState) {
     tabs: [mkTab('foryou', 'For You'), mkTab('upcoming', 'Upcoming'), mkTab('posts', 'My Posts'), mkTab('saved', 'Saved'), mkTab('calendar', 'Calendar')],
     showForYou: state.tab === 'foryou',
     fyOrganizers: [
-      { init: 'NY', name: 'UONGOZI NYTC', bg: '#1F3A38', fg: '#F7F1E6' },
-      { init: 'AG', name: 'Afrogroove', bg: '#D97A3B', fg: '#1F3A38' },
-      { init: 'UM', name: 'Umoja Day', bg: '#7B8B6E', fg: '#F7F1E6' },
-      { init: 'SF', name: 'Swahili Fair', bg: '#1F3A38', fg: '#F7F1E6' },
-      { init: 'KG', name: 'Kigali Sessions', bg: '#D97A3B', fg: '#1F3A38' },
-      { init: 'DC', name: 'Diaspora Connect', bg: '#7B8B6E', fg: '#F7F1E6' },
+      { init: 'NY', name: 'UONGOZI NYTC · Nyama choma', bg: '#1F3A38', fg: '#F7F1E6' },
+      { init: 'GM', name: 'Grill Masters DSM · Nyama choma', bg: '#D97A3B', fg: '#1F3A38' },
+      { init: 'AG', name: 'Afrogroove · Music', bg: '#D97A3B', fg: '#1F3A38' },
+      { init: 'KG', name: 'Kigali Sessions · Music', bg: '#7B8B6E', fg: '#F7F1E6' },
+      { init: 'BF', name: 'Bongo Fleva Nights · Music', bg: '#1F3A38', fg: '#F7F1E6' },
+      { init: 'UM', name: 'Umoja Day · Community', bg: '#7B8B6E', fg: '#F7F1E6' },
+      { init: 'DC', name: 'Diaspora Connect · Community', bg: '#1F3A38', fg: '#F7F1E6' },
+      { init: 'SF', name: 'Swahili Fair · Community', bg: '#D97A3B', fg: '#1F3A38' },
+      { init: 'HE', name: 'Harusi Expo · Weddings', bg: '#1F3A38', fg: '#F7F1E6' },
+      { init: 'NP', name: 'Neema Planners · Weddings', bg: '#7B8B6E', fg: '#F7F1E6' },
+      { init: 'GC', name: 'Grace Chapel NJ · Faith', bg: '#D97A3B', fg: '#1F3A38' },
+      { init: 'EA', name: 'EA Premier Fans · Sports', bg: '#1F3A38', fg: '#F7F1E6' },
     ],
     fyEvents: [
       { href: 'Event Nyama Choma.dc.html', img: 'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=500&q=80', title: 'Nyama Choma Festival', by: 'UONGOZI - NYTC', date: 'SAT · 8 AUG' },
@@ -1849,13 +1924,45 @@ function providerValuesV5(state, setPageState) {
     ['https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1400&q=80', 'Up-country route'],
   ];
   const dir = [
-    { name: 'DJ Zawadi', cat: 'MUSIC & DJS', rating: '5.0', jobs: 27, city: 'KAMPALA', desc: 'Amapiano + bongo sets, own decks and PA.', rate: 'UGX 350K/set', img: 'https://images.unsplash.com/photo-1571266028243-d220c6a7cbfd?w=600&q=80' },
+    { name: 'DJ Zawadi', cat: 'MUSIC & DJS', rating: '5.0', jobs: 27, city: 'KAMPALA', desc: 'Amapiano + bongo sets, own decks and PA. Travels with the pool.', rate: 'UGX 350K/set', img: 'https://images.unsplash.com/photo-1516873240891-4bf014598ab4?w=600&q=80' },
     { name: 'Mama T Events Co.', cat: 'TENTS & EQUIPMENT', rating: '5.0', jobs: 38, city: 'JERSEY CITY', desc: 'Canopies, chairs, serving tables. NYTC member discount.', rate: 'FROM $490', img: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=600&q=80' },
-    { name: 'Chef Halima', cat: 'CATERING & CHEFS', rating: '4.9', jobs: 54, city: 'DAR ES SALAAM', desc: 'Pilau, biryani and nyama choma for 20-500 guests.', rate: 'TZS 15K/plate', img: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=600&q=80' },
-    { name: 'Jersey Party Rentals', cat: 'TENTS & EQUIPMENT', rating: '4.8', jobs: 112, city: 'NEWARK, NJ', desc: 'Full event rental fleet, insured and park-permit compliant.', rate: 'FROM $180', img: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=600&q=80' },
+    { name: 'Chef Halima', cat: 'CATERING & CHEFS', rating: '4.9', jobs: 54, city: 'DAR ES SALAAM', desc: 'Pilau, biryani, nyama choma for 20–500 guests. Halal certified.', rate: 'TZS 15K/plate', img: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=600&q=80' },
+    { name: 'Jersey Party Rentals', cat: 'TENTS & EQUIPMENT', rating: '4.8', jobs: 112, city: 'NEWARK, NJ', desc: 'Full event rental fleet, insured, park-permit compliant.', rate: 'FROM $180', img: 'https://images.unsplash.com/photo-1478146896981-b80fe463b330?w=600&q=80' },
+    { name: 'Simba Sounds', cat: 'MUSIC & DJS', rating: '4.7', jobs: 43, city: 'NAIROBI', desc: 'PA hire + live band coordination. Gospel to gengetone.', rate: 'KES 25K/day', img: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&q=80' },
+    { name: 'Lensa ya Kigali', cat: 'PHOTOGRAPHY', rating: '5.0', jobs: 31, city: 'KIGALI', desc: 'Weddings and community events. Same-week photo delivery.', rate: 'RWF 150K/day', img: 'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=600&q=80' },
   ];
+  const dirCats = ['MUSIC & DJS', 'CATERING & CHEFS', 'TENTS & EQUIPMENT', 'TRANSPORT & DRIVERS', 'PHOTOGRAPHY', 'DECOR & MC'];
+  const dirNames = {
+    'MUSIC & DJS': ['DJ Nia', 'Bongo Beats Crew', 'Amapiano Kings', 'Live Wire Band', 'Sound of Serengeti', 'DJ Kesho', 'Rhumba Republic', 'Gospel Groove'],
+    'CATERING & CHEFS': ['Chef Baraka', 'Mama Ntilie Kitchen', 'Pilau Palace', 'Swahili Plates', 'Nyama Bros', 'Coastal Bites', 'Ugali Express', 'Harusi Caterers'],
+    'TENTS & EQUIPMENT': ['Twiga Tents', 'Canopy Co.', 'Furaha Rentals', 'Event Hire EA', 'Shamba Structures', 'Party Plus', 'Karibu Canopies', 'Stage & Sound'],
+    'TRANSPORT & DRIVERS': ['Safari 4x4', 'Nairobi Executive', 'Boda Fleet', 'Coast Coaches', 'Kili Movers', 'Airport Express', 'Convoy Kings', 'Village Rides'],
+    'PHOTOGRAPHY': ['Pixel Pori', 'Moments EA', 'Frame & Focus', 'Harusi Lens', 'Diaspora Studios', 'Golden Hour', 'Storyboard KE', 'Click Kampala'],
+    'DECOR & MC': ['Zawadi Decor', 'MC Tumaini', 'Ribbon & Bloom', 'Grand Events MC', 'Petals & Drapes', 'Karibu Hosts', 'Elegance Decor', 'Stage Presence'],
+  };
+  const dirCities = ['NAIROBI', 'KAMPALA', 'DAR ES SALAAM', 'KIGALI', 'MOMBASA', 'JINJA', 'ARUSHA', 'JERSEY CITY', 'NEWARK, NJ', 'BROOKLYN, NY'];
+  const dirImgs = ['photo-1516873240891-4bf014598ab4', 'photo-1556910103-1c02745aae4d', 'photo-1519167758481-83f550bb49b3', 'photo-1533473359331-0135ef1b58bf', 'photo-1502920917128-1aa500764cbd', 'photo-1470225620780-dba8ba36b745', 'photo-1478146896981-b80fe463b330', 'photo-1519741497674-611481863552'];
+  const dirRates = ['UGX 300K/set', 'KES 20K/day', 'TZS 12K/plate', 'FROM $220', 'RWF 140K/day', 'FROM $180'];
+  const dirDescs = ['Trusted across the region, insured and on time.', 'Member since 2026 · fast responder.', 'Village-road ready, travels for the right job.', 'Halal options, scales 20–500 guests.', 'Same-week delivery, diaspora-friendly.', 'Own equipment, no hidden fees.'];
+  dirCats.forEach((cat, ci) => {
+    for (let i = 0; i < 5; i++) {
+      const names = dirNames[cat];
+      dir.push({
+        name: names[i % names.length] + (i >= names.length ? ` ${i + 1}` : ''),
+        cat,
+        rating: (4.5 + ((i + ci) % 5) * 0.1).toFixed(1),
+        jobs: 12 + ((i * 17 + ci * 23) % 120),
+        city: dirCities[(i * 2 + ci) % dirCities.length],
+        desc: dirDescs[(i + ci) % dirDescs.length],
+        rate: dirRates[(i + ci) % dirRates.length],
+        img: `https://images.unsplash.com/${dirImgs[(i + ci) % dirImgs.length]}?w=600&q=80`,
+      });
+    }
+  });
+  const maxDir = Math.max(0, dir.length - 3);
   const galleryIdx = state.galleryIdx || 0;
   const dirIdx = state.dirIdx || 0;
+  const starSel = state.starSel ?? 5;
   return {
     galleryIs0: galleryIdx === 0,
     galleryIs1: galleryIdx === 1,
@@ -1897,15 +2004,54 @@ function providerValuesV5(state, setPageState) {
       { num: '03', title: 'Wedding convoys', desc: 'Decorated lead car plus guest cars, coordinated', rate: 'UGX 300K/car' },
       { num: '04', title: 'Event shuttles', desc: 'Cookouts, harambees and church events', rate: 'QUOTE' },
     ],
-    reviews: [
-      { job: 'AIRPORT PICKUP', when: 'AUG 2026', body: 'Picked us up at Entebbe at 3am. Tracked the delayed flight and had cold water waiting.', who: 'Faridah - visiting from CT, USA' },
-      { job: 'UP-COUNTRY, 2 DAYS', when: 'JUL 2026', body: 'Took us to the village past Mbale where the road is only mud. Never complained.', who: 'Joel M. - diaspora trip' },
-      { job: 'WEDDING CONVOY', when: 'JUN 2026', body: 'Three spotless cars, on time, and he knew the photographer route better than anyone.', who: 'Amina & Deo - Kampala' },
+    toggleWrite: () => setPageState((current) => ({ ...current, writeOpen: !current.writeOpen, reviewError: null })),
+    writeOpen: state.writeOpen,
+    writeLabel: state.writeOpen ? '✕ CLOSE' : '✎ WRITE A REVIEW',
+    writeBg: state.writeOpen ? '#1F3A38' : '#F7F1E6',
+    writeFg: state.writeOpen ? '#F7F1E6' : '#14201F',
+    avgRating: '4.9',
+    reviewCount: 61 + (state.posted ? 1 : 0),
+    breakdown: [
+      { stars: 5, pct: '89%', count: 54 },
+      { stars: 4, pct: '8%', count: 5 },
+      { stars: 3, pct: '3%', count: 2 },
+      { stars: 2, pct: '0%', count: 0 },
+      { stars: 1, pct: '0%', count: 0 },
     ],
-    dirOffset: dirIdx + 1,
+    starPicker: [1, 2, 3, 4, 5].map((n) => ({
+      pick: () => setPageState((current) => ({ ...current, starSel: n })),
+      color: n <= starSel ? '#D97A3B' : 'rgba(247,241,230,0.35)',
+    })),
+    setJob: (event) => setPageState((current) => ({ ...current, jobSel: event.target.value })),
+    draft: state.draft,
+    setDraft: (event) => setPageState((current) => ({ ...current, draft: event.target.value, reviewError: null })),
+    reviewError: state.reviewError,
+    submitReview: () => {
+      if (!String(state.draft || '').trim()) {
+        setPageState((current) => ({ ...current, reviewError: '✕ Add a sentence or two so it helps others.' }));
+        return;
+      }
+      setPageState((current) => ({ ...current, writeOpen: false, posted: true, draft: '' }));
+    },
+    reviews: [
+      ...(state.posted
+        ? [{
+            stars: '★★★★★'.slice(0, starSel) + '☆☆☆☆☆'.slice(0, 5 - starSel),
+            job: (state.jobSel || 'UP-COUNTRY, 2 DAYS').toUpperCase().split('?').pop().trim(),
+            when: 'JUST NOW',
+            body: state.draft || 'Great service, highly recommend.',
+            who: 'You · verified booking',
+            reply: false,
+          }]
+        : []),
+      { stars: '★★★★★', job: 'AIRPORT PICKUP', when: 'AUG 2026', body: 'Picked us up at Entebbe at 3am. Tracked the delayed flight, cold water waiting, kids asleep in ten minutes. Legend.', who: 'Faridah · visiting from CT, USA', reply: 'Asante Faridah! Karibu tena any time — those late flights are our specialty.' },
+      { stars: '★★★★★', job: 'UP-COUNTRY, 2 DAYS', when: 'JUL 2026', body: 'Took us to the village past Mbale where the road is only mud. Never complained, helped carry gifts, negotiated the boda crossing.', who: 'Joel M. · diaspora trip', reply: false },
+      { stars: '★★★★☆', job: 'WEDDING CONVOY', when: 'JUN 2026', body: 'Three spotless cars, on time, and he knew the photographer’s route better than the photographer.', who: 'Amina & Deo · Kampala', reply: 'Congratulations again to the happy couple! 🎉' },
+    ],
+    dirOffset: `${-(dirIdx * 318)}px`,
     dirPrev: () => setPageState((current) => ({ ...current, dirIdx: Math.max(0, current.dirIdx - 1) })),
-    dirNext: () => setPageState((current) => ({ ...current, dirIdx: Math.min(dir.length - 2, current.dirIdx + 1) })),
-    directory: dir.slice(dirIdx, dirIdx + 2).map((provider) => ({
+    dirNext: () => setPageState((current) => ({ ...current, dirIdx: Math.min(maxDir, current.dirIdx + 1) })),
+    directory: dir.map((provider) => ({
       ...provider,
       view: () => showToast(setPageState, `${provider.name} profile would open here.`),
     })),
@@ -2312,12 +2458,12 @@ function settingsValues(state, setPageState) {
     ? { name: 'Ssemakula Kato', biz: 'Kato 4x4 & Tours', email: 'kato@gmail.com', phone: '+256 7** *** 214' }
     : { name: 'Amina Mushi', biz: 'Amina M.', email: 'amina@gmail.com', phone: '+1 (9**) *** 4412' });
   const defaultNotifs = [
-    { title: 'Reminders (7d - 1d - 2h)', desc: "Events you RSVP'd or booked", app: true, email: true, sms: false },
-    { title: 'Offers & replies', desc: 'On your needs and threads', app: true, email: true, sms: true },
-    { title: 'Matched leads', desc: provider ? 'New needs in your categories and cities' : 'Providers matching your posts', app: true, email: true, sms: false },
-    { title: 'Money movement', desc: 'Top-ups, sends, escrow, payouts', app: true, email: true, sms: true },
-    { title: 'Comments & referrals', desc: 'Activity on your posts and links', app: true, email: false, sms: false },
-    { title: 'Twendezetu news', desc: 'Product updates, city launches', app: false, email: true, sms: false },
+    { title: 'Reminders (7d - 1d - 2h)', desc: "Events you RSVP'd or booked", app: true, email: true, sms: false, wa: true },
+    { title: 'Offers & replies', desc: 'On your needs and threads', app: true, email: true, sms: true, wa: true },
+    { title: 'Matched leads', desc: provider ? 'New needs in your categories and cities' : 'Providers matching your posts', app: true, email: true, sms: false, wa: false },
+    { title: 'Money movement', desc: 'Top-ups, sends, escrow, payouts', app: true, email: true, sms: true, wa: false },
+    { title: 'Comments & referrals', desc: 'Activity on your posts and links', app: true, email: false, sms: false, wa: false },
+    { title: 'Twendezetu news', desc: 'Product updates, city launches', app: false, email: true, sms: false, wa: false },
   ];
   const notifs = state.notifs || defaultNotifs;
   const go = (section) => () => setPageState((current) => ({ ...current, section }));
@@ -2388,7 +2534,13 @@ function settingsValues(state, setPageState) {
       smsBg: bg(item.sms),
       smsKnob: knob(item.sms),
       tSms: toggleNotif(index, 'sms'),
+      waBg: bg(item.wa),
+      waKnob: knob(item.wa),
+      tWa: toggleNotif(index, 'wa'),
     })),
+    quietBg: state.quiet ? '#D97A3B' : '#EFE7D6',
+    quietKnob: state.quiet ? '26px' : '2px',
+    toggleQuiet: () => setPageState((current) => ({ ...current, quiet: !current.quiet })),
     digestAll: () => showToast(setPageState, 'All non-urgent notifications will now bundle into one Friday digest.'),
     muteAll: () => showToast(setPageState, 'Muted for 7 days. Money-movement alerts stay on for account protection.'),
     payMethods: payDefs.map((method, index) => ({
@@ -2433,6 +2585,7 @@ function adminValues(state, setPageState) {
     ['settings', 'SETTINGS', false],
   ];
   const reportDefs = [
+    { severity: 'DISPUTE', sevBg: '#E8A472', reason: 'Refund dispute - escrow frozen', meta: 'CASE #DSP-1042 - KATO 4X4 BOOKING - UGX 760K HELD - 71H LEFT TO RESPOND', body: 'Provider no-show opened by the poster. Escrow is frozen. Awaiting the provider\'s response; if unresolved in 72h it escalates here for a platform decision. Both sides\' evidence attached.' },
     { severity: 'HIGH', sevBg: '#B8463A', reason: 'Asked to pay off-platform', meta: 'THREAD #TH-8812 - REPORTED BY AMINA M. - 2 HR AGO', body: 'Provider asked for a deposit to a personal mobile money number before accepting the offer.' },
     { severity: 'MED', sevBg: '#D97A3B', reason: 'Fake listing / impersonation', meta: 'LISTING #P-0417 - REPORTED BY KATO 4X4 - YESTERDAY', body: 'Image hash matches a verified listing and copied reviews.' },
     { severity: 'LOW', sevBg: '#7B8B6E', reason: 'Spam posting', meta: 'USER #U-2291 - AUTO-FLAGGED - YESTERDAY', body: 'Same provider pitch posted across multiple cities in 40 minutes.' },
@@ -2642,6 +2795,278 @@ function financeValues(state, setPageState) {
   };
 }
 
+function checkinValues(state, setPageState) {
+  const names = { 'TW-8841': 'Amina M. (×2)', 'TW-8842': 'Joel M.', 'TW-8843': 'Faridah K.' };
+  const flash = (result, entry) => {
+    setPageState((current) => {
+      const next = { ...current, result, log: entry ? [entry, ...current.log].slice(0, 8) : current.log };
+      if (entry && entry.status === 'ADMITTED') {
+        next.admitted = current.admitted + 1;
+        next.seen = { ...current.seen, [entry.code]: true };
+      }
+      if (entry && entry.status === 'DUPLICATE') next.blocked = current.blocked + 1;
+      return next;
+    });
+    window.setTimeout(() => setPageState((current) => ({ ...current, result: null })), 1400);
+  };
+  const admit = (code, name) => {
+    if (state.seen[code]) {
+      flash(
+        { ok: false, dup: true, title: '✕ Already in', sub: `${code} was scanned earlier` },
+        { icon: '⛔', code, name, note: 'Second scan blocked', status: 'DUPLICATE', color: '#E8A472' },
+      );
+    } else {
+      flash(
+        { ok: true, title: '✓ Karibu!', sub: `${code} · ${name} admitted` },
+        { icon: '✓', code, name, note: 'Valid ticket', status: 'ADMITTED', color: '#7B8B6E' },
+      );
+    }
+  };
+  const result = state.result;
+  return {
+    admitted: state.admitted,
+    blocked: state.blocked,
+    hasResult: !!result,
+    resultBg: result ? (result.ok ? 'rgba(123,139,110,0.96)' : result.dup ? 'rgba(232,164,114,0.96)' : 'rgba(184,70,58,0.96)') : 'transparent',
+    resultFg: result && result.dup ? '#14201F' : '#F7F1E6',
+    resultTitle: result ? result.title : '',
+    resultSub: result ? result.sub : '',
+    scanValid: () => admit('TW-8842', 'Joel M.'),
+    scanDup: () => admit('TW-8841', 'Amina M.'),
+    scanInvalid: () =>
+      flash(
+        { ok: false, title: '✕ Invalid', sub: 'Not a Twendezetu ticket, or refunded' },
+        { icon: '⚠', code: '—', name: 'Unknown QR', note: 'Signature failed / refunded', status: 'INVALID', color: '#B8463A' },
+      ),
+    manual: state.manual,
+    setManual: (event) => setPageState((current) => ({ ...current, manual: event.target.value })),
+    checkManual: () => {
+      const code = String(state.manual || '').trim().toUpperCase();
+      if (!code) return;
+      if (names[code]) admit(code, names[code].replace(' (×2)', ''));
+      else
+        flash(
+          { ok: false, title: '✕ Invalid', sub: `${code} not found` },
+          { icon: '⚠', code, name: 'Unknown code', note: 'No matching ticket', status: 'INVALID', color: '#B8463A' },
+        );
+      setPageState((current) => ({ ...current, manual: '' }));
+    },
+    log: state.log,
+    empty: state.log.length === 0,
+  };
+}
+
+function disputesValues(state, setPageState) {
+  const purchases = [
+    ['Afrogroove Night — early bird × 2', 'TICKET #TW-8841 · PAID 3 AUG · CARD ••4412', '$42.00'],
+    ['Kato 4x4 — 2-day booking', 'BOOKING #BK-5521 · ESCROW HELD · 12–14 SEP', 'UGX 760K'],
+  ];
+  const reasons = [
+    ['Event cancelled or moved', 'Automatic full refund if the organizer cancelled'],
+    ['Provider no-show', 'The provider never arrived or stopped responding'],
+    ['Not as described', 'What arrived differs materially from the offer'],
+    ['Charged incorrectly', 'Double charge, wrong amount, or unknown charge'],
+  ];
+  return {
+    notSubmitted: !state.submitted,
+    submitted: state.submitted,
+    purchases: purchases.map(([title, meta, amount], index) => ({
+      title,
+      meta,
+      amount,
+      pick: () => setPageState((current) => ({ ...current, purchase: index, formError: null })),
+      bg: state.purchase === index ? '#1F3A38' : '#FFFDF8',
+      fg: state.purchase === index ? '#F7F1E6' : '#14201F',
+    })),
+    reasons: reasons.map(([title, desc], index) => ({
+      title,
+      desc,
+      on: state.reason === index,
+      pick: () => setPageState((current) => ({ ...current, reason: index, formError: null })),
+      bg: state.reason === index ? '#1F3A38' : '#FFFDF8',
+      fg: state.reason === index ? '#F7F1E6' : '#14201F',
+    })),
+    detail: state.detail,
+    setDetail: (event) => setPageState((current) => ({ ...current, detail: event.target.value, formError: null })),
+    evBtnLabel: state.evidence ? '✓ 2 FILES ATTACHED — ADD MORE' : '↑ ATTACH EVIDENCE',
+    evBtnBg: state.evidence ? '#DCE8D9' : '#F7F1E6',
+    addEvidence: () => {
+      setPageState((current) => ({ ...current, evidence: true }));
+      showToast(setPageState, '✓ Evidence attached — visible to the other party and the resolution team.', 3800);
+    },
+    submitLabel: 'Open case — freeze the money →',
+    submitBg: '#B8463A',
+    submitFg: '#F7F1E6',
+    formError: state.formError,
+    submit: () => {
+      if (state.reason == null) {
+        setPageState((current) => ({ ...current, formError: '✕ Pick what happened (step 2) so we route the case correctly.' }));
+        return;
+      }
+      if (!String(state.detail || '').trim()) {
+        setPageState((current) => ({ ...current, formError: '✕ Add a short description — the other party needs context to respond.' }));
+        return;
+      }
+      setPageState((current) => ({ ...current, submitted: true }));
+    },
+    timeline: [
+      { mark: '✓', bg: '#7B8B6E', fg: '#F7F1E6', title: 'Case opened · escrow frozen', titleColor: '#14201F', desc: `JUST NOW — ${purchases[state.purchase][2]} locked. Both parties notified in-app + email.` },
+      { mark: '2', bg: '#D97A3B', fg: '#1F3A38', title: 'Other party responds (72h)', titleColor: '#14201F', desc: 'They can refund in full, propose a partial amount, or contest with their own evidence.' },
+      { mark: '3', bg: '#F7F1E6', fg: '#1F3A38', title: 'Platform decision (5 business days)', titleColor: '#8C7F6F', desc: 'If you don’t settle, the resolution team reviews both sides’ evidence and rules.' },
+      { mark: '4', bg: '#F7F1E6', fg: '#1F3A38', title: 'Refund to original method', titleColor: '#8C7F6F', desc: 'Card/mobile money: 3–5 days. Points: instant. Fees are refunded too when you win.' },
+    ],
+    withdraw: () => {
+      setPageState((current) => ({ ...current, submitted: false, reason: null, detail: '', evidence: false }));
+      showToast(setPageState, 'Case withdrawn — escrow unfrozen and both parties notified.', 3800);
+    },
+    toast: state.toast,
+  };
+}
+
+function organizerAnalyticsValues() {
+  return {
+    kpis: [
+      { label: 'PAGE VIEWS', value: '4,210', sub: '+22% this week', bg: '#D97A3B', fg: '#14201F' },
+      { label: 'RSVPs', value: '214', sub: '5.1% of views', bg: '#FFFDF8', fg: '#14201F' },
+      { label: 'TICKETS SOLD', value: '168', sub: '$3,180 in escrow', bg: '#FFFDF8', fg: '#14201F' },
+      { label: 'CHECKED IN', value: '87%', sub: '186 of 214 at gate', bg: '#FFFDF8', fg: '#14201F' },
+    ],
+    funnel: [
+      { label: 'Viewed the event', value: '4,210', pct: '100%', color: '#1F3A38' },
+      { label: 'Clicked RSVP / tickets', value: '612', pct: '58%', color: '#3A5F5C' },
+      { label: 'RSVP’d', value: '214', pct: '34%', color: '#7B8B6E' },
+      { label: 'Paid for a ticket', value: '168', pct: '27%', color: '#D97A3B' },
+      { label: 'Checked in at gate', value: '186', pct: '24%', color: '#B8593B' },
+    ],
+    sources: [
+      { label: 'WhatsApp', pct: '44%' },
+      { label: 'Facebook', pct: '21%' },
+      { label: 'Direct link', pct: '18%' },
+      { label: 'Twende feed', pct: '12%' },
+      { label: 'Email', pct: '5%' },
+    ],
+    revBars: [
+      { h: '30%', color: '#7B8B6E' }, { h: '42%', color: '#7B8B6E' }, { h: '38%', color: '#7B8B6E' },
+      { h: '55%', color: '#7B8B6E' }, { h: '48%', color: '#7B8B6E' }, { h: '100%', color: '#D97A3B' },
+      { h: '72%', color: '#7B8B6E' }, { h: '64%', color: '#7B8B6E' },
+    ],
+    tiers: [
+      { name: 'Early bird', sold: 120, cap: 120, rev: '$2,040', pct: '100%', color: '#7B8B6E' },
+      { name: 'General', sold: 40, cap: 200, rev: '$1,000', pct: '20%', color: '#D97A3B' },
+      { name: 'VIP lounge', sold: 8, cap: 40, rev: '$360', pct: '92%', color: '#B8593B' },
+    ],
+  };
+}
+
+function organizerPayoutsValues(state, setPageState) {
+  return {
+    flow: [
+      { step: '01', label: 'Buyer pays', desc: 'Card, mobile money, or points', bg: '#D97A3B', fg: '#14201F' },
+      { step: '02', label: 'Escrow', desc: 'Twendezetu holds it, not you', bg: '#FFFDF8', fg: '#14201F' },
+      { step: '03', label: 'Event happens', desc: 'Check-in confirms it ran', bg: '#FFFDF8', fg: '#14201F' },
+      { step: '04', label: 'Payout − 5%', desc: 'To your MoMo/bank, auto', bg: '#1F3A38', fg: '#F7F1E6' },
+    ],
+    withdrawLabel: state.withdrawn ? '✓ Withdrawal sent' : 'Withdraw $1,842 →',
+    withdraw: () => {
+      if (state.withdrawn) return;
+      setPageState((current) => ({ ...current, withdrawn: true }));
+      showToast(setPageState, '✓ $1,842 sent to MTN MoMo ••7214 — arrives within 1–2 hours. Receipt in your email.', 3600);
+    },
+    schedule: [
+      { mark: '✓', mBg: '#7B8B6E', mFg: '#F7F1E6', title: 'Diaspora Connect Mixer', when: 'RELEASED 22 AUG · in your balance', amount: '$1,842' },
+      { mark: '⏳', mBg: '#D97A3B', mFg: '#14201F', title: 'Nyama Choma Festival', when: 'AUTO-RELEASE 10 AUG (event + 2 days)', amount: '$3,021' },
+      { mark: '↻', mBg: '#EFE7D6', mFg: '#14201F', title: 'Waitlist seats — pending fill', when: 'VIP: 8 seats · released to waitlist as they’re bought', amount: '+$360' },
+    ],
+    history: [
+      { event: 'Diaspora Connect Mixer', meta: 'PAID OUT 22 AUG · MoMo ••7214', status: 'PAID', chipBg: '#7B8B6E', chipFg: '#F7F1E6', amount: '$1,842' },
+      { event: 'Umoja Cultural Day', meta: 'PAID OUT 16 AUG · MoMo ••7214', status: 'PAID', chipBg: '#7B8B6E', chipFg: '#F7F1E6', amount: '$2,410' },
+      { event: 'Swahili Food Fair — refund', meta: '2 tickets refunded from escrow · 14 AUG', status: 'REFUND', chipBg: '#E8A472', chipFg: '#14201F', amount: '−$40' },
+      { event: 'Gospel Sunday Picnic', meta: 'FREE EVENT · no payout', status: 'FREE', chipBg: '#EFE7D6', chipFg: '#14201F', amount: '$0' },
+    ],
+    statement: () => showToast(setPageState, 'Statement PDF generated for the selected period — download starting. (Backend: GET /api/organizer/payouts/statement)', 3600),
+    toast: state.toast,
+  };
+}
+
+function referralRewardsValues(state, setPageState) {
+  return {
+    copyLabel: state.copied ? '✓' : 'COPY',
+    copyLink: () => {
+      copyText('https://twende.to/r/amina');
+      setLater(setPageState, { copied: true }, 1600);
+      showToast(setPageState, '✓ Referral link copied — share it anywhere.', 3200);
+    },
+    rules: [
+      { icon: '👋', label: 'Friend joins & verifies their number', pts: '+50' },
+      { icon: '🎟', label: 'Their first ticket purchase', pts: '+200' },
+      { icon: '📣', label: 'They post an event or a need', pts: '+150' },
+      { icon: '🤝', label: 'They become a paying provider', pts: '+500' },
+    ],
+    tiers: [
+      { name: 'Rafiki', need: '1+ friend', perk: 'Points unlocked', badge: '✓ REACHED', badgeColor: '#4a7c4a', bg: '#EFF3EC', fg: '#14201F' },
+      { name: 'Connector', need: '10 friends', perk: '2× points + badge', badge: '3 TO GO', badgeColor: '#A85A23', bg: '#1F3A38', fg: '#F7F1E6' },
+      { name: 'Champion', need: '25 friends', perk: 'Free provider year', badge: 'LOCKED', badgeColor: '#8C7F6F', bg: '#FFFDF8', fg: '#14201F' },
+    ],
+    friends: [
+      { init: 'JM', name: 'Joel M.', action: 'Bought a ticket · 2 days ago', pts: '+250', color: '#4a7c4a', avBg: '#1F3A38', avFg: '#F7F1E6' },
+      { init: 'FK', name: 'Faridah K.', action: 'Posted a need · last week', pts: '+200', color: '#4a7c4a', avBg: '#D97A3B', avFg: '#14201F' },
+      { init: 'DO', name: 'Deo O.', action: 'Joined + verified · last week', pts: '+50', color: '#4a7c4a', avBg: '#7B8B6E', avFg: '#F7F1E6' },
+      { init: 'NW', name: 'Neema W.', action: 'Became a provider · Jul', pts: '+500', color: '#4a7c4a', avBg: '#1F3A38', avFg: '#F7F1E6' },
+      { init: 'SK', name: 'Samuel K.', action: 'Joined + verified · Jul', pts: '+50', color: '#4a7c4a', avBg: '#D97A3B', avFg: '#14201F' },
+    ],
+    toast: state.toast,
+  };
+}
+
+function splitPayValues(state, setPageState) {
+  const defs = [
+    { init: 'AM', name: 'Amina M. (you)', meta: 'organizer of this split', avBg: '#1F3A38', avFg: '#F7F1E6' },
+    { init: 'JM', name: 'Joel M.', meta: 'joel@…gmail.com', avBg: '#D97A3B', avFg: '#14201F' },
+    { init: 'FK', name: 'Faridah K.', meta: 'via WhatsApp link', avBg: '#7B8B6E', avFg: '#F7F1E6' },
+    { init: 'DO', name: 'Deo O.', meta: 'via WhatsApp link', avBg: '#1F3A38', avFg: '#F7F1E6' },
+    { init: 'NW', name: 'Neema W.', meta: 'not opened yet', avBg: '#D97A3B', avFg: '#14201F' },
+  ];
+  const paidN = Object.values(state.paid).filter(Boolean).length;
+  return {
+    paidCount: paidN,
+    collected: `$${(paidN * 17).toFixed(0)}.00`,
+    pct: `${(paidN / 5) * 100}%`,
+    remaining: `$${(5 - paidN) * 17}.00`,
+    guests: defs.map((guest, index) => {
+      const isPaid = !!state.paid[index];
+      return {
+        ...guest,
+        bg: isPaid ? '#EFF3EC' : '#FFFDF8',
+        share: '$17.00',
+        paid: isPaid,
+        unpaid: !isPaid,
+        meta: isPaid ? `paid ${index === 0 ? 'just now' : 'earlier'} · QR issued` : guest.meta,
+        remindLabel: state.reminded[index] ? '✓ NUDGED' : 'REMIND',
+        remind: () => {
+          setPageState((current) => ({ ...current, reminded: { ...current.reminded, [index]: true } }));
+          showToast(setPageState, `Reminder sent to ${guest.name.replace(' (you)', '')} via their preferred channel.`, 3400);
+        },
+      };
+    }),
+    copyLabel: state.copied ? '✓ LINK COPIED' : '⧉ COPY SPLIT LINK',
+    copyShort: state.copied ? '✓' : 'COPY',
+    copyLink: () => {
+      copyText('https://twende.to/split/afrogroove-x5');
+      setLater(setPageState, { copied: true }, 1800);
+      showToast(setPageState, '✓ Split link copied — send it to the group.', 3400);
+    },
+    payMine: () => {
+      setPageState((current) => ({ ...current, paid: { ...current.paid, 0: true } }));
+      showToast(setPageState, '✓ Your share paid — QR ticket sent to your email and My Twende.', 3400);
+    },
+    coverAll: () => {
+      setPageState((current) => ({ ...current, paid: { 0: true, 1: true, 2: true, 3: true, 4: true } }));
+      showToast(setPageState, '✓ You covered the remaining shares — all 5 QR tickets issued and split closed.', 3400);
+    },
+    toast: state.toast,
+  };
+}
+
 export function getInitialClaudePageState(page) {
   return clone(initialState[page]);
 }
@@ -2680,6 +3105,18 @@ export function createClaudePageValues(page, state, setPageState) {
       return settingsValues(state, setPageState);
     case 'mobile':
       return {};
+    case 'checkin':
+      return checkinValues(state, setPageState);
+    case 'disputes':
+      return disputesValues(state, setPageState);
+    case 'organizerAnalytics':
+      return organizerAnalyticsValues(state, setPageState);
+    case 'organizerPayouts':
+      return organizerPayoutsValues(state, setPageState);
+    case 'referralRewards':
+      return referralRewardsValues(state, setPageState);
+    case 'splitPay':
+      return splitPayValues(state, setPageState);
     default:
       return {};
   }
