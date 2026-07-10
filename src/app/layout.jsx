@@ -13,6 +13,14 @@ export const metadata = {
     title: 'Twendezetu — Gather anywhere.',
     description: 'Post events and needs, discover providers, RSVP, pay, and coordinate without exposing contacts.',
     type: 'website',
+    siteName: 'Twendezetu',
+    images: [{ url: '/assets/events/nytc-nanenane-2026-flyer.jpeg', alt: 'Twendezetu' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Twendezetu — Gather anywhere.',
+    description: 'Post events and needs, discover providers, RSVP, pay, and coordinate without exposing contacts.',
+    images: ['/assets/events/nytc-nanenane-2026-flyer.jpeg'],
   },
   icons: { icon: '/favicon.svg' },
 };

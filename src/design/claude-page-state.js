@@ -1,8 +1,11 @@
+import { EVENT_CATALOG, EVENT_CATS, findEventBySlug } from '@/design/events-catalog';
+
 const CURRENCIES = ['USD', 'KES', 'UGX', 'TZS', 'RWF'];
 
 const initialState = {
   home: { currency: 'USD', lang: 'en', cat: 'All' },
   event: { rsvpStep: 'idle', copied: false, gName: '', gEmail: '', gParty: 1, gError: null },
+  eventDetail: { slug: 'nyama-choma-festival-2026', rsvpStep: 'idle', copied: false, gName: '', gEmail: '', gError: null },
   create: {
     step: 1,
     kind: 'need',
@@ -27,6 +30,7 @@ const initialState = {
     waitlisted: false,
     group: false,
     guests: ['', ''],
+    eventSlug: null,
   },
   signin: { mode: 'register', role: 'advertiser' },
   myTwende: {
@@ -219,94 +223,8 @@ function moneyFormatter(currency) {
 
 function homeValues(state, setPageState) {
   const sw = state.lang === 'sw';
-  const allEvents = [
-    {
-      href: 'Event Nyama Choma.dc.html',
-      cat: 'Nyama choma',
-      img: 'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=1100&q=80',
-      title: 'NYTC Nyama Choma Festival',
-      city: 'Lincoln Park · Jersey City, NJ',
-      date: 'SAT · 8 AUG',
-      price: 'FREE',
-      going: 214,
-      badge: 'FEATURED',
-      blurb: 'Nanenane on the Communipaw Ave side — grill masters fire up at 2:30 PM, games for every rika, live bongo flava and amapiano into the evening.',
-    },
-    {
-      href: 'Event Nyama Choma.dc.html',
-      cat: 'Community',
-      img: '/assets/events/swahili-heritage-festival.jpeg',
-      title: 'Swahili Heritage Festival 2026',
-      city: 'Africatown · Philadelphia, PA',
-      date: 'SUN · 26 JUL',
-      price: 'FREE',
-      going: 182,
-      badge: 'HERITAGE',
-      blurb: 'The Embassy of the United Republic of Tanzania proudly presents Tamasha la Urithi wa Kiswahili — “Kiswahili kwa Ushirikiano, Amani na Ustawi.” Music and culture with DJ Luke, 3–5 PM at Africatown, 5800 Oxford Ave.',
-    },
-    {
-      href: 'Checkout.dc.html',
-      cat: 'Music + DJs',
-      img: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&q=80',
-      title: 'Afrogroove Night',
-      city: 'Brooklyn, NY',
-      date: 'FRI · 14 AUG',
-      price: 'FROM $20',
-      going: 96,
-      badge: 'TICKETS',
-      blurb: 'A diaspora dancefloor — afrobeat, amapiano and gengetone sets till late.',
-    },
-    {
-      href: 'Event Nyama Choma.dc.html',
-      cat: 'Community',
-      img: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=800&q=80',
-      title: 'Diaspora Connect Mixer',
-      city: 'Newark, NJ',
-      date: 'FRI · 21 AUG',
-      price: 'FREE',
-      going: 74,
-      badge: 'NEW',
-      blurb: 'Meet neighbours, mentors and new arrivals over chai and conversation.',
-    },
-  ];
-  // Distinct, live-verified Unsplash photo IDs — one per generated event, no repeats within or across categories.
-  const catalogImages = {
-    'Nyama choma': ['1555939594-58d7cb561ad1', '1544025162-d76694265947', '1600891964092-4316c288032e', '1432139555190-58524dae6a55', '1558030006-450675393462', '1529692236671-f1f6cf9683ba', '1565299624946-b28f40a0ae38', '1504674900247-0877df9cc836', '1512058564366-18510be2db19', '1466637574441-749b8f19452f', '1540189549336-e6e99c3679fe', '1476224203421-9ac39bcb3327', '1607013251379-e6eecfffe234', '1519708227418-c8fd9a32b7a2', '1571091718767-18b5b1457add', '1606787366850-de6330128bfc', '1552332386-f8dd00dc2f85', '1414235077428-338989a2e8c0', '1533777857889-4be7c70b33f7', '1546069901-ba9599a7e63c', '1498837167922-ddd27525d352', '1504754524776-8f4f37790ca0', '1559847844-5315695dadae'],
-    'Music + DJs': ['1429962714451-bb934ecdc4ec', '1493225457124-a3eb161ffa5f', '1516280440614-37939bbacd81', '1501386761578-eac5c94b800a', '1459749411175-04bf5292ceea', '1514525253161-7a46d19cd819', '1470229722913-7c0e2dbbafd3', '1493676304819-0d7a8d026dcf', '1506157786151-b8491531f063', '1533174072545-7a4b6ad7a6c3', '1524368535928-5b5e00ddc76b', '1540039155733-5bb30b53aa14', '1511671782779-c97d3d27a1d4', '1508973379184-7517410fb0bc', '1531058020387-3be344556be6', '1516450360452-9312f5e86fc7', '1549834125-82d3c48159a3', '1544785349-c4a5301826fd', '1465847899084-d164df4dedc6', '1470229538611-16ba8c7ffbd7', '1454922915609-78549ad709bb'],
-    'Community': ['1528605248644-14dd04022da1', '1511578314322-379afb476865', '1523580494863-6f3031224c94', '1517457373958-b7bdd4587205', '1509099836639-18ba1795216d', '1531206715517-5c0ba140b2b8', '1552664730-d307ca884978', '1488521787991-ed7bbaae773c', '1526976668912-1a811878dd37', '1517486808906-6ca8b3f04846', '1543269865-cbf427effbad', '1529156069898-49953e39b3ac', '1511632765486-a01980e01a18', '1573497019940-1c28c88b4f3e', '1560439514-4e9645039924', '1571019613454-1cb2f99b2d8b', '1491438590914-bc09fcaaf77a', '1523240795612-9a054b0db644', '1528901166007-3784c7dd3653', '1542744173-8e7e53415bb0', '1522202176988-66273c2fd55f', '1600880292203-757bb62b4baf', '1521737604893-d14cc237f11d', '1515169067868-5387ec356754'],
-    'Weddings': ['1519741497674-611481863552', '1465495976277-4387d4b0b4c6', '1511285560929-80b456fea0bc', '1606216794074-735e91aa2c92', '1522673607200-164d1b6ce486', '1519225421980-715cb0215aed', '1464366400600-7168b8af9bc3', '1583939003579-730e3918a45a', '1460364157752-926555421a7e', '1594736797933-d0501ba2fe65', '1525258946800-98cfd641d0de', '1519671482749-fd09be7ccebf', '1478146059778-26028b07395a', '1591604466107-ec97de577aff', '1523438885200-e635ba2c371e', '1537633552985-df8429e8048b', '1509927083803-4bd519298ac4', '1469371670807-013ccf25f16a', '1550005809-91ad75fb315f', '1502635385003-ee1e6a1a742d', '1583939411023-14783179e581'],
-    'Faith': ['1438232992991-995b7058bbb3', '1507692049790-de58290a4334', '1519491050282-cf00c82424b4', '1445019980597-93fa8acb246c', '1490127252417-7c393f993ee4', '1477414348463-c0eb7f1359b6', '1438032005730-c779502df39b', '1508963493744-76fce69379c0', '1529070538774-1843cb3265df', '1544427920-c49ccfb85579', '1502086223501-7ea6ecd79368', '1510590337019-5ef8d3d32116', '1473177104440-ffee2f376098', '1507842217343-583bb7270b66', '1524230572899-a752b3835840', '1520175480921-4edfa2983e0f', '1519681393784-d120267933ba', '1438761681033-6461ffad8d80', '1494790108377-be9c29b29330', '1531123897727-8f129e1688ce', '1544005313-94ddf0286df2', '1500648767791-00dcc994a43e'],
-    'Sports': ['1517649763962-0c623066013b', '1543351611-58f69d7c1781', '1461896836934-ffe607ba8211', '1526232761682-d26e03ac148e', '1552667466-07770ae110d0', '1579952363873-27f3bade9f55', '1517927033932-b3d18e61fb3a', '1530549387789-4c1017266635', '1546519638-68e109498ffc', '1431324155629-1a6deb1dec8d', '1552674605-db6ffd4facb5', '1534438327276-14e5300c3a48', '1531415074968-036ba1b575da', '1552508744-1696d4464960', '1487466365202-1afdb86c764e', '1540747913346-19e32dc3e97e', '1524178232363-1fb2b075b655'],
-  };
-  const catalogCities = ['Nairobi, KE', 'Kampala, UG', 'Dar es Salaam, TZ', 'Kigali, RW', 'Mombasa, KE', 'Jinja, UG', 'Arusha, TZ', 'Brooklyn, NY', 'Newark, NJ', 'Hartford, CT', 'Boston, MA', 'Dallas, TX'];
-  const catalogDates = ['FRI · 5 SEP', 'SAT · 6 SEP', 'SUN · 7 SEP', 'SAT · 13 SEP', 'FRI · 19 SEP', 'SAT · 20 SEP', 'SUN · 21 SEP', 'SAT · 27 SEP', 'FRI · 3 OCT', 'SAT · 4 OCT', 'SUN · 12 OCT', 'SAT · 18 OCT', 'SAT · 25 OCT', 'FRI · 31 OCT'];
-  const catalogTitles = {
-    'Nyama choma': ['Nyama Choma Sundowner', 'Mishkaki Night Market', 'Grill & Chill Cookout', 'Choma Fest', 'Kuku & Ugali Fair', 'Diaspora BBQ Reunion', 'Weekend Braai', 'Village Roast Festival'],
-    'Music + DJs': ['Bongo Flava Live', 'Amapiano Rooftop', 'Gengetone Takeover', 'Afrobeat Night', 'Rhumba Legends', 'Taarab Evening', 'Benga Revival', 'DJ Clash Live'],
-    'Community': ['Umoja Cultural Day', 'Diaspora Connect Mixer', 'Swahili Language Meetup', 'Ubuntu Family Day', 'Newcomers Welcome', 'Elders Appreciation', 'Youth Mentorship Fair', 'Neighbourhood Harambee'],
-    'Weddings': ['Harusi Expo', 'Bridal Showcase', 'Send-off Planning Fair', 'Ruracio Celebration', 'Engagement Soirée', 'Wedding Vendors Market', 'Kesho Bridal Fair', 'Traditional Wedding Day'],
-    'Faith': ['Gospel Sunday Picnic', 'Praise & Worship Night', 'Kesha Overnight', 'Youth Revival', 'Interfaith Gathering', 'Thanksgiving Service', 'Choir Festival', 'Prayer Breakfast'],
-    'Sports': ['Community 5K Run', 'Diaspora Football Cup', 'Netball Tournament', 'Athletics Meet', 'Boda Riders Rally', 'Marathon Fundraiser', 'Basketball Jam', 'Cricket Sunday'],
-  };
-  const catalogPrices = ['FREE', 'FROM $15', 'KES 500', 'UGX 20,000', 'TZS 10,000', 'RWF 5,000', 'FROM $25'];
-  const catalogCats = ['Nyama choma', 'Music + DJs', 'Community', 'Weddings', 'Faith', 'Sports'];
-  catalogCats.forEach((cat, ci) => {
-    const imgs = catalogImages[cat];
-    const titles = catalogTitles[cat];
-    imgs.forEach((imgId, i) => {
-      allEvents.push({
-        href: i % 3 === 0 ? 'Event Nyama Choma.dc.html' : 'Checkout.dc.html',
-        cat,
-        img: `https://images.unsplash.com/photo-${imgId}?w=600&q=80`,
-        title: titles[i % titles.length] + (i >= titles.length ? ` ${Math.floor(i / titles.length) + 1}` : ''),
-        city: catalogCities[(i + ci * 2) % catalogCities.length],
-        date: catalogDates[(i + ci) % catalogDates.length],
-        price: catalogPrices[(i + ci) % catalogPrices.length],
-        going: 24 + ((i * 37 + ci * 53) % 380),
-        badge: i === 1 ? 'NEW' : false,
-      });
-    });
-  });
+  const allEvents = EVENT_CATALOG;
+  const catalogCats = EVENT_CATS;
   const shownEvents = state.cat === 'All' ? allEvents : allEvents.filter((event) => event.cat === state.cat);
   const heroEvent = allEvents[0];
   const scrollShelf = (id, dir) => () => {
@@ -464,6 +382,102 @@ function homeValues(state, setPageState) {
       { num: '02', title: 'DJ for a cookout', meta: 'Jinja · 20 Sep · afrobeat + amapiano', offers: 4 },
       { num: '03', title: '3 canopy tents + chairs', meta: 'Jersey City, NJ · 8 Aug · NYTC festival', offers: 9 },
     ],
+  };
+}
+
+function shareBase() {
+  if (typeof window !== 'undefined' && window.location && window.location.origin) return window.location.origin;
+  return process.env.NEXT_PUBLIC_APP_URL || 'https://twendezetu-platform-oufr.vercel.app';
+}
+
+function eventDetailValues(state, setPageState) {
+  const event =
+    findEventBySlug(state.slug) || {
+      slug: state.slug || 'event',
+      title: 'Event not found',
+      cat: 'Community',
+      img: 'https://images.unsplash.com/photo-1528605248644-14dd04022da1?w=1100&q=80',
+      city: 'Twendezetu',
+      venue: 'Twendezetu',
+      date: 'SOON',
+      time: '',
+      price: 'FREE',
+      going: 0,
+      badge: false,
+      organizer: 'Twendezetu',
+      description: 'This event link could not be found. Browse the guide to discover events near you.',
+    };
+  const isFree = event.price === 'FREE';
+  const dateLine = event.time ? `${event.date} · ${event.time}` : event.date;
+  const heroImg = /^https:\/\/images\.unsplash\.com/.test(event.img) ? event.img.replace(/w=\d+/, 'w=1100') : event.img;
+  const shareUrl = `${shareBase()}/events/${event.slug}`;
+  const shareText = `${event.title} — ${event.date}, ${event.city}. Hii si ya kukosa!`;
+  const rsvped = state.rsvpStep === 'done';
+  const similar = EVENT_CATALOG.filter((item) => item.cat === event.cat && item.slug !== event.slug).slice(0, 8);
+
+  return {
+    title: event.title,
+    category: event.cat,
+    dateLine,
+    city: event.city,
+    venue: event.venue || event.city,
+    price: event.price,
+    priceHead: isFree ? 'Free entry' : event.price,
+    going: event.going,
+    img: heroImg,
+    organizer: event.organizer,
+    description: event.description,
+    badge: event.badge,
+    isFree,
+    isPaid: !isFree,
+    ticketsHref: `/checkout?event=${event.slug}`,
+    // Guest RSVP (no account required)
+    rsvped,
+    notRsvped: !rsvped,
+    rsvpForm: state.rsvpStep === 'form',
+    rsvpLabel: state.rsvpStep === 'form' ? 'Finish below ↓' : 'RSVP — I am going',
+    rsvpBg: state.rsvpStep === 'form' ? '#1F3A38' : '#D97A3B',
+    rsvpFg: state.rsvpStep === 'form' ? '#F7F1E6' : '#1F3A38',
+    toggleRsvp: () =>
+      setPageState((current) => ({ ...current, rsvpStep: current.rsvpStep === 'idle' ? 'form' : 'idle', gError: null })),
+    gName: state.gName || '',
+    setGName: (e) => setPageState((current) => ({ ...current, gName: e.target.value, gError: null })),
+    gEmail: state.gEmail || '',
+    setGEmail: (e) => setPageState((current) => ({ ...current, gEmail: e.target.value, gError: null })),
+    gError: state.gError,
+    gNameShown: String(state.gName || '').split(' ')[0] || 'rafiki',
+    confirmRsvp: () => {
+      const name = String(state.gName || '').trim();
+      const email = String(state.gEmail || '').trim();
+      if (!name) {
+        setPageState((current) => ({ ...current, gError: 'Please add your name.' }));
+        return;
+      }
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+        setPageState((current) => ({ ...current, gError: 'That email does not look right — we need it for your invite.' }));
+        return;
+      }
+      setPageState((current) => ({ ...current, rsvpStep: 'done', gError: null }));
+    },
+    cancelRsvp: () => setPageState((current) => ({ ...current, rsvpStep: 'idle', gError: null })),
+    // Share (canonical, unfurlable URL)
+    shareUrl,
+    copyLabel: state.copied ? '✓ COPIED' : 'COPY',
+    copyLink: () => {
+      copyText(shareUrl);
+      setLater(setPageState, { copied: true });
+    },
+    waHref: `https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`,
+    fbHref: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
+    emHref: `mailto:?subject=${encodeURIComponent(event.title)}&body=${encodeURIComponent(`${shareText}\n\n${shareUrl}`)}`,
+    similar: similar.map((item) => ({
+      href: item.href,
+      img: item.img,
+      title: item.title,
+      city: item.city,
+      date: item.date,
+      price: item.price,
+    })),
   };
 }
 
@@ -681,6 +695,7 @@ function checkoutValues(state, setPageState) {
   if (!lines.length) lines.push({ label: 'No tickets selected', amount: '—' });
 
   return {
+    eventTitle: findEventBySlug(state.eventSlug)?.title || 'Afrogroove Night',
     tiers: [
       mkTier('early', 'Early bird', 'SAVE 20%', 'Pay online before 1 Aug · limited allocation', fmt(25), false),
       mkTier('ga', 'General admission', false, 'Entry 9 PM – 3 AM · all areas', false, false),
@@ -1425,7 +1440,7 @@ function myTwendeValuesV5(state, setPageState) {
       { init: 'EA', name: 'EA Premier Fans · Sports', bg: '#1F3A38', fg: '#F7F1E6' },
     ],
     fyFeatured: {
-      href: 'Event Nyama Choma.dc.html',
+      href: '/events/swahili-heritage-festival-2026',
       img: '/assets/events/swahili-heritage-festival.jpeg',
       title: 'Swahili Heritage Festival 2026',
       by: 'Because you follow Tanzania Embassy',
@@ -1434,19 +1449,19 @@ function myTwendeValuesV5(state, setPageState) {
       blurb: 'Tamasha la Urithi wa Kiswahili — “Kiswahili kwa Ushirikiano, Amani na Ustawi.” Music and culture with DJ Luke.',
     },
     fyExplore: [
-      { href: 'Event Nyama Choma.dc.html', img: 'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=300&q=80', title: 'Nyama Choma Festival', date: 'SAT · 8 AUG', by: 'UONGOZI · NYTC' },
-      { href: 'Checkout.dc.html', img: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&q=80', title: 'Afrogroove Night', date: 'FRI · 14 AUG', by: 'Afrogroove Collective' },
-      { href: 'Twendezetu Home.dc.html', img: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=300&q=80', title: 'Diaspora Connect Mixer', date: 'FRI · 21 AUG', by: 'Diaspora Connect' },
+      { href: '/events/nyama-choma-festival-2026', img: 'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=300&q=80', title: 'Nyama Choma Festival', date: 'SAT · 8 AUG', by: 'UONGOZI · NYTC' },
+      { href: '/events/afrogroove-night', img: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&q=80', title: 'Afrogroove Night', date: 'FRI · 14 AUG', by: 'Afrogroove Collective' },
+      { href: '/events/diaspora-connect-mixer', img: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=300&q=80', title: 'Diaspora Connect Mixer', date: 'FRI · 21 AUG', by: 'Diaspora Connect' },
     ],
     fyShelfId: 'tw-mt-follow-shelf',
     fyPrev: () => scrollShelfBy('tw-mt-follow-shelf', -1),
     fyNext: () => scrollShelfBy('tw-mt-follow-shelf', 1),
     fyEvents: [
-      { href: 'Event Nyama Choma.dc.html', img: '/assets/events/swahili-heritage-festival.jpeg', title: 'Swahili Heritage Festival', by: 'Tanzania Embassy · Community', date: 'SUN · 26 JUL' },
-      { href: 'Event Nyama Choma.dc.html', img: 'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=500&q=80', title: 'Nyama Choma Festival', by: 'UONGOZI - NYTC', date: 'SAT · 8 AUG' },
-      { href: 'Checkout.dc.html', img: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80', title: 'Afrogroove Night', by: 'Afrogroove Collective', date: 'FRI · 14 AUG' },
-      { href: 'Twendezetu Home.dc.html', img: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=500&q=80', title: 'Umoja Cultural Day', by: 'Umoja Day Committee', date: 'SAT · 15 AUG' },
-      { href: 'Twendezetu Home.dc.html', img: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=500&q=80', title: 'Diaspora Connect Mixer', by: 'Diaspora Connect', date: 'FRI · 21 AUG' },
+      { href: '/events/swahili-heritage-festival-2026', img: '/assets/events/swahili-heritage-festival.jpeg', title: 'Swahili Heritage Festival', by: 'Tanzania Embassy · Community', date: 'SUN · 26 JUL' },
+      { href: '/events/nyama-choma-festival-2026', img: 'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=500&q=80', title: 'Nyama Choma Festival', by: 'UONGOZI - NYTC', date: 'SAT · 8 AUG' },
+      { href: '/events/afrogroove-night', img: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80', title: 'Afrogroove Night', by: 'Afrogroove Collective', date: 'FRI · 14 AUG' },
+      { href: '/events/umoja-cultural-day', img: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=500&q=80', title: 'Umoja Cultural Day', by: 'Umoja Day Committee', date: 'SAT · 15 AUG' },
+      { href: '/events/diaspora-connect-mixer', img: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=500&q=80', title: 'Diaspora Connect Mixer', by: 'Diaspora Connect', date: 'FRI · 21 AUG' },
     ],
     fyNeeds: [
       { title: '3 canopy tents + chairs (yours)', meta: 'JERSEY CITY · CLOSES 18 AUG · 9 OFFERS', chip: 'CLOSING SOON' },
@@ -3163,6 +3178,8 @@ export function createClaudePageValues(page, state, setPageState) {
       return homeValues(state, setPageState);
     case 'event':
       return eventValues(state, setPageState);
+    case 'eventDetail':
+      return eventDetailValues(state, setPageState);
     case 'create':
       return createValues(state, setPageState);
     case 'checkout':
