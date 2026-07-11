@@ -1,5 +1,5 @@
 import { ClaudeDesignPage } from '@/components/ClaudeDesignPage';
-import { findEventBySlug } from '@/design/events-catalog';
+import { findEventBySlug, ogImagesFor } from '@/design/events-catalog';
 
 const SITE = 'Twendezetu';
 
@@ -17,13 +17,13 @@ export function generateMetadata() {
       url: '/events/nyama-choma-festival-2026',
       type: 'website',
       siteName: SITE,
-      images: [{ url: event?.img || '/assets/events/nytc-nanenane-2026-flyer.jpeg', alt: event?.title }],
+      images: ogImagesFor(event?.img || '/assets/events/nytc-nanenane-2026-flyer.jpeg', event?.title),
     },
     twitter: {
       card: 'summary_large_image',
       title: event?.title || 'NYTC Nyama Choma Festival',
       description,
-      images: [event?.img || '/assets/events/nytc-nanenane-2026-flyer.jpeg'],
+      images: ogImagesFor(event?.img || '/assets/events/nytc-nanenane-2026-flyer.jpeg', event?.title).map((image) => image.url),
     },
   };
 }

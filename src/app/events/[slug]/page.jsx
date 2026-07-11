@@ -1,5 +1,5 @@
 import { ClaudeDesignPage } from '@/components/ClaudeDesignPage';
-import { findEventBySlug } from '@/design/events-catalog';
+import { findEventBySlug, ogImagesFor } from '@/design/events-catalog';
 
 const SITE = 'Twendezetu';
 
@@ -28,13 +28,13 @@ export async function generateMetadata({ params }) {
       url,
       type: 'website',
       siteName: SITE,
-      images: [{ url: event.img, alt: event.title }],
+      images: ogImagesFor(event.img, event.title),
     },
     twitter: {
       card: 'summary_large_image',
       title: event.title,
       description,
-      images: [event.img],
+      images: ogImagesFor(event.img, event.title).map((image) => image.url),
     },
   };
 }

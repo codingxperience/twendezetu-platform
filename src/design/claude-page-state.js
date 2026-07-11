@@ -1,4 +1,5 @@
 import { EVENT_CATALOG, EVENT_CATS, findEventBySlug } from '@/design/events-catalog';
+import { PROVIDER_CATALOG, findProviderBySlug } from '@/design/providers-catalog';
 
 const CURRENCIES = ['USD', 'KES', 'UGX', 'TZS', 'RWF'];
 
@@ -6,6 +7,7 @@ const initialState = {
   home: { currency: 'USD', lang: 'en', cat: 'All' },
   event: { rsvpStep: 'idle', copied: false, gName: '', gEmail: '', gParty: 1, gError: null },
   eventDetail: { slug: 'nyama-choma-festival-2026', rsvpStep: 'idle', copied: false, gName: '', gEmail: '', gError: null },
+  providerDetail: { slug: 'dj-zawadi', copied: false, reqOpen: false, reqName: '', reqEmail: '', reqMsg: '', reqError: null, reqDone: false, askOpen: false, question: '' },
   create: {
     step: 1,
     kind: 'need',
@@ -478,6 +480,100 @@ function eventDetailValues(state, setPageState) {
       date: item.date,
       price: item.price,
     })),
+  };
+}
+
+function providerDetailValues(state, setPageState) {
+  const provider =
+    findProviderBySlug(state.slug) || {
+      slug: state.slug || 'provider',
+      name: 'Provider not found',
+      cat: 'PROVIDERS',
+      city: 'Twendezetu',
+      rating: '5.0',
+      jobs: 0,
+      rate: '—',
+      img: 'https://images.unsplash.com/photo-1516873240891-4bf014598ab4?w=1100&q=80',
+      description: 'This provider link could not be found. Browse the directory to find providers near you.',
+      verified: false,
+      href: '/providers/provider',
+    };
+  const heroImg = /^https:\/\/images\.unsplash\.com/.test(provider.img) ? provider.img.replace(/w=\d+/, 'w=1100') : provider.img;
+  const shareUrl = `${shareBase()}/providers/${provider.slug}`;
+  const shareText = `${provider.name} — ${provider.cat} in ${provider.city}, ★${provider.rating} on Twendezetu.`;
+  const similar = PROVIDER_CATALOG.filter((item) => item.cat === provider.cat && item.slug !== provider.slug).slice(0, 8);
+
+  return {
+    name: provider.name,
+    category: provider.cat,
+    city: provider.city,
+    rating: provider.rating,
+    jobs: provider.jobs,
+    rate: provider.rate,
+    img: heroImg,
+    description: provider.description,
+    isVerified: !!provider.verified,
+    backHref: '/providers/kato-4x4',
+    reviews: [
+      { stars: '★★★★★', name: 'Amina M.', job: 'Wedding convoy', body: `${provider.name} was on time and professional — everything went through the platform, no surprises.` },
+      { stars: '★★★★★', name: 'Joseph K.', job: 'Airport pickup', body: 'Great communication and fair pricing. Would book again.' },
+      { stars: '★★★★☆', name: 'Grace N.', job: 'Community event', body: 'Solid, reliable service. Recommended for diaspora events.' },
+    ],
+    similar: similar.map((item) => ({ href: item.href, img: item.img, name: item.name, city: item.city, rating: item.rating, rate: item.rate })),
+    // Request a service (guest, masked)
+    reqOpen: state.reqOpen,
+    reqNotDone: !state.reqDone,
+    reqDone: state.reqDone,
+    reqBg: state.reqOpen ? '#1F3A38' : '#D97A3B',
+    reqFg: state.reqOpen ? '#F7F1E6' : '#1F3A38',
+    reqBtnLabel: state.reqDone ? '✓ Request sent' : state.reqOpen ? 'Hide request form' : 'Request a service →',
+    toggleReq: () => setPageState((current) => ({ ...current, reqOpen: !current.reqOpen, reqError: null })),
+    reqName: state.reqName,
+    setReqName: (e) => setPageState((current) => ({ ...current, reqName: e.target.value, reqError: null })),
+    reqEmail: state.reqEmail,
+    setReqEmail: (e) => setPageState((current) => ({ ...current, reqEmail: e.target.value, reqError: null })),
+    reqMsg: state.reqMsg,
+    setReqMsg: (e) => setPageState((current) => ({ ...current, reqMsg: e.target.value, reqError: null })),
+    reqError: state.reqError,
+    sendReq: () => {
+      if (!String(state.reqName || '').trim()) {
+        setPageState((current) => ({ ...current, reqError: 'Please add your name.' }));
+        return;
+      }
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(state.reqEmail || '').trim())) {
+        setPageState((current) => ({ ...current, reqError: 'We need a valid email to route replies (it stays masked).' }));
+        return;
+      }
+      if (!String(state.reqMsg || '').trim()) {
+        setPageState((current) => ({ ...current, reqError: 'Tell the provider what you need.' }));
+        return;
+      }
+      setPageState((current) => ({ ...current, reqDone: true, reqError: null }));
+    },
+    // Ask a question (guest)
+    askOpen: state.askOpen,
+    askBg: state.askOpen ? '#D97A3B' : '#F7F1E6',
+    toggleAsk: () => setPageState((current) => ({ ...current, askOpen: !current.askOpen })),
+    question: state.question,
+    setQuestion: (e) => setPageState((current) => ({ ...current, question: e.target.value })),
+    sendAsk: () => {
+      if (!String(state.question || '').trim()) {
+        showToast(setPageState, 'Type your question first.');
+        return;
+      }
+      showToast(setPageState, `Question sent to ${provider.name} — replies arrive in-platform.`);
+      setPageState((current) => ({ ...current, askOpen: false, question: '' }));
+    },
+    // Share (canonical, unfurlable URL)
+    shareUrl,
+    copyLabel: state.copied ? '✓ COPIED' : 'COPY',
+    copyLink: () => {
+      copyText(shareUrl);
+      setLater(setPageState, { copied: true });
+    },
+    waHref: `https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`,
+    fbHref: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
+    emHref: `mailto:?subject=${encodeURIComponent(provider.name)}&body=${encodeURIComponent(`${shareText}\n\n${shareUrl}`)}`,
   };
 }
 
@@ -2024,42 +2120,7 @@ function providerValuesV5(state, setPageState) {
     ['https://images.unsplash.com/photo-1502877338535-766e1452684a?w=1400&q=80', 'Vehicle detail'],
     ['https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1400&q=80', 'Up-country route'],
   ];
-  const dir = [
-    { name: 'DJ Zawadi', cat: 'MUSIC & DJS', rating: '5.0', jobs: 27, city: 'KAMPALA', desc: 'Amapiano + bongo sets, own decks and PA. Travels with the pool.', rate: 'UGX 350K/set', img: 'https://images.unsplash.com/photo-1516873240891-4bf014598ab4?w=600&q=80' },
-    { name: 'Mama T Events Co.', cat: 'TENTS & EQUIPMENT', rating: '5.0', jobs: 38, city: 'JERSEY CITY', desc: 'Canopies, chairs, serving tables. NYTC member discount.', rate: 'FROM $490', img: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=600&q=80' },
-    { name: 'Chef Halima', cat: 'CATERING & CHEFS', rating: '4.9', jobs: 54, city: 'DAR ES SALAAM', desc: 'Pilau, biryani, nyama choma for 20–500 guests. Halal certified.', rate: 'TZS 15K/plate', img: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=600&q=80' },
-    { name: 'Jersey Party Rentals', cat: 'TENTS & EQUIPMENT', rating: '4.8', jobs: 112, city: 'NEWARK, NJ', desc: 'Full event rental fleet, insured, park-permit compliant.', rate: 'FROM $180', img: 'https://images.unsplash.com/photo-1478146896981-b80fe463b330?w=600&q=80' },
-    { name: 'Simba Sounds', cat: 'MUSIC & DJS', rating: '4.7', jobs: 43, city: 'NAIROBI', desc: 'PA hire + live band coordination. Gospel to gengetone.', rate: 'KES 25K/day', img: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&q=80' },
-    { name: 'Lensa ya Kigali', cat: 'PHOTOGRAPHY', rating: '5.0', jobs: 31, city: 'KIGALI', desc: 'Weddings and community events. Same-week photo delivery.', rate: 'RWF 150K/day', img: 'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=600&q=80' },
-  ];
-  const dirCats = ['MUSIC & DJS', 'CATERING & CHEFS', 'TENTS & EQUIPMENT', 'TRANSPORT & DRIVERS', 'PHOTOGRAPHY', 'DECOR & MC'];
-  const dirNames = {
-    'MUSIC & DJS': ['DJ Nia', 'Bongo Beats Crew', 'Amapiano Kings', 'Live Wire Band', 'Sound of Serengeti', 'DJ Kesho', 'Rhumba Republic', 'Gospel Groove'],
-    'CATERING & CHEFS': ['Chef Baraka', 'Mama Ntilie Kitchen', 'Pilau Palace', 'Swahili Plates', 'Nyama Bros', 'Coastal Bites', 'Ugali Express', 'Harusi Caterers'],
-    'TENTS & EQUIPMENT': ['Twiga Tents', 'Canopy Co.', 'Furaha Rentals', 'Event Hire EA', 'Shamba Structures', 'Party Plus', 'Karibu Canopies', 'Stage & Sound'],
-    'TRANSPORT & DRIVERS': ['Safari 4x4', 'Nairobi Executive', 'Boda Fleet', 'Coast Coaches', 'Kili Movers', 'Airport Express', 'Convoy Kings', 'Village Rides'],
-    'PHOTOGRAPHY': ['Pixel Pori', 'Moments EA', 'Frame & Focus', 'Harusi Lens', 'Diaspora Studios', 'Golden Hour', 'Storyboard KE', 'Click Kampala'],
-    'DECOR & MC': ['Zawadi Decor', 'MC Tumaini', 'Ribbon & Bloom', 'Grand Events MC', 'Petals & Drapes', 'Karibu Hosts', 'Elegance Decor', 'Stage Presence'],
-  };
-  const dirCities = ['NAIROBI', 'KAMPALA', 'DAR ES SALAAM', 'KIGALI', 'MOMBASA', 'JINJA', 'ARUSHA', 'JERSEY CITY', 'NEWARK, NJ', 'BROOKLYN, NY'];
-  const dirImgs = ['photo-1516873240891-4bf014598ab4', 'photo-1556910103-1c02745aae4d', 'photo-1519167758481-83f550bb49b3', 'photo-1533473359331-0135ef1b58bf', 'photo-1502920917128-1aa500764cbd', 'photo-1470225620780-dba8ba36b745', 'photo-1478146896981-b80fe463b330', 'photo-1519741497674-611481863552'];
-  const dirRates = ['UGX 300K/set', 'KES 20K/day', 'TZS 12K/plate', 'FROM $220', 'RWF 140K/day', 'FROM $180'];
-  const dirDescs = ['Trusted across the region, insured and on time.', 'Member since 2026 · fast responder.', 'Village-road ready, travels for the right job.', 'Halal options, scales 20–500 guests.', 'Same-week delivery, diaspora-friendly.', 'Own equipment, no hidden fees.'];
-  dirCats.forEach((cat, ci) => {
-    for (let i = 0; i < 5; i++) {
-      const names = dirNames[cat];
-      dir.push({
-        name: names[i % names.length] + (i >= names.length ? ` ${i + 1}` : ''),
-        cat,
-        rating: (4.5 + ((i + ci) % 5) * 0.1).toFixed(1),
-        jobs: 12 + ((i * 17 + ci * 23) % 120),
-        city: dirCities[(i * 2 + ci) % dirCities.length],
-        desc: dirDescs[(i + ci) % dirDescs.length],
-        rate: dirRates[(i + ci) % dirRates.length],
-        img: `https://images.unsplash.com/${dirImgs[(i + ci) % dirImgs.length]}?w=600&q=80`,
-      });
-    }
-  });
+  const dir = PROVIDER_CATALOG;
   const maxDir = Math.max(0, dir.length - 3);
   const galleryIdx = state.galleryIdx || 0;
   const dirIdx = state.dirIdx || 0;
@@ -2154,7 +2215,9 @@ function providerValuesV5(state, setPageState) {
     dirNext: () => setPageState((current) => ({ ...current, dirIdx: Math.min(maxDir, current.dirIdx + 1) })),
     directory: dir.map((provider) => ({
       ...provider,
-      view: () => showToast(setPageState, `${provider.name} profile would open here.`),
+      view: () => {
+        if (typeof window !== 'undefined') window.location.href = provider.href;
+      },
     })),
     toast: state.toast,
   };
@@ -3180,6 +3243,8 @@ export function createClaudePageValues(page, state, setPageState) {
       return eventValues(state, setPageState);
     case 'eventDetail':
       return eventDetailValues(state, setPageState);
+    case 'providerDetail':
+      return providerDetailValues(state, setPageState);
     case 'create':
       return createValues(state, setPageState);
     case 'checkout':

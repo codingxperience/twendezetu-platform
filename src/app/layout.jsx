@@ -2,7 +2,19 @@ import './globals.css';
 import { Toaster } from '@/components/Toaster';
 import { ThemeApplier } from '@/components/ThemeApplier';
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://twendezetu-platform-oufr.vercel.app';
+// Resolve a public, crawlable base URL for social/OG previews.
+// A localhost NEXT_PUBLIC_APP_URL (dev default) must never leak into a deploy's
+// metadataBase, or link previews resolve to unreachable localhost URLs.
+function resolveAppUrl() {
+  const explicit = process.env.NEXT_PUBLIC_APP_URL;
+  const isLocal = (u) => !u || /localhost|127\.0\.0\.1|0\.0\.0\.0/.test(u);
+  if (!isLocal(explicit)) return explicit;
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return explicit || 'https://twendezetu-platform-oufr.vercel.app';
+}
+
+const appUrl = resolveAppUrl();
 
 export const metadata = {
   title: 'Twendezetu — Event Portal',

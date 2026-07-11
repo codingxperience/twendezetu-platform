@@ -163,6 +163,21 @@ export function findEventBySlug(slug) {
   return EVENT_CATALOG.find((event) => event.slug === slug) || null;
 }
 
+// A 1200x630 image is what WhatsApp/Facebook/Twitter want for a large link card.
+// Unsplash can crop to exactly that; local assets are returned untouched.
+export function ogImageFor(img) {
+  if (typeof img === 'string' && /images\.unsplash\.com/.test(img)) {
+    return `${img.split('?')[0]}?w=1200&h=630&fit=crop&q=80`;
+  }
+  return img;
+}
+
+export function ogImagesFor(img, alt) {
+  const url = ogImageFor(img);
+  const sized = typeof url === 'string' && url.includes('w=1200&h=630');
+  return [sized ? { url, width: 1200, height: 630, type: 'image/jpeg', alt } : { url, alt }];
+}
+
 export function eventsByCategory(cat) {
   return EVENT_CATALOG.filter((event) => event.cat === cat);
 }
