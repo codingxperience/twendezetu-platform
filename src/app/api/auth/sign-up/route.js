@@ -1,41 +1,22 @@
-import { z } from 'zod';
-import { prisma } from '@/lib/prisma';
-import { hashPassword, createSession } from '@/lib/auth';
-import { created, badRequest, zodError, serverError } from '@/lib/api';
+import { route, setSessionCookie } from '@/server/http';
+import { schemas } from '@/server/schemas';
+import { signUp } from '@/server/services/identity';
+import { enforceRateLimit } from '@/server/security/rate-limit';
 
-const Body = z.object({
-  name: z.string().min(2, 'Name is required').max(100),
-  email: z.string().email('Enter a valid email'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  city: z.string().optional(),
-  role: z.enum(['customer', 'vendor']).optional(),
-  phone: z.string().optional(),
+const DESTINATIONS = { user: '/my-twende', advertiser: '/create-event', provider: '/provider-verification' };
+
+export const POST = route({ auth: 'none', body: schemas.signUp, limit: [{ policy: 'auth.sign-up', by: 'ip' }] }, async ({ body, ip, req }) => {
+  await enforceRateLimit('auth.sign-up', `email:${body.email}`);
+  const { user, session } = await signUp({
+    name: body.name,
+    email: body.email,
+    password: body.password,
+    city: body.city,
+    country: body.country,
+    referralHandle: body.ref,
+    ipAddress: ip,
+    userAgent: req.headers.get('user-agent'),
+  });
+  await setSessionCookie(session.token, session.expiresAt);
+  return { user, next: DESTINATIONS[body.intent] };
 });
-
-export async function POST(req) {
-  let body;
-  try { body = Body.parse(await req.json()); } catch (e) { return zodError(e); }
-
-  const existing = await prisma.user.findUnique({ where: { email: body.email.toLowerCase() } });
-  if (existing) return badRequest('An account with that email already exists.');
-
-  try {
-    const passwordHash = await hashPassword(body.password);
-    const user = await prisma.user.create({
-      data: {
-        email: body.email.toLowerCase(),
-        name: body.name,
-        passwordHash,
-        city: body.city || 'Nairobi',
-        role: body.role || 'customer',
-        phone: body.phone,
-      },
-      select: { id: true, email: true, name: true, role: true, city: true },
-    });
-    await createSession(user.id, req);
-    return created({ user });
-  } catch (e) {
-    console.error(e);
-    return serverError('Could not create account.');
-  }
-}

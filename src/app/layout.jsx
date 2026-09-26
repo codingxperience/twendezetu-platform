@@ -1,6 +1,4 @@
 import './globals.css';
-import { Toaster } from '@/components/Toaster';
-import { ThemeApplier } from '@/components/ThemeApplier';
 
 // Resolve a public, crawlable base URL for social/OG previews.
 // A localhost NEXT_PUBLIC_APP_URL (dev default) must never leak into a deploy's
@@ -52,9 +50,7 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         <a href="#main" className="tz-skip">Skip to content</a>
-        <ThemeApplier />
         {children}
-        <Toaster />
       </body>
     </html>
   );
