@@ -1,7 +1,7 @@
 {
   "name": "twendezetu-platform",
   "version": "1.0.0",
-  "description": "Twendezetu \u2014 events, needs, providers and community money for East Africa and the diaspora. Next.js + Prisma + Supabase Postgres.",
+  "description": "Twendezetu — events, needs, providers and community money for East Africa and the diaspora. Next.js + Prisma + Supabase Postgres.",
   "private": true,
   "type": "module",
   "engines": {
@@ -30,6 +30,7 @@
     "@prisma/client": "5.22.0",
     "bcryptjs": "2.4.3",
     "next": "15.5.20",
+    "nodemailer": "10.0.11",
     "qrcode": "1.5.4",
     "react": "18.3.1",
     "react-dom": "18.3.1",

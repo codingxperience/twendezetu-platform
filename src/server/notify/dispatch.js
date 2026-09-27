@@ -4,6 +4,7 @@
 
 import { prisma } from '../db.js';
 import { config } from '../config.js';
+import nodemailer from 'nodemailer';
 import { log } from '../log.js';
 
 const MAX_ATTEMPTS = 5;
@@ -130,28 +131,65 @@ export function passwordResetEmail({ name, link, minutes }) {
 }
 
 export function emailConfigured() {
-  return Boolean(config().email.resendApiKey);
+  const { resendApiKey, smtp } = config().email;
+  return Boolean(resendApiKey || smtp);
 }
 
-// Sends one email now through Resend. Throws on a refused or failed send.
+// One pooled connection, reused across sends until the mailbox settings
+// change (a new password included).
+let mailbox = null;
+
+function smtpTransport(smtp) {
+  if (mailbox?.smtp !== smtp) {
+    mailbox?.transport.close();
+    mailbox = {
+      smtp,
+      transport: nodemailer.createTransport({
+        host: smtp.host,
+        port: smtp.port,
+        // Port 465 speaks TLS from the first byte; others must upgrade with
+        // STARTTLS before the password is sent, at least in production.
+        secure: smtp.port === 465,
+        requireTLS: smtp.port !== 465 && config().production,
+        auth: { user: smtp.user, pass: smtp.password },
+        pool: true,
+        maxConnections: 2,
+        connectionTimeout: 10_000,
+        greetingTimeout: 10_000,
+        socketTimeout: 20_000,
+      }),
+    };
+  }
+  return mailbox.transport;
+}
+
+// Sends one email now: through Resend when it is configured, otherwise
+// through the site's own mailbox over SMTP. Throws on a refused or failed
+// send, so callers can retry.
 export async function sendEmailNow({ to, subject, text, html, idempotencyKey }) {
-  const { resendApiKey, from } = config().email;
-  const response = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      authorization: `Bearer ${resendApiKey}`,
-      'content-type': 'application/json',
-      ...(idempotencyKey ? { 'idempotency-key': idempotencyKey } : {}),
-    },
-    body: JSON.stringify({ from, to: [to], subject, text, html }),
-    signal: AbortSignal.timeout(10_000),
-  });
-  if (!response.ok) throw new Error(`Resend responded ${response.status}: ${(await response.text()).slice(0, 200)}`);
+  const { resendApiKey, smtp, from } = config().email;
+  if (resendApiKey) {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${resendApiKey}`,
+        'content-type': 'application/json',
+        ...(idempotencyKey ? { 'idempotency-key': idempotencyKey } : {}),
+      },
+      body: JSON.stringify({ from, to: [to], subject, text, html }),
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (!response.ok) throw new Error(`Resend responded ${response.status}: ${(await response.text()).slice(0, 200)}`);
+    return;
+  }
+  if (!smtp) throw new Error('No email provider is configured.');
+  const info = await smtpTransport(smtp).sendMail({ from, to, subject, text, html });
+  if (info.rejected?.length) throw new Error(`The mail server refused ${info.rejected.join(', ')}`);
 }
 
 async function sendEmail(message) {
   if (!emailConfigured()) {
-    if (!config().production) log.info('email (not sent: RESEND_API_KEY unset)', { to: message.to, subject: message.subject, body: message.body });
+    if (!config().production) log.info('email (not sent: no email provider configured)', { to: message.to, subject: message.subject, body: message.body });
     return { skipped: true, reason: 'email_not_configured' };
   }
   const { text, html } = emailBodies(message);
