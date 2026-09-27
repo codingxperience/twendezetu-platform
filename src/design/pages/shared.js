@@ -76,6 +76,11 @@ export function patch(set, values) {
   set((state) => ({ ...state, ...values }));
 }
 
+// Ends a sentence without doubling a full stop after "Co." or "Amina M.".
+export function sentence(text) {
+  return /[.!?]$/.test(text) ? text : `${text}.`;
+}
+
 export const EMAIL_PATTERN = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
 export function shareLinks(url, text, title) {

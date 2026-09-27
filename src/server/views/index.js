@@ -7,6 +7,7 @@ import { eventView } from './event.js';
 import { checkoutView } from './checkout.js';
 import { myTwendeView } from './myTwende.js';
 import { messagesView } from './messages.js';
+import { walletView } from './wallet.js';
 
 export const VIEWS = {
   home: homeView,
@@ -14,4 +15,5 @@ export const VIEWS = {
   checkout: checkoutView,
   myTwende: myTwendeView,
   messages: messagesView,
+  wallet: walletView,
 };

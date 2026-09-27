@@ -1,6 +1,6 @@
 // Messages: masked conversations, formal offers and the bookings they lead to.
 
-import { COLORS, withStepUp } from './shared';
+import { COLORS, sentence, withStepUp } from './shared';
 
 const POLL_MS = 8000;
 
@@ -244,7 +244,7 @@ export function values(state, set, ctx) {
     : {
         PENDING_PAYMENT: `${booking.amount} to pay. Nothing is paid out until the job is done.`,
         ESCROWED: `${booking.amount} held by Twendezetu. Released ${booking.releaseHours} hours after the job${booking.releaseOn ? ` (from ${booking.releaseOn})` : ''} unless someone raises a problem.`,
-        RELEASED: `${booking.amount} paid to ${booking.providerName}.`,
+        RELEASED: sentence(`${booking.amount} paid to ${booking.providerName}`),
         DISPUTED: `${booking.amount} frozen in escrow while the dispute is decided.`,
         CANCELLED: 'Cancelled before any money moved.',
         REFUNDED: `${booking.amount} refunded.`,

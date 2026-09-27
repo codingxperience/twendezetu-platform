@@ -1,6 +1,6 @@
 // My Twende: the signed-in person's own space.
 
-import { COLORS, copyText, scrollShelf, shareLinks, withStepUp } from './shared';
+import { COLORS, copyText, scrollShelf, sentence, shareLinks, withStepUp } from './shared';
 
 const TABS = [
   ['foryou', 'For you'],
@@ -138,7 +138,7 @@ export function values(state, set, ctx) {
       const result = await ctx.api.post(`/api/providers/${provider.slug}/follow`);
       patchData((current) => ({ providers: current.providers.map((item) => (item.slug === provider.slug ? { ...item, following: result.following } : item)) }));
       return result;
-    }, { reloadAfter: false, success: (result) => `${result.following ? 'Following' : 'Unfollowed'} ${provider.name}${provider.name.endsWith('.') ? '' : '.'}` });
+    }, { reloadAfter: false, success: (result) => sentence(`${result.following ? 'Following' : 'Unfollowed'} ${provider.name}`) });
 
   // ── Upcoming ──────────────────────────────────────────────────────────
   const upcoming = data.upcoming.map((ev) => {
