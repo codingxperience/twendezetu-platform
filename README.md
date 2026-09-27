@@ -121,6 +121,19 @@ protected.
    with `Authorization: Bearer <CRON_SECRET>`; without `?all=1` it runs the
    frequent jobs every time and the hourly, daily and weekly ones when due.
 
+### SiteGround (Node.js tool)
+
+1. In Site Tools → Node.js, deploy from GitHub with the Next.js preset,
+   branch `main`, Node 22, package manager npm, build command
+   `npm run build:hosted` and output directory `.next`.
+2. Add the variables from `.env.example` under Environment Variables before
+   the first build. `NEXT_PUBLIC_APP_URL` is baked in at build time.
+3. With `MIGRATE_ON_BUILD=true` each build applies pending migrations.
+   `SEED_ON_BUILD=demo` (with `SEED_DEMO_PASSWORD`) loads the demo data on
+   the next build; set it back to `off` straight after.
+4. In Devs → Cron Jobs, call the scheduler every five minutes:
+   `curl -fsS -H "Authorization: Bearer <CRON_SECRET>" https://YOUR_DOMAIN/api/cron/tick`
+
 ### Containers (Railway, Fly.io, Render, Cloud Run)
 
 ```bash

@@ -1,8 +1,8 @@
-// The build Vercel runs. Hosted builds are the one place that can always
-// reach the database, so migrations can run here, but only when an operator
-// turns it on with MIGRATE_ON_BUILD=true: a preview build must not change the
-// production schema by accident. Afterwards the database is summarised in
-// the build log as row counts only, never personal data.
+// The build a host runs (SiteGround's Node.js tool, Vercel). Hosted builds
+// can always reach the database, so migrations can run here, but only when
+// an operator turns it on with MIGRATE_ON_BUILD=true: a preview build must
+// not change the production schema by accident. Afterwards the database is
+// summarised in the build log as row counts only, never personal data.
 //
 // SEED_ON_BUILD=demo also loads the demo catalogue (see prisma/seed.mjs). The
 // seed refuses to touch a database holding real accounts; the build then
