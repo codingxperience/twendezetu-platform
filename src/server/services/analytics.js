@@ -6,7 +6,7 @@ import { prisma, toNumber } from '../db.js';
 import { forbidden, notFound } from '../errors.js';
 import { ESCROW, FEES } from '../fees.js';
 import { formatMoney } from '../../shared/money.js';
-import { dayLabel, shortDate, shortName } from '../../shared/format.js';
+import { dayKey, dayLabel, shortDate, shortName } from '../../shared/format.js';
 
 const SOURCE_LABELS = { whatsapp: 'WhatsApp', facebook: 'Facebook', direct: 'Direct link', feed: 'Twende feed', email: 'Email', x: 'X', instagram: 'Instagram' };
 
@@ -27,10 +27,6 @@ export async function organizerEvents(user) {
 
 function pct(part, whole) {
   return whole ? `${Math.min(100, Math.round((part / whole) * 100))}%` : '0%';
-}
-
-function localDay(date, timeZone) {
-  return new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(date);
 }
 
 // Where the funnel loses the most people, and what usually helps there.
@@ -116,7 +112,7 @@ export async function eventAnalytics(user, slug) {
   // Eight local days ending today, in the event's own time zone.
   const days = Array.from({ length: 8 }, (_value, index) => new Date(now - (7 - index) * 86_400_000));
   const sales = Object.fromEntries(salesByDay.map((row) => [row.day, Number(row.amount)]));
-  const dayAmounts = days.map((date) => sales[localDay(date, zone)] || 0);
+  const dayAmounts = days.map((date) => sales[dayKey(date, zone)] || 0);
   const maxDay = Math.max(0, ...dayAmounts);
   const peakIndex = maxDay ? dayAmounts.indexOf(maxDay) : -1;
   const weekSales = dayAmounts.reduce((sum, amount) => sum + amount, 0);

@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { fromZonedInput, toZonedInput } from '../../src/shared/time.js';
+import { dayKey, messageStamp } from '../../src/shared/format.js';
 
 test('event times are read in the venue time zone', () => {
   assert.equal(fromZonedInput('2026-08-08T14:00', 'Africa/Nairobi').toISOString(), '2026-08-08T11:00:00.000Z');
@@ -29,4 +30,11 @@ test('times survive a round trip through storage', () => {
 test('bad input gives null rather than a wrong date', () => {
   assert.equal(fromZonedInput('24/12/2026 7pm', 'Africa/Nairobi'), null);
   assert.equal(fromZonedInput('', 'Africa/Nairobi'), null);
+});
+
+test('the same instant can fall on different days by zone', () => {
+  const late = new Date('2026-08-08T23:30:00Z');
+  assert.equal(dayKey(late, 'America/New_York'), '2026-08-08');
+  assert.equal(dayKey(late, 'Africa/Nairobi'), '2026-08-09');
+  assert.equal(messageStamp(late, 'Africa/Nairobi'), 'SUN 02:30');
 });

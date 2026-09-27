@@ -51,10 +51,18 @@ const AFRICAN_ZONE_NAMES = {
   'Africa/Kigali': 'CAT',
 };
 
-function parts(date, timeZone, options) {
+// Zones are passed as `timeZone: zone`, never as a shorthand property: the
+// production minifier inlines small helpers and has dropped the binding
+// behind a shorthand `{ timeZone }` (a ReferenceError only in builds).
+function parts(date, zone, options) {
   return Object.fromEntries(
-    new Intl.DateTimeFormat('en-US', { timeZone, ...options }).formatToParts(date).map((part) => [part.type, part.value]),
+    new Intl.DateTimeFormat('en-US', { timeZone: zone, ...options }).formatToParts(date).map((part) => [part.type, part.value]),
   );
+}
+
+// "2026-08-08": the calendar day in `zone`, for grouping by local day.
+export function dayKey(date, zone = 'UTC') {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: zone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(date);
 }
 
 // "SAT · 8 AUG"
@@ -96,20 +104,18 @@ export function relativeTime(date, now = new Date()) {
   return shortDate(date);
 }
 
-// "TUE", "10:14" style stamps for message threads.
 // Conversation list stamps in the reader's time zone: "14:05" today,
 // "TUE" this week, "3 OCT" before that.
-export function threadStamp(date, timeZone = 'UTC', now = new Date()) {
-  const day = (value) => new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(value);
-  if (day(date) === day(now)) return new Intl.DateTimeFormat('en-GB', { timeZone, hour: '2-digit', minute: '2-digit' }).format(date);
-  if (now - date < 6 * 24 * 3600 * 1000) return new Intl.DateTimeFormat('en-US', { timeZone, weekday: 'short' }).format(date).toUpperCase();
-  return shortDate(date, timeZone);
+export function threadStamp(date, zone = 'UTC', now = new Date()) {
+  if (dayKey(date, zone) === dayKey(now, zone)) return new Intl.DateTimeFormat('en-GB', { timeZone: zone, hour: '2-digit', minute: '2-digit' }).format(date);
+  if (now - date < 6 * 24 * 3600 * 1000) return new Intl.DateTimeFormat('en-US', { timeZone: zone, weekday: 'short' }).format(date).toUpperCase();
+  return shortDate(date, zone);
 }
 
 // "TUE 14:05" in the given time zone.
-export function messageStamp(date, timeZone = 'UTC') {
-  const weekday = new Intl.DateTimeFormat('en-US', { timeZone, weekday: 'short' }).format(date).toUpperCase();
-  const time = new Intl.DateTimeFormat('en-GB', { timeZone, hour: '2-digit', minute: '2-digit' }).format(date);
+export function messageStamp(date, zone = 'UTC') {
+  const weekday = new Intl.DateTimeFormat('en-US', { timeZone: zone, weekday: 'short' }).format(date).toUpperCase();
+  const time = new Intl.DateTimeFormat('en-GB', { timeZone: zone, hour: '2-digit', minute: '2-digit' }).format(date);
   return `${weekday} ${time}`;
 }
 

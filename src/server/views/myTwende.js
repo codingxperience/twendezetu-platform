@@ -11,7 +11,7 @@ import { toEventCard } from '../services/events.js';
 import { dateRange, needCard } from '../services/marketplace.js';
 import { REMINDER_PLANS } from '../services/rsvps.js';
 import { preferencesFor } from '../notify/preferences.js';
-import { COUNTRIES, PROVIDER_CATEGORIES, dayLabel, initials, ratingLabel, relativeTime, shortDate, timeLabel } from '../../shared/format.js';
+import { COUNTRIES, PROVIDER_CATEGORIES, dayKey, dayLabel, initials, ratingLabel, relativeTime, shortDate, timeLabel } from '../../shared/format.js';
 import { convert, formatMoney } from '../../shared/money.js';
 import { unauthorized } from '../errors.js';
 import { me } from './common.js';
@@ -23,10 +23,6 @@ const CARD_INCLUDE = {
 
 // Events stay "upcoming" until six hours after they start.
 const GRACE_MS = 6 * 3600 * 1000;
-
-function localDay(date, timeZone) {
-  return new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(date);
-}
 
 function plural(count, word) {
   if (count === 1) return `${count} ${word}`;
@@ -301,7 +297,7 @@ export async function myTwendeView(viewer) {
   // Calendar entries keyed by the local day of each event, deadline or booking.
   const calendar = [
     ...rsvps.map((rsvp) => ({
-      day: localDay(rsvp.event.startsAt, rsvp.event.timezone),
+      day: dayKey(rsvp.event.startsAt, rsvp.event.timezone),
       kind: 'event',
       title: rsvp.event.title,
       short: shortTitle(rsvp.event.title),
@@ -311,7 +307,7 @@ export async function myTwendeView(viewer) {
     ...needs
       .filter((need) => need.closesAt && need.status === 'OPEN')
       .map((need) => ({
-        day: localDay(need.closesAt, needZone(need)),
+        day: dayKey(need.closesAt, needZone(need)),
         kind: 'post',
         title: `Offers close: ${need.title}`,
         short: 'Offers close',
@@ -395,6 +391,6 @@ export async function myTwendeView(viewer) {
     wallet: { points, value: walletValue },
     referral: { link: `${base}/r/${viewer.handle}`, friends: referralCount, points: referralPoints._sum.points || 0 },
     prefs: { reminders: prefs.REMINDERS.email, offers: prefs.OFFERS.email, social: prefs.SOCIAL.email, digest: user.weeklyDigest },
-    today: localDay(now, COUNTRIES[user.country]?.timezone || 'UTC'),
+    today: dayKey(now, COUNTRIES[user.country]?.timezone || 'UTC'),
   };
 }
