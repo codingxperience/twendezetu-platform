@@ -78,36 +78,84 @@ function escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 }
 
-function emailBodies(message) {
-  const link = absolute(message.href);
-  const text = `${message.body}${link ? `\n\n${link}` : ''}\n\n— Twendezetu\nManage notifications: ${config().appUrl}/settings`;
-  const html = `<!doctype html><html><body style="margin:0;background:#F7F1E6;font-family:Helvetica,Arial,sans-serif;color:#14201F">
+// The branded frame every email shares. `inner` is trusted markup built
+// from escaped values; `button` is { href, label } or null.
+function frame({ title, inner, button, footer }) {
+  return `<!doctype html><html><body style="margin:0;background:#F7F1E6;font-family:Helvetica,Arial,sans-serif;color:#14201F">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:32px 16px">
 <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;background:#FFFDF8;border:2px solid #1F3A38">
 <tr><td style="background:#1F3A38;color:#F7F1E6;padding:18px 24px;font-size:18px;font-weight:bold;letter-spacing:1px">TWENDE<span style="color:#D97A3B">ZETU</span></td></tr>
-<tr><td style="padding:28px 24px"><h1 style="margin:0 0 12px;font-size:22px">${escapeHtml(message.subject)}</h1>
-<p style="margin:0 0 20px;font-size:15px;line-height:1.55">${escapeHtml(message.body).replace(/\n/g, '<br>')}</p>
-${link ? `<a href="${escapeHtml(link)}" style="display:inline-block;background:#D97A3B;color:#1F3A38;text-decoration:none;font-weight:bold;padding:12px 20px">Open Twendezetu →</a>` : ''}
+<tr><td style="padding:28px 24px"><h1 style="margin:0 0 12px;font-size:22px">${escapeHtml(title)}</h1>
+${inner}
+${button ? `<a href="${escapeHtml(button.href)}" style="display:inline-block;background:#D97A3B;color:#1F3A38;text-decoration:none;font-weight:bold;padding:12px 20px">${escapeHtml(button.label)}</a>` : ''}
 </td></tr>
-<tr><td style="padding:16px 24px;border-top:1px solid #EFE7D6;font-size:12px;color:#6E6155">You receive this because of your Twendezetu activity. <a href="${escapeHtml(config().appUrl)}/settings" style="color:#A85A23">Notification settings</a></td></tr>
+<tr><td style="padding:16px 24px;border-top:1px solid #EFE7D6;font-size:12px;color:#6E6155">${footer}</td></tr>
 </table></td></tr></table></body></html>`;
+}
+
+function paragraphs(text) {
+  return String(text)
+    .split(/\n{2,}/)
+    .map((part) => `<p style="margin:0 0 16px;font-size:15px;line-height:1.55">${escapeHtml(part).replace(/\n/g, '<br>')}</p>`)
+    .join('\n');
+}
+
+function emailBodies(message) {
+  const link = absolute(message.href);
+  const settings = `${config().appUrl}/settings`;
+  const text = `${message.body}${link ? `\n\n${link}` : ''}\n\n— Twendezetu\nManage notifications: ${settings}`;
+  const html = frame({
+    title: message.subject,
+    inner: paragraphs(message.body),
+    button: link ? { href: link, label: 'Open Twendezetu →' } : null,
+    footer: `You receive this because of your Twendezetu activity. <a href="${escapeHtml(settings)}" style="color:#A85A23">Notification settings</a>`,
+  });
   return { text, html };
 }
 
-async function sendEmail(message) {
+// The password reset email. It carries a live credential, so it is built
+// and sent directly rather than stored in the outbox or the in-app inbox.
+export function passwordResetEmail({ name, link, minutes }) {
+  const greeting = name ? `Hi ${name.split(' ')[0]},` : 'Hi,';
+  const body = `${greeting}\n\nSomeone asked to reset the password for your Twendezetu account. If it was you, choose a new password with the link below. It works once, for the next ${minutes} minutes.\n\nIf you did not ask for this, ignore this email: your password stays as it is and nobody can use this link without access to your inbox.`;
+  const subject = 'Reset your Twendezetu password';
+  const text = `${body}\n\nChoose a new password: ${link}\n\n— Twendezetu`;
+  const html = frame({
+    title: subject,
+    inner: paragraphs(body),
+    button: { href: link, label: 'Choose a new password →' },
+    footer: `If the button does not work, paste this address into your browser:<br><span style="word-break:break-all">${escapeHtml(link)}</span>`,
+  });
+  return { subject, text, html };
+}
+
+export function emailConfigured() {
+  return Boolean(config().email.resendApiKey);
+}
+
+// Sends one email now through Resend. Throws on a refused or failed send.
+export async function sendEmailNow({ to, subject, text, html, idempotencyKey }) {
   const { resendApiKey, from } = config().email;
-  if (!resendApiKey) {
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      authorization: `Bearer ${resendApiKey}`,
+      'content-type': 'application/json',
+      ...(idempotencyKey ? { 'idempotency-key': idempotencyKey } : {}),
+    },
+    body: JSON.stringify({ from, to: [to], subject, text, html }),
+    signal: AbortSignal.timeout(10_000),
+  });
+  if (!response.ok) throw new Error(`Resend responded ${response.status}: ${(await response.text()).slice(0, 200)}`);
+}
+
+async function sendEmail(message) {
+  if (!emailConfigured()) {
     if (!config().production) log.info('email (not sent: RESEND_API_KEY unset)', { to: message.to, subject: message.subject, body: message.body });
     return { skipped: true, reason: 'email_not_configured' };
   }
   const { text, html } = emailBodies(message);
-  const response = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { authorization: `Bearer ${resendApiKey}`, 'content-type': 'application/json', 'idempotency-key': message.id },
-    body: JSON.stringify({ from, to: [message.to], subject: message.subject, text, html }),
-    signal: AbortSignal.timeout(10_000),
-  });
-  if (!response.ok) throw new Error(`Resend responded ${response.status}: ${(await response.text()).slice(0, 200)}`);
+  await sendEmailNow({ to: message.to, subject: message.subject, text, html, idempotencyKey: message.id });
   return { skipped: false };
 }
 

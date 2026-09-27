@@ -46,7 +46,11 @@ const nextConfig = {
   experimental: { serverActions: { bodySizeLimit: '5mb' } },
 
   async headers() {
-    return [{ source: '/:path*', headers: securityHeaders }];
+    return [
+      { source: '/:path*', headers: securityHeaders },
+      // Reset links carry their token in the address; never pass it on.
+      { source: '/sign-in', headers: [{ key: 'Referrer-Policy', value: 'no-referrer' }] },
+    ];
   },
 
   async redirects() {

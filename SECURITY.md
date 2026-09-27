@@ -21,6 +21,15 @@ maintainers a chance to fix it before telling anyone else.
   their SHA-256, so a copy of it holds no usable session. Signing out,
   changing a password or being suspended ends sessions at once. Members can
   see and end their sessions under Settings → Security.
+- **Password reset** links are single use, expire after 30 minutes and
+  exist only in the email: the database keeps their SHA-256, and no copy
+  goes to the notification inbox or outbox. The request form answers the
+  same way, just as fast, for every address; the lookup and the email run
+  after the reply. A new link cancels older ones, a second request within a
+  minute sends nothing, and the reset page drops the token from the
+  address bar and sends no referrer. Resetting signs out every device and
+  tells the member; with two-step verification on, the next sign-in still
+  asks for the texted code.
 - **Two-step verification** sends a code by text message at sign-in. Money
   moves (sending points, cashing out, withdrawing earnings, covering a
   split) ask for a fresh code when it is on.
