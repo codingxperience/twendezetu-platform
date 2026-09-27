@@ -32,6 +32,14 @@ export async function checkinEvents(user) {
   return events;
 }
 
+// What was scanned, for a code we could not match: a pasted link or forged
+// QR can be long, so only its start is shown.
+function shortInput(input = '') {
+  const text = input.trim().toUpperCase();
+  if (!text) return '—';
+  return text.length > 18 ? `${text.slice(0, 17)}…` : text;
+}
+
 // Times are shown in the event's own time zone: the people reading them are
 // at the gate.
 export async function checkinStats(eventId, timeZone = 'UTC') {
@@ -52,8 +60,8 @@ export async function checkinStats(eventId, timeZone = 'UTC') {
     blocked,
     log: log.map((scan) => ({
       icon: scan.result === 'ADMITTED' ? '✓' : scan.result === 'DUPLICATE' ? '⛔' : '⚠',
-      code: scan.ticket?.code || '—',
-      name: scan.ticket?.holderName || 'Unknown QR',
+      code: scan.ticket?.code || shortInput(scan.input),
+      name: scan.ticket?.holderName || 'Unknown code',
       note: scan.result === 'ADMITTED' ? 'Valid ticket' : scan.result === 'DUPLICATE' ? 'Second scan blocked' : 'Not valid for this event',
       status: scan.result,
       time: messageStamp(scan.createdAt, timeZone),

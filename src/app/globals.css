@@ -605,3 +605,12 @@ a { color: inherit; }
 
 .tw-dialog-actions button[type="submit"] { background: #1F3A38; color: #F7F1E6; box-shadow: 3px 3px 0 #D97A3B; }
 .tw-dialog-actions button.tw-danger { background: #B8463A; border-color: #B8463A; }
+
+/* Door check-in: the scan line sweeping the viewfinder. */
+@keyframes tw-scan {
+  0%, 100% { top: 18%; }
+  50% { top: 80%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .claude-design [data-scan-line] { animation: none !important; top: 50% !important; }
+}
