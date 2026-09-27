@@ -1,7 +1,7 @@
 {
   "name": "twendezetu-platform",
   "version": "1.0.0",
-  "description": "Twendezetu — events, needs, providers and community money for East Africa and the diaspora. Next.js + Prisma + Supabase Postgres.",
+  "description": "Twendezetu \u2014 events, needs, providers and community money for East Africa and the diaspora. Next.js + Prisma + Supabase Postgres.",
   "private": true,
   "type": "module",
   "engines": {
@@ -13,6 +13,8 @@
     "build:with-migrate": "npm run db:deploy && npm run build",
     "start": "next start",
     "lint": "next lint",
+    "test": "node --test 'tests/unit/*.test.mjs'",
+    "test:integration": "node --test --test-concurrency=1 'tests/integration/*.test.mjs'",
     "db:deploy": "node scripts/prisma-migrate-deploy.mjs",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
