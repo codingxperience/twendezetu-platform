@@ -7,3 +7,6 @@ dev.db-journal
 out
 *.log
 .DS_Store
+exports
+prisma/dev.db*
+coverage
