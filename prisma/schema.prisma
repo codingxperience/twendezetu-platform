@@ -518,6 +518,8 @@ model Order {
   feeMinor      Int
   totalMinor    Int
   pointsSpent   Int?
+  // Running total of partial refunds; a full refund returns what is left.
+  refundedMinor Int            @default(0)
   channel       PaymentChannel
   status        OrderStatus    @default(PENDING)
   promoCodeId   String?

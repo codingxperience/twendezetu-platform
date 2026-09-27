@@ -2,11 +2,12 @@ import { route, withStatus } from '@/server/http';
 import { invalid, notFound } from '@/server/errors';
 import { prisma } from '@/server/db';
 import { schemas } from '@/server/schemas';
-import { respondToDispute, withdrawDispute } from '@/server/services/disputes';
+import { addDisputeNote, respondToDispute, withdrawDispute } from '@/server/services/disputes';
 import { parseMoneyInput } from '@/shared/money';
 
-export const POST = route({ auth: 'required', body: schemas.disputeAction, idempotent: true }, async ({ body, viewer, params }) => {
+export const POST = route({ auth: 'required', body: schemas.disputeAction, idempotent: true, limit: [{ policy: 'dispute.write', by: 'user' }] }, async ({ body, viewer, params }) => {
   if (body.action === 'withdraw') return withStatus(200, await withdrawDispute(viewer, params.id));
+  if (body.action === 'note') return withStatus(200, await addDisputeNote(viewer, params.id, { note: body.note, fileIds: body.fileIds }));
   const dispute = await prisma.dispute.findUnique({ where: { id: params.id }, select: { currency: true } });
   if (!dispute) throw notFound();
   const refundMinor = body.action === 'partial' ? parseMoneyInput(body.amount, dispute.currency) : undefined;

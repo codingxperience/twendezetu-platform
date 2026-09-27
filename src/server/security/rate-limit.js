@@ -27,6 +27,7 @@ export const POLICIES = Object.freeze({
   'member.write': { limit: 60, periodSeconds: 60 },
   'messages.send': { limit: 30, periodSeconds: 60 },
   'post.create': { limit: 10, periodSeconds: 60 * 60 },
+  'dispute.write': { limit: 20, periodSeconds: 60 * 60 },
   'money.move': { limit: 12, periodSeconds: 60 },
   'upload': { limit: 20, periodSeconds: 10 * 60 },
   'report': { limit: 10, periodSeconds: 60 * 60 },

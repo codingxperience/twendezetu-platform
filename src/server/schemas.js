@@ -194,7 +194,7 @@ export const schemas = {
     detail: text(2000, 10),
     evidenceFileIds: z.array(id).max(10).optional(),
   }),
-  disputeAction: z.object({ action: z.enum(['refund', 'partial', 'contest', 'withdraw']), amount: optionalText(40), note: optionalText(1000) }),
+  disputeAction: z.object({ action: z.enum(['refund', 'partial', 'contest', 'withdraw', 'note']), amount: optionalText(40), note: optionalText(1000), fileIds: z.array(id).max(10).optional() }),
 
   adminReport: z.object({ action: z.enum(['dismiss', 'warn', 'suspend']) }),
   adminUser: z.object({ action: z.enum(['suspend', 'reinstate']), reason: optionalText(200) }),

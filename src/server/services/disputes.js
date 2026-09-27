@@ -24,19 +24,23 @@ export const REASONS = Object.freeze({
 
 const LIVE = ['OPEN', 'ESCALATED'];
 
+// A purchase gets one case. Withdrawing lets you open it again; a decided
+// case is final.
+const ARGUED = { status: { not: 'WITHDRAWN' } };
+
 // Purchases this person can open a case on: paid ticket orders and funded
-// bookings from the last 60 days.
+// bookings from the last 60 days that have not been argued already.
 export async function eligiblePurchases(userId) {
   const since = new Date(Date.now() - 60 * 86_400_000);
   const [orders, bookings] = await Promise.all([
     prisma.order.findMany({
-      where: { buyerId: userId, status: 'PAID', paidAt: { gte: since } },
+      where: { buyerId: userId, status: 'PAID', paidAt: { gte: since }, disputes: { none: ARGUED } },
       include: { event: { select: { title: true } }, _count: { select: { tickets: true } } },
       orderBy: { paidAt: 'desc' },
       take: 10,
     }),
     prisma.booking.findMany({
-      where: { customerId: userId, status: { in: ['ESCROWED', 'DISPUTED', 'RELEASED'] }, escrowedAt: { gte: since } },
+      where: { customerId: userId, status: { in: ['ESCROWED', 'RELEASED'] }, escrowedAt: { gte: since }, disputes: { none: ARGUED } },
       include: { provider: { select: { name: true } } },
       orderBy: { escrowedAt: 'desc' },
       take: 10,
@@ -46,13 +50,15 @@ export async function eligiblePurchases(userId) {
     ...orders.map((order) => ({
       kind: 'order',
       id: order.id,
+      reference: order.reference,
       title: `${order.event.title} — ${order._count.tickets} ticket${order._count.tickets === 1 ? '' : 's'}`,
-      meta: `ORDER ${order.reference} · PAID ${shortDate(order.paidAt)} · ${order.channel === 'POINTS' ? 'POINTS' : 'CARD'}`,
-      amount: formatMoney(order.totalMinor, order.currency),
+      meta: `ORDER ${order.reference} · PAID ${shortDate(order.paidAt)} · ${order.channel === 'POINTS' ? 'POINTS' : 'CARD'}${order.refundedMinor ? ` · ${formatMoney(order.refundedMinor, order.currency)} ALREADY REFUNDED` : ''}`,
+      amount: formatMoney(order.totalMinor - order.refundedMinor, order.currency),
     })),
     ...bookings.map((booking) => ({
       kind: 'booking',
       id: booking.id,
+      reference: booking.reference,
       title: `${booking.provider.name} — ${booking.title}`,
       meta: `BOOKING ${booking.reference} · ${booking.status === 'RELEASED' ? 'PAID OUT' : 'ESCROW HELD'}`,
       amount: formatMoney(booking.amountMinor, booking.currency),
@@ -70,7 +76,7 @@ export async function openDispute(user, { orderId, bookingId, reason, detail, ev
     const order = await prisma.order.findUnique({ where: { id: orderId }, include: { event: { select: { title: true, status: true, organizer: { select: { ownerId: true } } } } } });
     if (!order || order.buyerId !== user.id) throw notFound();
     if (order.status !== 'PAID') throw badRequest('Only paid orders can be disputed.');
-    subject = { orderId: order.id, amountMinor: order.totalMinor, currency: order.currency, respondentId: order.event.organizer.ownerId, title: order.event.title, cancelled: order.event.status === 'CANCELLED' };
+    subject = { orderId: order.id, amountMinor: order.totalMinor - order.refundedMinor, currency: order.currency, respondentId: order.event.organizer.ownerId, title: order.event.title, cancelled: order.event.status === 'CANCELLED' };
   } else if (bookingId) {
     const booking = await prisma.booking.findUnique({ where: { id: bookingId }, include: { provider: { select: { ownerId: true, name: true } } } });
     if (!booking || booking.customerId !== user.id) throw notFound();
@@ -79,6 +85,8 @@ export async function openDispute(user, { orderId, bookingId, reason, detail, ev
   } else {
     throw invalid('Choose the purchase this is about.');
   }
+  const earlier = await prisma.dispute.findFirst({ where: { ...(subject.orderId ? { orderId: subject.orderId } : { bookingId: subject.bookingId }), ...ARGUED }, select: { status: true } });
+  if (earlier) throw conflict(LIVE.includes(earlier.status) ? 'There is already an open case for this purchase.' : 'A case on this purchase was already decided.', 'dispute_exists');
 
   if (evidenceFileIds.length) {
     const files = await prisma.fileObject.findMany({ where: { id: { in: evidenceFileIds }, ownerId: user.id, purpose: 'DISPUTE_EVIDENCE' }, select: { id: true } });
@@ -232,7 +240,7 @@ export async function resolveDispute(actor, disputeId, { outcome, refundMinor, n
 
   await transaction(async (tx) => {
     await tx.disputeEvent.create({
-      data: { disputeId: dispute.id, actorId: actor?.id || null, kind: 'resolved', note: `${byRespondent ? 'Settled by the other party' : 'Decision'}: ${amount ? `${formatMoney(amount, dispute.currency)} refunded` : 'no refund'}${note ? ` — ${note}` : ''}` },
+      data: { disputeId: dispute.id, actorId: actor?.id || null, kind: 'resolved', note: `${byRespondent ? 'Settled between the two sides' : actor ? 'Resolution team decision' : 'Closed automatically'}: ${amount ? `${formatMoney(amount, dispute.currency)} refunded` : 'no refund'}${note ? ` — ${note}` : ''}` },
     });
     for (const userId of [dispute.openedById, dispute.respondentId].filter(Boolean)) {
       await notify(tx, {
@@ -277,23 +285,93 @@ export async function escalateOverdueDisputes() {
   return overdue.length;
 }
 
+// Either side can add context or evidence while the case is live. Notes go
+// on the timeline both parties (and the resolution team) read.
+export async function addDisputeNote(user, disputeId, { note, fileIds = [] }) {
+  const dispute = await liveDispute(disputeId);
+  if (![dispute.openedById, dispute.respondentId].includes(user.id)) throw notFound();
+  const text = String(note || '').trim();
+  if (!text && !fileIds.length) throw invalid('Write a note or attach a file.');
+  if (fileIds.length) {
+    const files = await prisma.fileObject.findMany({ where: { id: { in: fileIds }, ownerId: user.id, purpose: 'DISPUTE_EVIDENCE' }, select: { id: true } });
+    if (files.length !== fileIds.length) throw forbidden('One of the attachments is not available.');
+  }
+  const opener = dispute.openedById === user.id;
+  await transaction(async (tx) => {
+    for (const fileId of fileIds) await tx.disputeEvidence.create({ data: { disputeId: dispute.id, fileId, uploadedBy: user.id } });
+    const attached = fileIds.length ? `${fileIds.length} file${fileIds.length === 1 ? '' : 's'} attached` : '';
+    await tx.disputeEvent.create({
+      data: { disputeId: dispute.id, actorId: user.id, kind: opener ? 'note.opener' : 'note.respondent', note: [text.slice(0, 1000), attached].filter(Boolean).join(' · ') },
+    });
+    const other = opener ? dispute.respondentId : dispute.openedById;
+    if (other) {
+      await notify(tx, { userId: other, topic: 'MONEY', title: `New note on case ${dispute.reference}`, body: text.slice(0, 160) || 'New evidence was attached.', href: `/disputes?case=${dispute.reference}` });
+    }
+  });
+  return { added: true };
+}
+
+const STATUS_LABELS = {
+  OPEN: 'Waiting on the other party',
+  ESCALATED: 'With the resolution team',
+  RESOLVED_REFUNDED: 'Refunded in full',
+  RESOLVED_PARTIAL: 'Partly refunded',
+  RESOLVED_DENIED: 'Closed without a refund',
+  WITHDRAWN: 'Withdrawn',
+};
+
+function subjectTitle(dispute) {
+  if (dispute.order) return `${dispute.order.event.title} · order ${dispute.order.reference}`;
+  if (dispute.booking) return `${dispute.booking.provider.name} — ${dispute.booking.title}`;
+  return 'Purchase';
+}
+
+// Cases this person opened or has to answer, newest first. Notes are labelled
+// by side, never by name: the parties already know who they are dealing with.
 export async function disputesForUser(userId) {
   const disputes = await prisma.dispute.findMany({
     where: { OR: [{ openedById: userId }, { respondentId: userId }] },
-    include: { timeline: { orderBy: { createdAt: 'asc' } } },
+    include: {
+      timeline: { orderBy: { createdAt: 'asc' } },
+      evidence: { orderBy: { createdAt: 'asc' }, include: { file: { select: { id: true, name: true, mime: true } } } },
+      order: { select: { reference: true, event: { select: { title: true } } } },
+      booking: { select: { reference: true, title: true, provider: { select: { name: true } } } },
+    },
     orderBy: { createdAt: 'desc' },
-    take: 10,
+    take: 20,
   });
-  return disputes.map((dispute) => ({
-    id: dispute.id,
-    reference: dispute.reference,
-    status: dispute.status,
-    mine: dispute.openedById === userId,
-    reason: REASONS[dispute.reason][0],
-    amount: formatMoney(dispute.amountMinor, dispute.currency),
-    amountMinor: dispute.amountMinor,
-    respondBy: dispute.respondBy,
-    respondIn: dispute.status === 'OPEN' ? `${Math.max(0, Math.ceil((dispute.respondBy.getTime() - Date.now()) / 3_600_000))}H LEFT` : null,
-    timeline: dispute.timeline.map((event) => ({ kind: event.kind, note: event.note, when: relativeTime(event.createdAt) })),
-  }));
+  return disputes.map((dispute) => {
+    const mine = dispute.openedById === userId;
+    const live = LIVE.includes(dispute.status);
+    return {
+      id: dispute.id,
+      reference: dispute.reference,
+      status: dispute.status,
+      statusLabel: STATUS_LABELS[dispute.status],
+      live,
+      mine,
+      subject: subjectTitle(dispute),
+      orderReference: dispute.order?.reference || null,
+      bookingId: dispute.bookingId,
+      reason: REASONS[dispute.reason][0],
+      detail: dispute.detail,
+      amount: formatMoney(dispute.amountMinor, dispute.currency),
+      amountMinor: dispute.amountMinor,
+      currency: dispute.currency,
+      refunded: dispute.refundMinor ? formatMoney(dispute.refundMinor, dispute.currency) : null,
+      resolution: dispute.resolution,
+      opened: relativeTime(dispute.createdAt),
+      respondIn: dispute.status === 'OPEN' ? Math.max(0, Math.ceil((dispute.respondBy.getTime() - Date.now()) / 3_600_000)) : null,
+      canRespond: !mine && dispute.status === 'OPEN',
+      canWithdraw: mine && live,
+      canNote: live,
+      evidence: dispute.evidence.map((item) => ({
+        name: item.file.name,
+        href: `/api/files/${item.file.id}`,
+        image: item.file.mime.startsWith('image/'),
+        side: item.uploadedBy === dispute.openedById ? 'opener' : 'respondent',
+      })),
+      timeline: dispute.timeline.map((event) => ({ kind: event.kind, note: event.note, when: relativeTime(event.createdAt) })),
+    };
+  });
 }

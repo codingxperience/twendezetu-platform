@@ -4,4 +4,4 @@ import { disputesForUser, eligiblePurchases, openDispute } from '@/server/servic
 
 export const GET = route({ auth: 'required' }, async ({ viewer }) => ({ purchases: await eligiblePurchases(viewer.id), cases: await disputesForUser(viewer.id) }));
 
-export const POST = route({ auth: 'required', body: schemas.openDispute, idempotent: true }, async ({ body, viewer }) => ({ dispute: await openDispute(viewer, body) }));
+export const POST = route({ auth: 'required', body: schemas.openDispute, idempotent: true, limit: [{ policy: 'dispute.write', by: 'user' }] }, async ({ body, viewer }) => ({ dispute: await openDispute(viewer, body) }));

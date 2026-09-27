@@ -16,6 +16,7 @@ import { providerVerificationView } from './providerVerification.js';
 import { providerWalletView } from './providerWallet.js';
 import { settingsView } from './settings.js';
 import { checkinView } from './checkin.js';
+import { disputesView } from './disputes.js';
 
 export const VIEWS = {
   home: homeView,
@@ -32,4 +33,5 @@ export const VIEWS = {
   providerWallet: providerWalletView,
   settings: settingsView,
   checkin: checkinView,
+  disputes: disputesView,
 };

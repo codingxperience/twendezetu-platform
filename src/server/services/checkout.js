@@ -425,6 +425,12 @@ export async function expireStaleOrders() {
 // released. Points go straight back to the wallet; card payments are
 // refunded at the processor first, so the ledger never claims a refund that
 // did not happen.
+//
+// Partial refunds add up on the order, and a "full" refund returns only what
+// is left, so a case settled for part of the money followed by a cancellation
+// never pays out twice. Fee and points shares are worked out on the running
+// total, so the rounding of several partial refunds still ends exactly at the
+// amounts paid.
 export async function refundOrder(orderId, { actorId, reason, amountMinor, refundKey }) {
   const order = await prisma.order.findUnique({
     where: { id: orderId },
@@ -436,12 +442,17 @@ export async function refundOrder(orderId, { actorId, reason, amountMinor, refun
     throw conflict('The buyer account no longer exists, so points cannot be returned automatically.', 'refund_manual');
   }
 
-  const full = amountMinor == null || amountMinor >= order.totalMinor;
-  const refund = full ? order.totalMinor : amountMinor;
+  const remaining = order.totalMinor - order.refundedMinor;
+  if (remaining <= 0) throw conflict('This order has already been refunded in full.', 'not_refundable');
+  const full = amountMinor == null || amountMinor >= remaining;
+  const refund = full ? remaining : amountMinor;
   if (refund <= 0) throw badRequest('Refund amount must be positive.');
-  const feePart = full ? order.feeMinor : Math.round((order.feeMinor * refund) / order.totalMinor);
+  const before = order.refundedMinor;
+  const after = before + refund;
+  const share = (whole, round = Math.round) => round((whole * after) / order.totalMinor) - round((whole * before) / order.totalMinor);
+  const feePart = share(order.feeMinor);
   const netPart = refund - feePart;
-  const key = refundKey || `order:${order.id}:${full ? 'full' : refund}`;
+  const key = refundKey || `order:${order.id}:${full ? 'full' : `${before}+${refund}`}`;
 
   if (order.channel === 'CARD') {
     const payment = await prisma.payment.findFirst({ where: { subjectId: order.id, status: 'SUCCEEDED' } });
@@ -453,7 +464,15 @@ export async function refundOrder(orderId, { actorId, reason, amountMinor, refun
     : accounts.eventEscrow(order.eventId, order.currency);
 
   await transaction(async (tx) => {
-    const points = order.channel === 'POINTS' ? (full ? order.pointsSpent : Math.floor((order.pointsSpent * refund) / order.totalMinor)) : 0;
+    // Two refunds racing on one order: only the one that saw the current
+    // total gets to record it.
+    const claimed = await tx.order.updateMany({
+      where: { id: order.id, status: 'PAID', refundedMinor: before },
+      data: { refundedMinor: after, ...(full ? { status: 'REFUNDED', refundedAt: new Date() } : {}) },
+    });
+    if (!claimed.count) throw conflict('Another refund on this order just went through. Refresh and try again.', 'refund_race');
+
+    const points = order.channel === 'POINTS' ? share(order.pointsSpent, Math.floor) : 0;
     const destination = order.channel === 'POINTS'
       ? [
           { account: accounts.fx(order.currency), amount: refund },
@@ -477,12 +496,11 @@ export async function refundOrder(orderId, { actorId, reason, amountMinor, refun
     });
 
     if (full) {
-      await tx.order.update({ where: { id: order.id }, data: { status: 'REFUNDED', refundedAt: new Date() } });
       await tx.ticket.updateMany({ where: { orderId: order.id, status: 'VALID' }, data: { status: 'VOID', voidedAt: new Date() } });
       await tx.payment.updateMany({ where: { subjectId: order.id, status: 'SUCCEEDED' }, data: { status: 'REFUNDED' } });
       if (order.event.status !== 'CANCELLED') await releaseSeats(tx, order.id);
     }
-    await audit(tx, { actorId, action: 'order.refunded', targetType: 'Order', targetId: order.id, meta: { refund, reason } });
+    await audit(tx, { actorId, action: 'order.refunded', targetType: 'Order', targetId: order.id, meta: { refund, reason, refundedTotal: after } });
 
     const body = `${formatMoney(refund, order.currency)} for ${order.event.title} (order ${order.reference}) is on its way back${order.channel === 'POINTS' ? ' to your Twende points — it is there now.' : ' to your card. Banks take 3–5 days to show it.'}`;
     if (order.buyerId) await notify(tx, { userId: order.buyerId, topic: 'MONEY', title: 'Refund issued', body, href: '/my-twende?tab=upcoming', urgent: true });
