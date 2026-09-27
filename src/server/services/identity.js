@@ -318,7 +318,7 @@ export async function resetPassword({ token, newPassword, ipAddress }) {
 
 // ── Profile ───────────────────────────────────────────────────────────────
 
-export async function updateProfile(user, { name, city, country, locale, currency, businessName }) {
+export async function updateProfile(user, { name, city, country, locale, currency, businessName, avatarUrl }) {
   if (country && !COUNTRIES[country]) throw invalid('Choose a supported country.');
   return transaction(async (tx) => {
     const updated = await tx.user.update({
@@ -329,8 +329,9 @@ export async function updateProfile(user, { name, city, country, locale, currenc
         ...(country ? { country } : {}),
         ...(locale ? { locale } : {}),
         ...(currency ? { currency } : {}),
+        ...(avatarUrl !== undefined ? { avatarUrl: avatarUrl || null } : {}),
       },
-      select: { id: true, name: true, city: true, country: true, locale: true, currency: true },
+      select: { id: true, name: true, city: true, country: true, locale: true, currency: true, avatarUrl: true },
     });
     if (businessName && user.provider) {
       await tx.provider.update({ where: { id: user.provider.id }, data: { name: businessName.trim() } });

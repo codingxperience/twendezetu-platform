@@ -44,6 +44,8 @@ export const schemas = {
 
   profile: z.object({
     name: text(80, 2).optional(),
+    // An uploaded photo, or '' to remove it.
+    avatarUrl: imageUrl.optional().or(z.literal('')),
     city: optionalText(80),
     country: country.optional(),
     locale: z.enum(['EN', 'SW']).optional(),
