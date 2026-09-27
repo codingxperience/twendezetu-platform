@@ -11,6 +11,8 @@ import { notify } from '../notify/index.js';
 import { COUNTRIES, PROVIDER_CATEGORIES, providerCategoryFromLabel, relativeTime } from '../../shared/format.js';
 import { saveListing } from './providers.js';
 import { maskPhone } from './identity.js';
+import { deleteFiles } from '../storage.js';
+import { log } from '../log.js';
 
 const PAYOUT_LABELS = { MTN_MOMO: 'MTN MoMo', MPESA: 'M-Pesa', BANK: 'Bank account', AIRTEL_MONEY: 'Airtel Money' };
 
@@ -42,7 +44,8 @@ export async function verificationState(user) {
   const { provider, application } = await applicationFor(user);
   const account = await prisma.user.findUnique({ where: { id: user.id }, select: { phone: true, phoneVerifiedAt: true, country: true } });
   const app = application;
-  const done = completeness(app, account);
+  // After approval the documents are gone by design; the sections stay done.
+  const done = app?.status === 'APPROVED' ? { business: true, identity: true, proof: true, phone: true, payout: true } : completeness(app, account);
   return {
     hasProvider: Boolean(provider),
     status: app?.status || 'DRAFT',
@@ -84,6 +87,9 @@ export async function saveSection(user, section, input) {
     const account = await prisma.user.findUnique({ where: { id: user.id }, select: { country: true } });
     const country = input.country || account.country || 'UG';
     if (!COUNTRIES[country]) throw invalid('Choose a supported country.');
+    // The application's description seeds a brand-new listing; an existing
+    // listing keeps the headline and description its owner wrote for customers.
+    const listed = await prisma.provider.findUnique({ where: { ownerId: user.id }, select: { id: true } });
     const listing = await saveListing(user, {
       name: input.bizName,
       category,
@@ -91,8 +97,7 @@ export async function saveSection(user, section, input) {
       country,
       serviceAreas: cities.slice(1),
       yearsActive: input.bizYears ? Number.parseInt(input.bizYears, 10) || null : null,
-      headline: String(input.bizDesc || '').split(/(?<=[.!?])\s/)[0]?.slice(0, 140),
-      description: input.bizDesc,
+      ...(listed ? {} : { headline: String(input.bizDesc || '').split(/(?<=[.!?])\s/)[0]?.slice(0, 140), description: input.bizDesc }),
     });
     await prisma.verificationApplication.upsert({
       where: { providerId: listing.id },
@@ -236,6 +241,19 @@ export async function reviewApplication(reviewer, applicationId, { decision, not
       href: status === 'APPROVED' ? `/providers/${app.provider.slug}` : '/provider-verification',
     });
     await audit(tx, { actorId: reviewer.id, action: `verification.${decision}`, targetType: 'Provider', targetId: app.providerId, meta: { note } });
+    // Once there is a final decision, the identity documents have done their
+    // job: the ID number and every uploaded document are discarded. A
+    // request for more information keeps them, since the review continues.
+    if (status !== 'NEEDS_INFO') {
+      await tx.verificationApplication.update({ where: { id: app.id }, data: { idNumberEnc: null, idFileId: null, proofFileId: null, portfolioFileIds: { set: [] } } });
+    }
   });
+  if (status !== 'NEEDS_INFO') {
+    await deleteFiles([app.idFileId, app.proofFileId, ...app.portfolioFileIds]).catch((error) => {
+      // The records are already detached from the application; a failed
+      // storage delete is logged for a retry rather than undoing the decision.
+      log.error('verification documents not deleted', { applicationId: app.id, error });
+    });
+  }
   return { status };
 }

@@ -27,7 +27,7 @@ const template = `
       </sc-for>
     </aside>
 
-    <main style="padding: 36px 32px 80px; min-width: 0;">
+    <section style="padding: 36px 32px 80px; min-width: 0;">
 
       <!-- PROFILE -->
       <sc-if value="{{ isProfile }}" hint-placeholder-val="{{ true }}">
@@ -164,7 +164,7 @@ const template = `
           </div>
         </div>
       </sc-if>
-    </main>
+    </section>
   </div>
 
 </div>

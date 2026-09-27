@@ -137,6 +137,23 @@ export async function readFileBytes(file) {
   return Buffer.from(await response.arrayBuffer());
 }
 
+// Removes files for good: the stored bytes first, then the records. Used to
+// discard identity documents once a verification decision is made.
+export async function deleteFiles(fileIds) {
+  const ids = [...new Set(fileIds.filter(Boolean))];
+  if (!ids.length) return 0;
+  const files = await prisma.fileObject.findMany({ where: { id: { in: ids } }, select: { id: true, driver: true, bucket: true, key: true } });
+  const byBucket = new Map();
+  for (const file of files.filter((item) => item.driver === 'SUPABASE')) {
+    byBucket.set(file.bucket, [...(byBucket.get(file.bucket) || []), file.key]);
+  }
+  for (const [bucket, keys] of byBucket) {
+    await supabaseRequest('DELETE', `object/${bucket}`, { headers: { 'content-type': 'application/json' }, body: JSON.stringify({ prefixes: keys }) });
+  }
+  const { count } = await prisma.fileObject.deleteMany({ where: { id: { in: files.map((file) => file.id) } } });
+  return count;
+}
+
 export function publicUrl(fileId) {
   return `/api/files/${fileId}`;
 }

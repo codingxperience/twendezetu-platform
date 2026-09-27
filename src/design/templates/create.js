@@ -33,7 +33,7 @@ const template = `
     </aside>
 
     <!-- Step content -->
-    <main>
+    <section>
       <!-- STEP 1: kind -->
       <sc-if value="{{ isStep1 }}">
         <div>
@@ -282,7 +282,7 @@ const template = `
           </div>
         </div>
       </sc-if>
-    </main>
+    </section>
   </div>
 </div>
 `;

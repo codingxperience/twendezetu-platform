@@ -13,7 +13,7 @@ const template = `
 
   <div class="tw-2col" style="max-width: 1140px; margin: 0 auto; padding: 32px 24px 80px; display: grid; grid-template-columns: 1.4fr 0.85fr; gap: 44px; align-items: start;">
 
-    <main>
+    <section>
       <div style="font-family: var(--tz-mono); font-size: 12px; color: #A85A23; letter-spacing: 0.08em;">[Lipa pamoja — one group, split the bill]</div>
       <h1 style="font-family: var(--tz-display); font-size: clamp(30px, 4.5vw, 52px); text-transform: uppercase; line-height: 0.95; margin: 8px 0 6px;">Afrogroove Night — 5 tickets<span style="color: #D97A3B;">.</span></h1>
       <p style="font-size: 14px; color: #6E6155; line-height: 1.55; max-width: 560px; margin: 0 0 22px;">You reserved 5 early-bird tickets. Everyone pays their own share by link — each person gets their own QR the moment they pay. Seats are <strong>held for 48 hours</strong>; unpaid shares release back automatically.</p>
@@ -54,7 +54,7 @@ const template = `
         <button onClick="{{ payMine }}" style="font-family: var(--tz-mono); font-size: 12px; border: 2px solid #1F3A38; background: #D97A3B; color: #14201F; padding: 12px 18px; cursor: pointer;">PAY MY SHARE NOW</button>
         <button onClick="{{ coverAll }}" style="font-family: var(--tz-mono); font-size: 12px; border: 2px solid #1F3A38; background: #F7F1E6; padding: 12px 18px; cursor: pointer;">COVER THE REMAINING {{ remaining }}</button>
       </div>
-    </main>
+    </section>
 
     <aside class="tw-sticky" style="position: sticky; top: 100px; display: grid; gap: 16px;">
       <div style="border: 2px solid #1F3A38; background: #FFFDF8; box-shadow: 6px 6px 0 #1F3A38; padding: 20px 22px;">

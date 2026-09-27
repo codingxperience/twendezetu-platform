@@ -12,6 +12,7 @@ import { createView } from './create.js';
 import { providerView } from './provider.js';
 import { providersView } from './providers.js';
 import { providerDashboardView } from './providerDashboard.js';
+import { providerVerificationView } from './providerVerification.js';
 
 export const VIEWS = {
   home: homeView,
@@ -24,4 +25,5 @@ export const VIEWS = {
   provider: providerView,
   providers: providersView,
   providerDashboard: providerDashboardView,
+  providerVerification: providerVerificationView,
 };

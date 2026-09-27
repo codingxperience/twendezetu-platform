@@ -13,7 +13,7 @@ const template = `
 
   <div class="tw-2col" style="max-width: 1160px; margin: 0 auto; padding: 40px 24px 80px; display: grid; grid-template-columns: 1.3fr 0.8fr; gap: 44px; align-items: start;">
 
-    <main>
+    <section>
       <!-- New request -->
       <sc-if value="{{ notSubmitted }}" hint-placeholder-val="{{ true }}">
         <div>
@@ -89,7 +89,7 @@ const template = `
           </div>
         </div>
       </sc-if>
-    </main>
+    </section>
 
     <!-- Right rail -->
     <aside class="tw-sticky" style="position: sticky; top: 100px; display: grid; gap: 16px;">

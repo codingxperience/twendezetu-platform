@@ -45,7 +45,7 @@ const template = `
     </aside>
 
     <!-- Main -->
-    <main style="padding: 32px 28px 80px; min-width: 0;">
+    <section style="padding: 32px 28px 80px; min-width: 0;">
 
       <!-- OVERVIEW -->
       <sc-if value="{{ isOverview }}" hint-placeholder-val="{{ true }}">
@@ -244,7 +244,7 @@ const template = `
           </div>
         </div>
       </sc-if>
-    </main>
+    </section>
   </div>
 
 </div>

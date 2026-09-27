@@ -35,9 +35,12 @@ export function normalizePhone(raw, country) {
   return `+${digits}`;
 }
 
+// "+256 ••• ••• 214", "+1 ••• ••• 112": the country code and the last three
+// digits, enough to recognise your own number and no more.
 export function maskPhone(phone) {
   if (!phone) return null;
-  return `${phone.slice(0, 4)} ••• ••• ${phone.slice(-3)}`;
+  const code = /^\+(1|2[0-9]{2})/.exec(phone)?.[0] || phone.slice(0, 4);
+  return `${code} ••• ••• ${phone.slice(-3)}`;
 }
 
 async function uniqueHandle(db, name, email) {
