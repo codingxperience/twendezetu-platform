@@ -3,7 +3,7 @@ import { invalid, notFound } from '@/server/errors';
 import { prisma } from '@/server/db';
 import { schemas } from '@/server/schemas';
 import { resolveDispute } from '@/server/services/disputes';
-import { parseMoneyInput } from '@/server/money';
+import { parseMoneyInput } from '@/shared/money';
 
 export const POST = route({ auth: 'required', roles: ['ADMIN', 'MODERATOR'], body: schemas.adminDispute, idempotent: true }, async ({ body, viewer, params }) => {
   const dispute = await prisma.dispute.findUnique({ where: { id: params.id }, select: { currency: true } });

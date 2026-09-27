@@ -11,8 +11,8 @@ import { badRequest, forbidden, notFound } from '../errors.js';
 import { maskContacts, offPlatformPaymentSignal } from '../security/masking.js';
 import { notify } from '../notify/index.js';
 import { getSettings } from '../settings.js';
-import { formatMoney } from '../money.js';
-import { initials, messageStamp, ratingLabel, shortName, threadStamp } from '../format.js';
+import { formatMoney } from '../../shared/money.js';
+import { initials, messageStamp, ratingLabel, shortName, threadStamp } from '../../shared/format.js';
 import { reference } from '../security/crypto.js';
 import { maskPhone } from './identity.js';
 
@@ -247,4 +247,23 @@ export async function threadDetail(user, threadId) {
     isPoster,
     messages,
   };
+}
+
+// Opens (or reopens) a masked conversation with an event's organizer.
+export async function openOrganizerThread(user, slug) {
+  const event = await prisma.event.findUnique({ where: { slug }, select: { id: true, title: true, organizer: { select: { ownerId: true } } } });
+  if (!event) throw notFound();
+  if (event.organizer.ownerId === user.id) throw badRequest('You organise this event.');
+  const thread = await transaction((tx) =>
+    findOrCreateThread(tx, {
+      kind: 'EVENT',
+      subject: `${event.title} · questions`,
+      eventId: event.id,
+      participants: [
+        { userId: user.id, role: 'MEMBER' },
+        { userId: event.organizer.ownerId, role: 'ORGANIZER' },
+      ],
+    }),
+  );
+  return { threadId: thread.id };
 }

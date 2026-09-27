@@ -7,7 +7,7 @@ import { badRequest, conflict, invalid, notFound, unauthorized } from '../errors
 import { encrypt, lastDigits } from '../security/crypto.js';
 import { verifyPassword } from '../security/passwords.js';
 import { DEFAULT_PREFERENCES, TOPICS, preferencesFor } from '../notify/preferences.js';
-import { relativeTime } from '../format.js';
+import { relativeTime } from '../../shared/format.js';
 import { normalizePhone } from './identity.js';
 
 export async function notificationSettings(userId, { provider = false } = {}) {

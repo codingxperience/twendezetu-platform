@@ -6,7 +6,7 @@ import { badRequest, conflict, forbidden, notFound, unauthorized } from '../erro
 import { randomToken, sha256 } from '../security/crypto.js';
 import { cancelScheduled, notify, notifyGuest } from '../notify/index.js';
 import { getSettings } from '../settings.js';
-import { dayLabel, timeLabel } from '../format.js';
+import { dayLabel, timeLabel } from '../../shared/format.js';
 
 export const REMINDER_PLANS = Object.freeze({
   '7d,1d,2h': '7d · 1d · 2h',

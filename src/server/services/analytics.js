@@ -3,8 +3,8 @@
 
 import { prisma, toNumber } from '../db.js';
 import { forbidden, notFound } from '../errors.js';
-import { formatMoney } from '../money.js';
-import { shortDate } from '../format.js';
+import { formatMoney } from '../../shared/money.js';
+import { shortDate } from '../../shared/format.js';
 
 const SOURCE_LABELS = { whatsapp: 'WhatsApp', facebook: 'Facebook', direct: 'Direct link', feed: 'Twende feed', email: 'Email', x: 'X', instagram: 'Instagram' };
 

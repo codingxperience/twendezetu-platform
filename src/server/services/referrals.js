@@ -5,7 +5,7 @@
 import { REFERRAL_POINTS, REFERRAL_TIERS } from '../fees.js';
 import { accounts, post } from '../ledger.js';
 import { notify } from '../notify/index.js';
-import { relativeTime, initials, shortName } from '../format.js';
+import { relativeTime, initials, shortName } from '../../shared/format.js';
 
 const MILESTONE_COPY = {
   JOINED: 'Joined + verified',

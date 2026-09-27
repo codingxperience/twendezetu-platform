@@ -8,7 +8,7 @@ import { badRequest, forbidden, invalid, notFound } from '../errors.js';
 import { accounts, balanceOf, post } from '../ledger.js';
 import { notify } from '../notify/index.js';
 import { getSettings } from '../settings.js';
-import { initials, shortDate, shortName, slugify } from '../format.js';
+import { initials, shortDate, shortName, slugify } from '../../shared/format.js';
 import { uniqueSlug } from './events.js';
 
 // Pools above US$1,000 can be held for finance review (admin setting).

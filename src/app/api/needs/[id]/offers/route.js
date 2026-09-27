@@ -3,7 +3,7 @@ import { invalid, notFound } from '@/server/errors';
 import { prisma } from '@/server/db';
 import { schemas } from '@/server/schemas';
 import { submitOffer } from '@/server/services/marketplace';
-import { parseMoneyInput } from '@/server/money';
+import { parseMoneyInput } from '@/shared/money';
 
 export const POST = route({ auth: 'required', body: schemas.offer }, async ({ body, viewer, params }) => {
   const need = await prisma.need.findUnique({ where: { id: params.id }, select: { currency: true } });

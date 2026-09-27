@@ -7,12 +7,12 @@ import { badRequest, invalid, notFound } from '../errors.js';
 import { accounts, balanceOf, post, statement } from '../ledger.js';
 import { getRates } from '../fx.js';
 import { FEES, LIMITS } from '../fees.js';
-import { convert, formatMoney } from '../money.js';
+import { convert, formatMoney } from '../../shared/money.js';
 import { createCharge, openCheckout } from '../payments/charges.js';
 import { notify } from '../notify/index.js';
 import { reference } from '../security/crypto.js';
 import { requireStepUp } from './identity.js';
-import { shortDate, shortName } from '../format.js';
+import { shortDate, shortName } from '../../shared/format.js';
 
 export const POINTS_PER_USD = 100;
 

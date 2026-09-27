@@ -4,7 +4,7 @@
 import { prisma } from '../db.js';
 import { forbidden, notFound } from '../errors.js';
 import { parseScan } from './tickets.js';
-import { messageStamp } from '../format.js';
+import { messageStamp } from '../../shared/format.js';
 
 export async function checkinEventFor(user, slug) {
   const event = await prisma.event.findUnique({

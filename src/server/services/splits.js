@@ -8,13 +8,13 @@ import { badRequest, conflict, invalid, notFound, unauthorized } from '../errors
 import { accounts, post } from '../ledger.js';
 import { getRates } from '../fx.js';
 import { FEES, LIMITS } from '../fees.js';
-import { formatMoney, percentOf, pointsFor } from '../money.js';
+import { formatMoney, percentOf, pointsFor } from '../../shared/money.js';
 import { createCharge, openCheckout } from '../payments/charges.js';
 import { notify, notifyGuest } from '../notify/index.js';
 import { randomToken } from '../security/crypto.js';
-import { initials, shortName } from '../format.js';
+import { initials, shortName } from '../../shared/format.js';
 import { requireStepUp } from './identity.js';
-import { EVENT_FOR_CHECKOUT, afterPaid, saleLines, uniqueOrderReference } from './checkout.js';
+import { EVENT_FOR_CHECKOUT, afterPaid, notifyWaitlist, saleLines, uniqueOrderReference } from './checkout.js';
 
 export async function createSplit(user, { eventSlug, tierId, guests }) {
   const names = [user.name, ...guests.map((guest) => guest.name)].map((name) => String(name || '').trim()).filter(Boolean);
@@ -279,7 +279,10 @@ export async function expireSplits() {
       const { count } = await tx.split.updateMany({ where: { id: split.id, status: 'OPEN' }, data: { status: 'CANCELLED' } });
       if (!count) return;
       const unpaid = split.shares.filter((share) => share.status === 'PENDING').length;
-      if (unpaid) await tx.$executeRaw`UPDATE "TicketTier" SET "sold" = GREATEST(0, "sold" - ${unpaid}) WHERE "id" = ${split.tierId}`;
+      if (unpaid) {
+        await tx.$executeRaw`UPDATE "TicketTier" SET "sold" = GREATEST(0, "sold" - ${unpaid}) WHERE "id" = ${split.tierId}`;
+        await notifyWaitlist(tx, split.tierId, unpaid);
+      }
       await notify(tx, {
         userId: split.organizerId,
         topic: 'SOCIAL',

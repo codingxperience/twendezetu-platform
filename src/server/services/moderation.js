@@ -9,8 +9,8 @@ import { revokeAllSessions } from '../security/sessions.js';
 import { notify } from '../notify/index.js';
 import { getSettings, setSetting, SETTING_COPY } from '../settings.js';
 import { getRates } from '../fx.js';
-import { convert } from '../money.js';
-import { EVENT_CATEGORIES, maskEmail, relativeTime, shortName } from '../format.js';
+import { convert } from '../../shared/money.js';
+import { EVENT_CATEGORIES, maskEmail, relativeTime, shortName } from '../../shared/format.js';
 
 const SEVERITY = { SCAM: 'HIGH', OFF_PLATFORM_PAYMENT: 'HIGH', IMPERSONATION: 'MEDIUM', HARASSMENT: 'MEDIUM', SPAM: 'LOW', OTHER: 'LOW' };
 

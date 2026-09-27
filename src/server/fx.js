@@ -5,7 +5,7 @@
 import { prisma } from './db.js';
 import { config } from './config.js';
 import { log } from './log.js';
-import { DISPLAY_CURRENCIES } from './money.js';
+import { DISPLAY_CURRENCIES } from '../shared/money.js';
 
 const CACHE_MS = 5 * 60 * 1000;
 let cache = null;

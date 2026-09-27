@@ -8,7 +8,7 @@ import { audit } from '../audit.js';
 import { badRequest, conflict, forbidden, invalid, notFound } from '../errors.js';
 import { decrypt, encrypt, lastDigits } from '../security/crypto.js';
 import { notify } from '../notify/index.js';
-import { COUNTRIES, PROVIDER_CATEGORIES, providerCategoryFromLabel, relativeTime } from '../format.js';
+import { COUNTRIES, PROVIDER_CATEGORIES, providerCategoryFromLabel, relativeTime } from '../../shared/format.js';
 import { saveListing } from './providers.js';
 import { maskPhone } from './identity.js';
 

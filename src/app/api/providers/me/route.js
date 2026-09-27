@@ -3,8 +3,8 @@ import { invalid } from '@/server/errors';
 import { prisma } from '@/server/db';
 import { schemas } from '@/server/schemas';
 import { providerDashboard, saveListing } from '@/server/services/providers';
-import { parseMoneyInput } from '@/server/money';
-import { COUNTRIES } from '@/server/format';
+import { parseMoneyInput } from '@/shared/money';
+import { COUNTRIES } from '@/shared/format';
 
 export const GET = route({ auth: 'required' }, async ({ viewer }) => ({ dashboard: await providerDashboard(viewer) }));
 

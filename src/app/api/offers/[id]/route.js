@@ -3,7 +3,7 @@ import { invalid, notFound } from '@/server/errors';
 import { prisma } from '@/server/db';
 import { schemas } from '@/server/schemas';
 import { acceptOffer, counterOffer, declineOffer, reviseOffer, withdrawOffer } from '@/server/services/marketplace';
-import { parseMoneyInput } from '@/server/money';
+import { parseMoneyInput } from '@/shared/money';
 
 export const POST = route({ auth: 'required', body: schemas.offerAction, idempotent: true }, async ({ body, viewer, params }) => {
   switch (body.action) {

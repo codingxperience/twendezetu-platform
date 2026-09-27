@@ -1,45 +1,26 @@
-import { ClaudeDesignPage } from '@/components/ClaudeDesignPage';
-import { findEventBySlug, ogImagesFor } from '@/design/events-catalog';
+import { notFound } from 'next/navigation';
+import EventView from '../../_views/event';
+import { getViewer } from '@/server/viewer';
+import { eventMetadata, eventView } from '@/server/views/event';
+import { previewMetadata } from '@/server/og';
 
-const SITE = 'Twendezetu';
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const event = findEventBySlug(slug);
-
-  if (!event) {
-    return {
-      title: `Event · ${SITE}`,
-      description: 'Discover events, needs and providers across East Africa and the diaspora.',
-    };
+  const event = await eventMetadata(slug);
+  if (!event || event.hiddenAt || !['PUBLISHED', 'CANCELLED'].includes(event.status)) {
+    return { title: 'Event — Twendezetu', robots: { index: false } };
   }
-
-  const title = `${event.title} · ${event.date} · ${event.city}`;
-  const description = event.blurb || event.description;
-  const url = `/events/${event.slug}`;
-
-  return {
-    title: `${event.title} — ${SITE}`,
-    description,
-    alternates: { canonical: url },
-    openGraph: {
-      title: event.title,
-      description,
-      url,
-      type: 'website',
-      siteName: SITE,
-      images: ogImagesFor(event.img, event.title),
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: event.title,
-      description,
-      images: ogImagesFor(event.img, event.title).map((image) => image.url),
-    },
-  };
+  return previewMetadata({ title: event.title, description: event.blurb, path: `/events/${event.slug}`, image: event.coverUrl });
 }
 
-export default async function EventDetailPage({ params }) {
+export default async function EventPage({ params, searchParams }) {
   const { slug } = await params;
-  return <ClaudeDesignPage page="eventDetail" initialState={{ slug }} />;
+  const query = (await searchParams) || {};
+  const text = (value) => (typeof value === 'string' ? value.slice(0, 120) : undefined);
+  const viewer = await getViewer();
+  const data = await eventView(viewer, { slug, rsvp: text(query.rsvp) });
+  if (!data) notFound();
+  return <EventView data={data} params={{ slug, rsvp: text(query.rsvp), r: text(query.r), src: text(query.src) }} />;
 }

@@ -14,7 +14,7 @@ import { notify, sendText } from '../notify/index.js';
 import { awardReferral } from './referrals.js';
 import { enforceRateLimit } from '../security/rate-limit.js';
 import { balancesByCurrency, balanceOf, accounts } from '../ledger.js';
-import { COUNTRIES, slugify } from '../format.js';
+import { COUNTRIES, slugify } from '../../shared/format.js';
 
 export function normalizeEmail(email) {
   return String(email || '').trim().toLowerCase();

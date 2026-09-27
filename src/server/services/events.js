@@ -8,8 +8,8 @@ import { checkRateLimit } from '../security/rate-limit.js';
 import { config } from '../config.js';
 import { notify, notifyGuest } from '../notify/index.js';
 import { awardReferral } from './referrals.js';
-import { COUNTRIES, EVENT_CATEGORIES, dayLabel, priceLabel, slugify, timeLabel } from '../format.js';
-import { isCurrency } from '../money.js';
+import { COUNTRIES, EVENT_CATEGORIES, dayLabel, priceLabel, slugify, timeLabel } from '../../shared/format.js';
+import { isCurrency } from '../../shared/money.js';
 
 const PUBLIC_EVENT = { status: 'PUBLISHED', hiddenAt: null };
 
@@ -48,6 +48,10 @@ export function toEventCard(event) {
     blurb: event.blurb,
     description: event.description,
     isFree: event.isFree,
+    priceFromMinor: event.priceFromMinor,
+    currency: event.currency,
+    tierCount: paidTiers.length,
+    featured: event.featuredRank != null,
     status: event.status,
   };
 }

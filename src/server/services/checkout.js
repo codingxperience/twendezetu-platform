@@ -8,19 +8,19 @@
 import { prisma, transaction } from '../db.js';
 import { config } from '../config.js';
 import { audit } from '../audit.js';
-import { badRequest, conflict, forbidden, invalid, notFound, unauthorized, unavailable } from '../errors.js';
-import { reference } from '../security/crypto.js';
+import { badRequest, conflict, invalid, notFound, unauthorized, unavailable } from '../errors.js';
+import { hmac, reference, safeEqual } from '../security/crypto.js';
 import { accounts, post } from '../ledger.js';
 import { getRates } from '../fx.js';
 import { ESCROW, FEES, LIMITS } from '../fees.js';
-import { formatMoney, percentOf, pointsFor } from '../money.js';
+import { formatMoney, percentOf, pointsFor } from '../../shared/money.js';
 import { createCharge, openCheckout, refundCharge } from '../payments/charges.js';
 import { notify, notifyGuest } from '../notify/index.js';
 import { awardReferral } from './referrals.js';
 import { ensureAttendeeRsvp } from './rsvps.js';
 import { newTicketCode } from './tickets.js';
 import { requireStepUp } from './identity.js';
-import { dayLabel, timeLabel } from '../format.js';
+import { dayLabel, timeLabel } from '../../shared/format.js';
 import { log } from '../log.js';
 
 const EVENT_FOR_CHECKOUT = {
@@ -107,11 +107,51 @@ async function reserveSeats(tx, lines) {
   }
 }
 
+// Guests have no account, so their order page and ticket QR codes open with
+// a key derived from the order id. The key is in their confirmation email
+// and in the link the card page returns to; the order reference alone shows
+// nothing. A member's order only ever opens for that member.
+export function orderAccessKey(orderId) {
+  return hmac('order-access', orderId).toString('base64url').slice(0, 32);
+}
+
+export function canOpenOrder(order, viewer, key) {
+  if (order.buyerId) return Boolean(viewer && order.buyerId === viewer.id);
+  return typeof key === 'string' && key.length > 0 && safeEqual(key, orderAccessKey(order.id));
+}
+
+function orderPath(order, slug) {
+  return `/checkout?event=${slug}&order=${order.reference}${order.buyerId ? '' : `&key=${orderAccessKey(order.id)}`}`;
+}
+
 async function releaseSeats(tx, orderId) {
   const items = await tx.orderItem.findMany({ where: { orderId }, select: { tierId: true, quantity: true } });
   for (const item of items) {
     await tx.$executeRaw`UPDATE "TicketTier" SET "sold" = GREATEST(0, "sold" - ${item.quantity}) WHERE "id" = ${item.tierId}`;
+    await notifyWaitlist(tx, item.tierId, item.quantity);
   }
+}
+
+// Seats came back on a tier: tell the people waiting, oldest first, one
+// person per seat. Seats are not reserved for them — whoever checks out
+// first gets it — so the message says exactly that.
+export async function notifyWaitlist(tx, tierId, seats) {
+  const waiting = await tx.waitlistEntry.findMany({
+    where: { tierId, notifiedAt: null },
+    orderBy: { createdAt: 'asc' },
+    take: seats,
+    include: { event: { select: { title: true, slug: true, status: true } }, tier: { select: { name: true } } },
+  });
+  const open = waiting.filter((entry) => entry.event.status === 'PUBLISHED');
+  for (const entry of open) {
+    const title = `A ${entry.tier.name} seat is back`;
+    const body = `A seat for ${entry.event.title} has just come back. It goes to whoever checks out first.`;
+    const href = `/checkout?event=${entry.event.slug}`;
+    const dedupeKey = `waitlist:${entry.id}`;
+    if (entry.userId) await notify(tx, { userId: entry.userId, topic: 'REMINDERS', title, body, href, urgent: true, dedupeKey });
+    else await notifyGuest(tx, { email: entry.email, topic: 'REMINDERS', subject: title, body, href, dedupeKey });
+  }
+  if (open.length) await tx.waitlistEntry.updateMany({ where: { id: { in: open.map((entry) => entry.id) } }, data: { notifiedAt: new Date() } });
 }
 
 async function redeemPromo(tx, promo) {
@@ -177,9 +217,10 @@ export async function afterPaid(tx, order, event, lines, holders, { reserved = f
   const payLine = reserved
     ? `Reserved — pay ${formatMoney(order.totalMinor, order.currency)} at the door.`
     : `Order ${order.reference} · ${formatMoney(order.totalMinor, order.currency)}`;
-  const body = `${when} · ${event.venue}\n${payLine}\n\n${codes}\n\nShow the QR codes in My Twende at the gate.`;
+  const where = order.buyerId ? 'Your QR codes are in My Twende — show them at the gate.' : 'Open the link below for your QR codes and show them at the gate. Keep this email private: the link opens your tickets.';
+  const body = `${when} · ${event.venue}\n${payLine}\n\n${codes}\n\n${where}`;
   if (order.buyerId) await notify(tx, { userId: order.buyerId, topic: 'REMINDERS', title: subject, body, href: '/my-twende?tab=upcoming', urgent: true });
-  else await notifyGuest(tx, { email: order.buyerEmail, topic: 'REMINDERS', subject, body, href: `/events/${event.slug}` });
+  else await notifyGuest(tx, { email: order.buyerEmail, topic: 'REMINDERS', subject, body, href: orderPath(order, event.slug) });
 
   if (event.organizer?.ownerId) {
     const count = `${tickets.length} ticket${tickets.length === 1 ? '' : 's'}`;
@@ -278,7 +319,7 @@ export async function placeOrder({ viewer, slug, items, promoCode, channel, buye
       amountMinor: order.totalMinor,
       currency: order.currency,
       description: `${event.title} — ${priced.quantity} ticket${priced.quantity === 1 ? '' : 's'}`,
-      returnPath: `/checkout?event=${event.slug}&order=${order.reference}`,
+      returnPath: orderPath(order, event.slug),
     });
     return { order, charge, lines: priced.lines };
   });
@@ -317,6 +358,7 @@ function summary(order, tickets, extra = {}) {
     pointsSpent: order.pointsSpent,
     totalLabel: formatMoney(order.totalMinor, order.currency),
     tickets: tickets.map((ticket) => ({ code: ticket.code, holderName: ticket.holderName })),
+    ...(order.buyerId ? {} : { accessKey: orderAccessKey(order.id) }),
     ...extra,
   };
 }
@@ -463,13 +505,20 @@ export async function joinWaitlist({ slug, tierId, viewer, email, name }) {
   return { waitlisted: true };
 }
 
-export async function orderForViewer(referenceCode, viewer) {
+export async function leaveWaitlist(viewer, entryId) {
+  const { count } = await prisma.waitlistEntry.deleteMany({ where: { id: entryId, userId: viewer.id } });
+  if (!count) throw notFound();
+  return { left: true };
+}
+
+// Returns the order only to someone allowed to open it; anyone else gets
+// null, the same answer as a reference that does not exist.
+export async function orderForViewer(referenceCode, viewer, key) {
   const order = await prisma.order.findUnique({
     where: { reference: referenceCode },
     include: { tickets: { select: { code: true, holderName: true, status: true } }, event: { select: { title: true, slug: true } } },
   });
-  if (!order) return null;
-  if (viewer && order.buyerId && order.buyerId !== viewer.id) throw forbidden();
+  if (!order || !canOpenOrder(order, viewer, key)) return null;
   return order;
 }
 
