@@ -24,10 +24,14 @@ export function tierFor(friendCount) {
 export async function awardReferral(tx, refereeId, milestone) {
   const referee = await tx.user.findUnique({
     where: { id: refereeId },
-    select: { name: true, referredById: true, referredBy: { select: { id: true, status: true } } },
+    select: { name: true, phoneVerifiedAt: true, referredBy: { select: { id: true, status: true } } },
   });
   const referrer = referee?.referredBy;
   if (!referrer || referrer.status !== 'ACTIVE') return null;
+  // Nothing pays before the friend verifies a phone number (one account per
+  // number), which is what stops points being farmed with throwaway
+  // sign-ups. Steps reached before that are paid when they verify.
+  if (!referee.phoneVerifiedAt) return null;
 
   const already = await tx.referralReward.findUnique({ where: { refereeId_milestone: { refereeId, milestone } } });
   if (already) return null;
@@ -59,50 +63,75 @@ export async function awardReferral(tx, refereeId, milestone) {
     body: `${shortName(referee.name)} · ${MILESTONE_COPY[milestone].toLowerCase()}.`,
     href: '/referral-rewards',
   });
+
+  if (milestone === 'JOINED') {
+    for (const earlier of await milestonesReached(tx, refereeId)) await awardReferral(tx, refereeId, earlier);
+  }
   return points;
 }
 
+// Steps a friend reached before verifying their phone.
+async function milestonesReached(tx, userId) {
+  const [tickets, events, needs, memberships] = await Promise.all([
+    tx.order.count({ where: { buyerId: userId, paidAt: { not: null } } }),
+    tx.event.count({ where: { createdById: userId } }),
+    tx.need.count({ where: { posterId: userId } }),
+    tx.membership.count({ where: { provider: { ownerId: userId } } }),
+  ]);
+  return [tickets && 'FIRST_TICKET', (events || needs) && 'FIRST_POST', memberships && 'BECAME_PROVIDER'].filter(Boolean);
+}
+
 export async function referralSummary(db, userId) {
-  const [user, rewards] = await Promise.all([
+  const [user, rewards, invited] = await Promise.all([
     db.user.findUnique({ where: { id: userId }, select: { handle: true } }),
     db.referralReward.findMany({
       where: { referrerId: userId },
       orderBy: { createdAt: 'desc' },
       include: { referee: { select: { id: true, name: true } } },
     }),
+    db.user.count({ where: { referredById: userId } }),
   ]);
 
   const byFriend = new Map();
   for (const reward of rewards) {
-    const entry = byFriend.get(reward.refereeId) || { name: reward.referee.name, points: 0, latest: reward };
+    const entry = byFriend.get(reward.refereeId) || { name: reward.referee.name, points: 0, latest: reward, milestones: 0 };
     entry.points += reward.points;
+    entry.milestones += 1;
     byFriend.set(reward.refereeId, entry);
   }
   const verified = rewards.filter((reward) => reward.milestone === 'JOINED').length;
   const totalPoints = rewards.reduce((sum, reward) => sum + reward.points, 0);
+  const current = tierFor(verified);
+  const next = REFERRAL_TIERS.find((tier) => tier.friends > verified) || null;
 
   return {
     handle: user.handle,
     verifiedFriends: verified,
+    // Signed up through the link but not yet verified: nothing earned yet.
+    waiting: Math.max(0, invited - byFriend.size),
     totalPoints,
+    multiplier: current?.multiplier || 1,
+    currentTier: current?.name || null,
+    nextTier: next ? { name: next.name, friends: next.friends, remaining: next.friends - verified } : null,
     rules: [
-      { icon: '👋', label: 'Friend joins & verifies their number', pts: `+${REFERRAL_POINTS.JOINED}` },
-      { icon: '🎟', label: 'Their first ticket purchase', pts: `+${REFERRAL_POINTS.FIRST_TICKET}` },
-      { icon: '📣', label: 'They post an event or a need', pts: `+${REFERRAL_POINTS.FIRST_POST}` },
-      { icon: '🤝', label: 'They become a paying provider', pts: `+${REFERRAL_POINTS.BECAME_PROVIDER}` },
+      { icon: '👋', label: 'Friend joins and verifies their phone number', points: REFERRAL_POINTS.JOINED },
+      { icon: '🎟', label: 'Their first ticket purchase', points: REFERRAL_POINTS.FIRST_TICKET },
+      { icon: '📣', label: 'They post an event or a need', points: REFERRAL_POINTS.FIRST_POST },
+      { icon: '🤝', label: 'They become a paying provider', points: REFERRAL_POINTS.BECAME_PROVIDER },
     ],
     tiers: REFERRAL_TIERS.map((tier) => ({
       name: tier.name,
-      need: `${tier.friends}${tier.friends === 1 ? '+ friend' : ' friends'}`,
+      need: `${tier.friends} verified friend${tier.friends === 1 ? '' : 's'}`,
       perk: tier.perk,
       reached: verified >= tier.friends,
-      remaining: Math.max(0, tier.friends - verified),
+      current: current?.name === tier.name,
     })),
     friends: [...byFriend.values()].map((friend) => ({
       init: initials(friend.name),
       name: shortName(friend.name),
       action: `${MILESTONE_COPY[friend.latest.milestone]} · ${relativeTime(friend.latest.createdAt).toLowerCase()}`,
-      pts: `+${friend.points}`,
+      milestones: friend.milestones,
+      points: friend.points,
     })),
   };
 }

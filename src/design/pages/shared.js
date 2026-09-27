@@ -16,11 +16,14 @@ export const COLORS = Object.freeze({
   muted: '#6E6155',
 });
 
-export function copyText(text) {
+// Resolves true once the text is on the clipboard, false if the browser
+// refused (no permission, or an insecure page).
+export async function copyText(text) {
   try {
-    navigator.clipboard?.writeText(text);
+    await navigator.clipboard.writeText(text);
+    return true;
   } catch {
-    // Clipboard access can be refused; the visible "copied" state still shows.
+    return false;
   }
 }
 
