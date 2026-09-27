@@ -22,6 +22,7 @@ import { organizerPayoutsView } from './organizerPayouts.js';
 import { referralRewardsView } from './referralRewards.js';
 import { splitPayView } from './splitPay.js';
 import { adminView } from './admin.js';
+import { financeView } from './finance.js';
 
 export const VIEWS = {
   home: homeView,
@@ -44,4 +45,5 @@ export const VIEWS = {
   referralRewards: referralRewardsView,
   splitPay: splitPayView,
   admin: adminView,
+  finance: financeView,
 };

@@ -1296,6 +1296,8 @@ model Pool {
   contributorCount Int        @default(0)
   status           PoolStatus @default(OPEN)
   closesAt         DateTime?
+  // Set when a large release is waiting on a finance review.
+  releaseRequestedAt DateTime?
   releasedAt       DateTime?
   createdAt        DateTime   @default(now())
   updatedAt        DateTime   @updatedAt

@@ -7,10 +7,11 @@ import { conflict, notFound } from '../errors.js';
 import { getRates } from '../fx.js';
 import { convert, formatMoney } from '../../shared/money.js';
 import { notify } from '../notify/index.js';
-import { shortDate } from '../../shared/format.js';
+import { shortDate, shortName } from '../../shared/format.js';
 import { releaseBooking } from './marketplace.js';
 import { pendingPayoutSummary } from './payouts.js';
 import { csvCell } from './wallet.js';
+import { FEES } from '../fees.js';
 
 const RANGES = { '7d': 7, '30d': 30, '90d': 90 };
 
@@ -25,8 +26,8 @@ export const LEDGER_FILTERS = Object.freeze({
 });
 
 const STREAMS = {
-  TICKET_SALE: 'Ticket fees (5%)',
-  ESCROW_RELEASE: 'Booking fees (7%)',
+  TICKET_SALE: `Ticket fees (${FEES.ticketServiceBps / 100}%)`,
+  ESCROW_RELEASE: `Booking fees (${FEES.bookingCommissionBps / 100}%)`,
   MEMBERSHIP: 'Provider memberships',
   CASHOUT: 'Cash-out & withdrawal fees',
   PAYOUT: 'Cash-out & withdrawal fees',
@@ -44,8 +45,12 @@ function usd(minor, currency, rates) {
 
 function usdLabel(cents) {
   const dollars = cents / 100;
-  if (Math.abs(dollars) >= 100_000) return `$${(dollars / 1000).toFixed(1)}K`;
-  return `${dollars < 0 ? '−' : ''}$${Math.abs(dollars).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+  const sign = dollars < 0 ? '−' : '';
+  const size = Math.abs(dollars);
+  if (size >= 100_000) return `${sign}$${(size / 1000).toFixed(1)}K`;
+  // Small figures keep their cents so a few dollars of fees do not read as $0.
+  const digits = size < 1000 ? 2 : 0;
+  return `${sign}$${size.toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits })}`;
 }
 
 export async function financeOverview({ range = '30d', filter = 'ALL' } = {}) {
@@ -88,15 +93,28 @@ export async function financeOverview({ range = '30d', filter = 'ALL' } = {}) {
     .sort((a, b) => b.cents - a.cents)
     .map((row) => ({ code: row.code, pct: `${gmv ? Math.round((row.cents / gmv) * 100) : 0}%`, usd: usdLabel(row.cents) }));
 
-  const [ledger, escrow, payouts] = await Promise.all([ledgerRows({ from, filter, rates }), escrowBook(rates), pendingPayoutSummary()]);
+  const soon = new Date(Date.now() + 30 * 86_400_000);
+  const [ledger, escrow, payouts, heldEscrow, wallets, renewSoon, lapsed, queue, pools] = await Promise.all([
+    ledgerRows({ from, filter, rates }),
+    escrowBook(rates),
+    pendingPayoutSummary(),
+    prisma.ledgerAccount.findMany({ where: { kind: { in: ['BOOKING_ESCROW', 'EVENT_ESCROW'] }, balance: { gt: 0 } }, select: { kind: true, currency: true, balance: true } }),
+    prisma.ledgerAccount.aggregate({ where: { kind: { in: ['USER_WALLET', 'POOL'] }, currency: 'PTS' }, _sum: { balance: true } }),
+    prisma.provider.count({ where: { membershipEndsAt: { gt: new Date(), lt: soon } } }),
+    prisma.provider.count({ where: { membershipEndsAt: { lt: new Date(), gt: new Date(Date.now() - 90 * 86_400_000) } } }),
+    payoutQueue(),
+    poolReviews(),
+  ]);
   const payoutUsd = payouts.reduce((sum, row) => sum + usd(row.net, row.currency, rates), 0);
+  const escrowUsd = (kind) => heldEscrow.filter((row) => row.kind === kind).reduce((sum, row) => sum + usd(toNumber(row.balance), row.currency, rates), 0);
+  const points = toNumber(wallets._sum.balance || 0);
 
   return {
     range,
     kpis: [
       { label: 'GROSS VOLUME (GMV)', big: usdLabel(gmv), sub: 'tickets + bookings + top-ups' },
       { label: 'PLATFORM REVENUE', big: usdLabel(revenue), sub: 'fees + memberships, net of refunds' },
-      { label: 'FEES ON PAID FLOWS', big: usdLabel(flowFees), sub: '5% tickets · 7% bookings · cash-out fees' },
+      { label: 'FEES ON PAID FLOWS', big: usdLabel(flowFees), sub: `${FEES.ticketServiceBps / 100}% tickets · ${FEES.bookingCommissionBps / 100}% bookings · cash-out fees` },
       { label: 'MEMBERSHIP REVENUE', big: usdLabel(membership), sub: `${activeMemberships.toLocaleString('en-US')} active provider memberships` },
     ],
     streams: Object.entries(streams)
@@ -107,6 +125,17 @@ export async function financeOverview({ range = '30d', filter = 'ALL' } = {}) {
     ledger,
     escrow,
     payouts: { count: payouts.reduce((sum, row) => sum + row.count, 0), total: usdLabel(payoutUsd), byCurrency: payouts.map((row) => ({ ...row, label: row.currency === 'PTS' ? `${row.net.toLocaleString('en-US')} pts` : formatMoney(row.net, row.currency) })) },
+    held: {
+      bookings: usdLabel(escrowUsd('BOOKING_ESCROW')),
+      tickets: usdLabel(escrowUsd('EVENT_ESCROW')),
+      bookingCount: heldEscrow.filter((row) => row.kind === 'BOOKING_ESCROW').length,
+    },
+    // Points in wallets and pools, at 1 US cent each: what members could
+    // spend or cash out.
+    pointsLiability: { points: points.toLocaleString('en-US'), usd: usdLabel(points) },
+    memberships: { active: activeMemberships, renewSoon, lapsed },
+    queue,
+    pools,
   };
 }
 
@@ -203,6 +232,24 @@ export async function ledgerCsv({ range = '30d', filter = 'ALL' }) {
   return [header, ...rows.map((row) => [row.createdAt.toISOString(), row.type, row.kind, row.title, row.meta, row.status, row.gross, row.fee, row.id])]
     .map((row) => row.map(csvCell).join(','))
     .join('\r\n');
+}
+
+// Pools whose creators asked for a release that needs a finance review.
+export async function poolReviews() {
+  const pools = await prisma.pool.findMany({
+    where: { releaseRequestedAt: { not: null }, status: { not: 'RELEASED' } },
+    orderBy: { releaseRequestedAt: 'asc' },
+    include: { creator: { select: { name: true } } },
+    take: 20,
+  });
+  return pools.map((pool) => ({
+    slug: pool.slug,
+    title: pool.title,
+    creator: shortName(pool.creator.name),
+    points: pool.raisedPoints.toLocaleString('en-US'),
+    contributors: pool.contributorCount,
+    asked: shortDate(pool.releaseRequestedAt),
+  }));
 }
 
 export async function payoutQueue() {

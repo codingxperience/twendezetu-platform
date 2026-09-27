@@ -168,7 +168,7 @@ export function values(state, set, ctx) {
       })),
       release: async () => {
         const sure = await ctx.ask({ title: `Release ${pool.raised} points?`, body: `Everything in "${pool.title}" moves to your wallet and the pool closes.`, input: false, confirmLabel: 'Release' });
-        if (sure) ctx.run(`release:${pool.slug}`, () => ctx.api.post(`/api/pools/${pool.slug}/release`, undefined, { idempotent: true }), { success: (result) => `${points(result.released)} points are in your wallet.` });
+        if (sure) ctx.run(`release:${pool.slug}`, () => ctx.api.post(`/api/pools/${pool.slug}/release`, undefined, { idempotent: true }), { success: (result) => (result.review ? 'Sent to the finance team for review. You will be told when it is released.' : `${points(result.released)} points are in your wallet.`) });
       },
       shareLabel: state.copied === shareKey ? '✓ LINK COPIED' : '⧉ SHARE LINK',
       share: () => {

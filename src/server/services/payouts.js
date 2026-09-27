@@ -14,6 +14,13 @@ import { reference } from '../security/crypto.js';
 import { requireStepUp } from './identity.js';
 import { shortDate } from '../../shared/format.js';
 
+// Where a person follows their withdrawals: points in the points wallet,
+// business money in the provider wallet or, for organizers, payouts.
+async function walletHref(db, userId, currency) {
+  if (currency === 'PTS') return '/points-wallet';
+  return (await db.provider.count({ where: { ownerId: userId } })) ? '/provider-wallet' : '/organizer-payouts';
+}
+
 export async function payoutMethods(userId) {
   const methods = await prisma.paymentMethod.findMany({
     where: { userId, deletedAt: null, kind: { in: ['MPESA', 'MTN_MOMO', 'AIRTEL_MONEY', 'BANK'] } },
@@ -64,7 +71,7 @@ export async function requestWithdrawal(user, { currency, amountMinor, methodId,
       urgent: true,
       title: 'Withdrawal requested',
       body: `${formatMoney(amountMinor - fee, currency)} to ${method.label} after the ${formatMoney(fee, currency)} fee. Reference ${payoutReference}.`,
-      href: (await tx.provider.count({ where: { ownerId: user.id } })) ? '/provider-wallet' : '/organizer-payouts',
+      href: await walletHref(tx, user.id, currency),
     });
   });
   return { reference: payoutReference, net: amountMinor - fee, fee };
@@ -254,7 +261,7 @@ export async function markPayoutPaid(financeUser, payoutId, externalRef) {
       topic: 'MONEY',
       title: 'Withdrawal sent',
       body: `${payout.currency === 'PTS' ? `${net.toLocaleString('en-US')} points' value` : formatMoney(net, payout.currency)} was sent to ${payout.destinationLabel}. Reference ${externalRef}.`,
-      href: payout.currency === 'PTS' ? '/points-wallet' : '/provider-wallet',
+      href: await walletHref(tx, payout.userId, payout.currency),
     });
   });
   return { status: 'PAID' };
@@ -289,7 +296,7 @@ export async function markPayoutFailed(financeUser, payoutId, reason) {
       urgent: true,
       title: 'Withdrawal could not be completed',
       body: `${payout.reference} was returned to your balance in full, fee included${reason ? `: ${reason}` : '.'} Check your payout details and try again.`,
-      href: payout.currency === 'PTS' ? '/points-wallet' : '/provider-wallet',
+      href: await walletHref(tx, payout.userId, payout.currency),
     });
   });
   return { status: 'FAILED' };

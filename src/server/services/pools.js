@@ -96,7 +96,20 @@ export async function releasePool(user, slug, { byFinance = false } = {}) {
   if (balance <= 0) throw badRequest('There is nothing in this pool to release yet.');
   const settings = await getSettings();
   if (!byFinance && settings.poolReleaseReview && balance > REVIEW_THRESHOLD_POINTS) {
-    throw forbidden('Pools over $1,000 are released after a finance review. The team has been notified.');
+    // Large releases wait for finance. The request is recorded once and the
+    // team is told; the console lists it until someone releases it.
+    if (!pool.releaseRequestedAt) {
+      await transaction(async (tx) => {
+        const claimed = await tx.pool.updateMany({ where: { id: pool.id, releaseRequestedAt: null }, data: { releaseRequestedAt: new Date() } });
+        if (!claimed.count) return;
+        const team = await tx.user.findMany({ where: { role: { in: ['FINANCE', 'ADMIN'] }, status: 'ACTIVE' }, select: { id: true } });
+        for (const member of team) {
+          await notify(tx, { userId: member.id, topic: 'MONEY', title: `Pool release to review: ${pool.title}`, body: `${balance.toLocaleString('en-US')} points are waiting for release.`, href: '/finance#pools' });
+        }
+        await audit(tx, { actorId: user.id, action: 'pool.release_requested', targetType: 'Pool', targetId: pool.id, meta: { points: balance } });
+      });
+    }
+    return { released: 0, review: true };
   }
 
   await transaction(async (tx) => {
@@ -114,6 +127,9 @@ export async function releasePool(user, slug, { byFinance = false } = {}) {
     });
     await tx.pool.update({ where: { id: pool.id }, data: { status: 'RELEASED', releasedAt: new Date() } });
     await audit(tx, { actorId: user.id, action: 'pool.released', targetType: 'Pool', targetId: pool.id, meta: { points: balance, byFinance } });
+    if (byFinance) {
+      await notify(tx, { userId: pool.creatorId, topic: 'MONEY', title: `Pool released: ${pool.title}`, body: `Finance reviewed and released ${balance.toLocaleString('en-US')} points to your wallet.`, href: '/points-wallet' });
+    }
   });
   return { released: balance };
 }
@@ -123,7 +139,9 @@ function poolView(pool, viewerId) {
   const recent = pool.contributions || [];
   const shown = recent.slice(0, 3).map((contribution) => initials(contribution.user.name));
   const extra = pool.contributorCount - shown.length;
-  const status = pool.status === 'OPEN' && pool.closesAt && pool.closesAt.getTime() - Date.now() < 3 * 86_400_000 ? 'CLOSING SOON' : pool.status;
+  const status = pool.releaseRequestedAt && pool.status !== 'RELEASED'
+    ? 'IN FINANCE REVIEW'
+    : pool.status === 'OPEN' && pool.closesAt && pool.closesAt.getTime() - Date.now() < 3 * 86_400_000 ? 'CLOSING SOON' : pool.status;
   return {
     slug: pool.slug,
     title: pool.title,
