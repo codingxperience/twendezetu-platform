@@ -419,7 +419,7 @@ const SERVICE_AREAS = {
 async function createProviders(people, passwordHash, rates) {
   const providers = {};
   const all = [
-    { name: 'Kato 4x4 & Tours', cat: 'TRANSPORT & DRIVERS', rating: '4.9', jobs: 61, city: 'KAMPALA', desc: 'Village-road specialist. Airport runs at any hour, convoys, up-country trips.', rate: 'UGX 400K/day', img: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=1100&q=80', verified: true, slug: 'kato-4x4', owner: people.kato },
+    { name: 'Kato 4x4 & Tours', cat: 'TRANSPORT & DRIVERS', rating: '4.9', jobs: 61, city: 'KAMPALA', desc: 'Village-road specialist. Airport runs at any hour, convoys, up-country trips.', rate: 'UGX 400K/day', img: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=1100&q=80', verified: true, slug: 'kato-4x4', owner: people.kato, about: '"The roads to the village don\'t scare us." Ten years driving Kampala, Jinja, Mbale and everywhere the tarmac ends. Clean Land Cruiser and Hilux fleet, patient drivers, flight tracking for late arrivals, and honest quotes — fuel spelled out, no surprises.' },
     ...PROVIDER_CATALOG,
     { name: 'QuickCars UG', cat: 'TRANSPORT & DRIVERS', rating: '4.5', jobs: 3, city: 'KAMPALA', desc: 'Cars for hire across Kampala.', rate: 'UGX 250K/day', img: 'https://images.unsplash.com/photo-1502877338535-766e1452684a?w=1100&q=80', verified: false, slug: 'quickcars-ug' },
   ];
@@ -450,7 +450,7 @@ async function createProviders(people, passwordHash, rates) {
         city,
         country,
         headline: item.desc,
-        description: `${item.name} offers ${item.cat.toLowerCase()} in ${city}. ${item.desc}`,
+        description: item.about || `${item.name} offers ${item.cat.toLowerCase()} in ${city}. ${item.desc}`,
         coverUrl: item.img.replace(/w=\d+/, 'w=1100'),
         rateMinor: rate.minor,
         rateCurrency: currency,

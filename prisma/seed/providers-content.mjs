@@ -16,14 +16,53 @@ const NAMES = {
   'MUSIC & DJS': ['DJ Nia', 'Bongo Beats Crew', 'Amapiano Kings', 'Live Wire Band', 'Sound of Serengeti', 'DJ Kesho', 'Rhumba Republic', 'Gospel Groove'],
   'CATERING & CHEFS': ['Chef Baraka', 'Mama Ntilie Kitchen', 'Pilau Palace', 'Swahili Plates', 'Nyama Bros', 'Coastal Bites', 'Ugali Express', 'Harusi Caterers'],
   'TENTS & EQUIPMENT': ['Twiga Tents', 'Canopy Co.', 'Furaha Rentals', 'Event Hire EA', 'Shamba Structures', 'Party Plus', 'Karibu Canopies', 'Stage & Sound'],
-  'TRANSPORT & DRIVERS': ['Safari 4x4', 'Nairobi Executive', 'Boda Fleet', 'Coast Coaches', 'Kili Movers', 'Airport Express', 'Convoy Kings', 'Village Rides'],
+  'TRANSPORT & DRIVERS': ['Safari 4x4', 'Executive Rides', 'Msafara Convoys', 'Coast Coaches', 'Kili Movers', 'Airport Express', 'Convoy Kings', 'Village Rides'],
   'PHOTOGRAPHY': ['Pixel Pori', 'Moments EA', 'Frame & Focus', 'Harusi Lens', 'Diaspora Studios', 'Golden Hour', 'Storyboard KE', 'Click Kampala'],
   'DECOR & MC': ['Zawadi Decor', 'MC Tumaini', 'Ribbon & Bloom', 'Grand Events MC', 'Petals & Drapes', 'Karibu Hosts', 'Elegance Decor', 'Stage Presence'],
 };
 const CITIES = ['NAIROBI', 'KAMPALA', 'DAR ES SALAAM', 'KIGALI', 'MOMBASA', 'JINJA', 'ARUSHA', 'JERSEY CITY', 'NEWARK, NJ', 'BROOKLYN, NY'];
-const IMGS = ['photo-1516873240891-4bf014598ab4', 'photo-1556910103-1c02745aae4d', 'photo-1519167758481-83f550bb49b3', 'photo-1533473359331-0135ef1b58bf', 'photo-1502920917128-1aa500764cbd', 'photo-1470225620780-dba8ba36b745', 'photo-1478146896981-b80fe463b330', 'photo-1519741497674-611481863552'];
-const RATES = ['UGX 300K/set', 'KES 20K/day', 'TZS 12K/plate', 'FROM $220', 'RWF 140K/day', 'FROM $180'];
-const DESCS = ['Trusted across the region, insured and on time.', 'Member since 2026 · fast responder.', 'Village-road ready, travels for the right job.', 'Halal options, scales 20–500 guests.', 'Same-week delivery, diaspora-friendly.', 'Own equipment, no hidden fees.'];
+
+// Everything generated for a listing comes from its own category, so a
+// transport company never reads like a caterer. Rates are in US dollars and
+// the seed converts them to the provider's local currency.
+const BY_CATEGORY = {
+  'MUSIC & DJS': {
+    descs: ['Bongo flava, amapiano and rhumba sets with own decks and PA.', 'Live band for harusi and harambee nights, sound check included.', 'Gospel and worship sets for church events and send-offs.', 'MC and DJ in one booking, bilingual Kiswahili and English.', 'Outdoor PA for cookouts up to 400 guests.'],
+    imgs: ['photo-1516873240891-4bf014598ab4', 'photo-1470225620780-dba8ba36b745'],
+    rate: [220, 'set'],
+  },
+  'CATERING & CHEFS': {
+    descs: ['Pilau, biryani and nyama choma for 20 to 500 guests. Halal kitchen.', 'Coastal Swahili menus: samaki wa kupaka, viazi karai, mahamri.', 'Ugali, sukuma and choma buffets with serving staff.', 'Wedding cakes and dessert tables to order.', 'Street-food stalls for festivals: mishkaki, chips mayai, mandazi.'],
+    imgs: ['photo-1556910103-1c02745aae4d'],
+    rate: [6, 'plate'],
+  },
+  'TENTS & EQUIPMENT': {
+    descs: ['Canopies, chairs and serving tables, delivered and set up.', 'Stage, lighting and generator hire for outdoor events.', 'Marquees for up to 300 guests, insured.', 'Tables, linen and crockery by the dozen.', 'Portable toilets and handwash stations for festivals.'],
+    imgs: ['photo-1519167758481-83f550bb49b3', 'photo-1478146896981-b80fe463b330'],
+    rate: [180, 'day'],
+  },
+  'TRANSPORT & DRIVERS': {
+    descs: ['4x4 hire with driver for up-country trips.', 'Airport transfers at any hour, flight tracked.', 'Wedding convoys: decorated lead car plus guest cars.', 'Minibuses for church groups and school trips.', 'Chauffeured saloon cars for guests visiting from abroad.'],
+    imgs: ['photo-1533473359331-0135ef1b58bf', 'photo-1449965408869-eaa3f722e40d'],
+    rate: [110, 'day'],
+  },
+  'PHOTOGRAPHY': {
+    descs: ['Weddings and introductions, edited gallery within a week.', 'Event photo and video, drone shots where permitted.', 'Portraits and family sessions for visiting relatives.', 'Graduation and send-off coverage, prints on the day.', 'Documentary coverage for community events.'],
+    imgs: ['photo-1502920917128-1aa500764cbd', 'photo-1519741497674-611481863552'],
+    rate: [150, 'day'],
+  },
+  'DECOR & MC': {
+    descs: ['Kitenge and flower decor for harusi and send-offs.', 'Bilingual MC for weddings, fundraisers and galas.', 'Balloon arches and backdrop walls for photos.', 'Table styling and centrepieces, set up and cleared.', 'Programme planning and MC for harambees.'],
+    imgs: ['photo-1519741497674-611481863552', 'photo-1519167758481-83f550bb49b3'],
+    rate: [200, null],
+  },
+};
+
+// A base rate in dollars, varied a little between providers.
+function rateFor([usd, unit], index) {
+  const amount = Math.round(usd * (0.8 + (index % 5) * 0.1));
+  return unit ? `$${amount}/${unit}` : `FROM $${amount}`;
+}
 
 function slugify(value) {
   return String(value).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
@@ -53,9 +92,9 @@ function buildCatalog() {
         rating: (4.5 + ((i + ci) % 5) * 0.1).toFixed(1),
         jobs: 12 + ((i * 17 + ci * 23) % 120),
         city: CITIES[(i * 2 + ci) % CITIES.length],
-        desc: DESCS[(i + ci) % DESCS.length],
-        rate: RATES[(i + ci) % RATES.length],
-        img: `https://images.unsplash.com/${IMGS[(i + ci) % IMGS.length]}?w=600&q=80`,
+        desc: BY_CATEGORY[cat].descs[i % BY_CATEGORY[cat].descs.length],
+        rate: rateFor(BY_CATEGORY[cat].rate, i),
+        img: `https://images.unsplash.com/${BY_CATEGORY[cat].imgs[i % BY_CATEGORY[cat].imgs.length]}?w=600&q=80`,
         verified: (i + ci) % 3 === 0,
       });
     }

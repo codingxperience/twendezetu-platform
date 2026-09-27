@@ -9,13 +9,14 @@
 import { prisma, transaction } from '../db.js';
 import { badRequest, forbidden, notFound } from '../errors.js';
 import { maskContacts, offPlatformPaymentSignal } from '../security/masking.js';
-import { notify } from '../notify/index.js';
+import { notify, notifyGuest } from '../notify/index.js';
 import { getSettings } from '../settings.js';
 import { formatMoney } from '../../shared/money.js';
 import { initials, messageStamp, ratingLabel, shortName, threadStamp } from '../../shared/format.js';
 import { reference } from '../security/crypto.js';
 import { maskPhone } from './identity.js';
 import { timezoneFor } from '../notify/preferences.js';
+import { requestClaimPath } from './guest-requests.js';
 
 export const NOTICES = {
   masked: 'Contact details are masked until an offer is accepted.',
@@ -121,6 +122,20 @@ export async function sendMessage(user, threadId, { text, fileId }) {
       title: `New message from ${shortName(user.name)}`,
       body: `${thread.subject}: ${body.slice(0, 140)}`,
     });
+    // A guest who asked without an account gets the reply by email.
+    const guest = await tx.serviceRequest.findFirst({ where: { threadId, requesterId: null }, select: { id: true, email: true } });
+    if (guest) {
+      const provider = thread.providerId ? await tx.provider.findUnique({ where: { id: thread.providerId }, select: { name: true } }) : null;
+      const from = provider?.name || shortName(user.name);
+      await notifyGuest(tx, {
+        email: guest.email,
+        topic: 'OFFERS',
+        subject: `${from} replied to your request`,
+        body: `${from} wrote:\n\n“${fileId ? 'They sent an attachment.' : body}”\n\nTo answer, open the link below and sign in or create a free account. Keep this email private: the link joins the conversation to whoever opens it.`,
+        href: requestClaimPath(guest.id),
+      });
+      await tx.serviceRequest.update({ where: { id: guest.id }, data: { status: 'REPLIED' } });
+    }
     return { id: message.id, redacted, flagged: suspicious };
   });
 }
@@ -134,6 +149,7 @@ export async function markThreadRead(user, threadId) {
 
 function counterpartOf(thread, viewerId) {
   const other = thread.participants.find((participant) => participant.userId !== viewerId);
+  if (!other && thread.kind === 'PROVIDER') return { name: 'Guest', initials: 'G', sub: 'NO ACCOUNT · REPLIES GO BY EMAIL', role: 'MEMBER', userId: null };
   if (!other) return { name: 'Twendezetu', initials: 'TZ', sub: '', role: 'MEMBER', userId: null };
   if (other.role === 'PROVIDER' && thread.provider) {
     const provider = thread.provider;

@@ -9,64 +9,57 @@ const template = `
       <a href="/" style="text-decoration: none; color: #14201F; font-family: var(--tz-display); font-size: 26px; text-transform: uppercase; line-height: 0.9;">TWENDE<br><span style="color: #D97A3B;">ZETU</span></a>
       <nav class="tw-nav" style="display: flex; gap: 24px; font-size: 14px; font-weight: 500;">
         <a href="/" style="color: #6E6155; text-decoration: none;">Event guide</a>
+        <a href="/providers" style="color: #6E6155; text-decoration: none;">Directory</a>
         <a href="/create-event" style="color: #6E6155; text-decoration: none;">Post an event or need</a>
         <a href="/provider-dashboard" style="color: #6E6155; text-decoration: none;">For providers</a>
       </nav>
     </div>
-    <a href="/sign-in" style="font-family: var(--tz-mono); font-size: 13px; background: #1F3A38; color: #F7F1E6; text-decoration: none; padding: 12px 20px; box-shadow: 4px 4px 0 #D97A3B;">SIGN IN →</a>
+    <a href="{{ accountHref }}" style="font-family: var(--tz-mono); font-size: 13px; background: #1F3A38; color: #F7F1E6; text-decoration: none; padding: 12px 20px; box-shadow: 4px 4px 0 #D97A3B;">{{ accountLabel }}</a>
   </header>
 
   <!-- Public-listing orientation -->
   <div style="background: #EFE7D6; border-bottom: 2px solid #1F3A38; padding: 9px 24px;">
     <div style="max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-family: var(--tz-mono); font-size: 11.5px; color: #6E6155;">
-      <span>▣ PUBLIC LISTING — this is exactly what customers see. Anyone can view or request a quote without an account.</span>
-      <a href="/provider-dashboard" style="color: #A85A23; text-decoration: none; white-space: nowrap;">Provider? Manage yours in the dashboard →</a>
+      <span>{{ orientation }}</span>
+      <a href="/provider-dashboard" style="color: #A85A23; text-decoration: none; white-space: nowrap;">{{ orientationLink }}</a>
     </div>
   </div>
 
   <!-- Breadcrumb -->
   <div style="max-width: 1200px; margin: 0 auto; padding: 20px 24px 0; font-family: var(--tz-mono); font-size: 12px; color: #6E6155;">
-    <a href="/" style="color: #A85A23;">← Providers</a> · Transport &amp; drivers · Kampala, Uganda
+    <a href="/providers" style="color: #A85A23;">← Providers</a> · <a href="{{ categoryHref }}" style="color: #6E6155;">{{ category }}</a> · {{ place }}
   </div>
 
   <!-- Title -->
   <section style="max-width: 1200px; margin: 0 auto; padding: 16px 24px 32px;">
     <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap;">
       <div>
-        <h1 style="font-family: var(--tz-display); font-size: clamp(44px, 7vw, 92px); text-transform: uppercase; line-height: 0.92; margin: 0;">Kato 4x4<br>&amp; Tours<span style="color: #D97A3B;">.</span></h1>
-        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; font-family: var(--tz-mono); font-size: 12.5px;">
-          <span style="background: #1F3A38; color: #F7F1E6; padding: 7px 13px;">★ 4.9 · 61 JOBS</span>
-          <span style="border: 2px solid #1F3A38; padding: 5px 13px;">KAMPALA + UP-COUNTRY</span>
-          <span style="border: 2px solid #1F3A38; padding: 5px 13px;">MEMBER SINCE 2026 ✓</span>
-          <span style="background: #D97A3B; border: 2px solid #1F3A38; color: #1F3A38; padding: 5px 13px;">RESPONDS IN ~2 HRS</span>
+        <h1 style="font-family: var(--tz-display); font-size: clamp(44px, 7vw, 92px); text-transform: uppercase; line-height: 0.92; margin: 0; max-width: 900px;">{{ name }}<span style="color: #D97A3B;">.</span></h1>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; font-family: var(--tz-mono); font-size: 12.5px; align-items: center;">
+          <span style="background: #1F3A38; color: #F7F1E6; padding: 7px 13px;">{{ ratingChip }}</span>
+          <span style="border: 2px solid #1F3A38; padding: 5px 13px;">{{ areasLabel }}</span>
+          <span style="border: 2px solid #1F3A38; padding: 5px 13px;">{{ memberChip }}</span>
+          <sc-if value="{{ response }}"><span style="background: #D97A3B; border: 2px solid #1F3A38; color: #1F3A38; padding: 5px 13px;">{{ response }}</span></sc-if>
+          <sc-if value="{{ canFollow }}"><button onClick="{{ toggleFollow }}" aria-pressed="{{ following }}" style="font-family: var(--tz-mono); font-size: 12px; border: 2px solid #1F3A38; background: {{ followBg }}; color: {{ followFg }}; padding: 6px 13px; cursor: pointer;">{{ followLabel }}</button></sc-if>
         </div>
       </div>
-      <div style="font-family: var(--tz-mono); font-size: 12px; color: #6E6155; text-align: right; line-height: 1.6;">4x4 hire · airport runs · wedding convoys<br>village-road specialist · flight tracking</div>
+      <div style="font-family: var(--tz-mono); font-size: 12px; color: #6E6155; text-align: right; line-height: 1.6; max-width: 360px;">{{ headline }}</div>
     </div>
   </section>
 
   <!-- Gallery carousel -->
   <section style="border-top: 2px solid #1F3A38; border-bottom: 2px solid #1F3A38; background: #14201F; position: relative;">
-    <sc-if value="{{ galleryIs0 }}" hint-placeholder-val="{{ true }}">
-      <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=1400&q=80" alt="Land Cruiser on the open road" style="width: 100%; height: 400px; object-fit: cover; display: block;">
-    </sc-if>
-    <sc-if value="{{ galleryIs1 }}" hint-placeholder-val="{{ false }}">
-      <img src="https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=1400&q=80" alt="Driver at the wheel" style="width: 100%; height: 400px; object-fit: cover; display: block;">
-    </sc-if>
-    <sc-if value="{{ galleryIs2 }}" hint-placeholder-val="{{ false }}">
-      <img src="https://images.unsplash.com/photo-1502877338535-766e1452684a?w=1400&q=80" alt="Vehicle detail" style="width: 100%; height: 400px; object-fit: cover; display: block;">
-    </sc-if>
-    <sc-if value="{{ galleryIs3 }}" hint-placeholder-val="{{ false }}">
-      <img src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1400&q=80" alt="Up-country route" style="width: 100%; height: 400px; object-fit: cover; display: block;">
-    </sc-if>
-    <button onClick="{{ galleryPrev }}" style="position: absolute; left: 18px; top: 50%; transform: translateY(-50%); width: 46px; height: 46px; border: 2px solid #1F3A38; background: #F7F1E6; font-family: var(--tz-mono); font-size: 17px; cursor: pointer; box-shadow: 3px 3px 0 #1F3A38;">←</button>
-    <button onClick="{{ galleryNext }}" style="position: absolute; right: 18px; top: 50%; transform: translateY(-50%); width: 46px; height: 46px; border: 2px solid #1F3A38; background: #F7F1E6; font-family: var(--tz-mono); font-size: 17px; cursor: pointer; box-shadow: 3px 3px 0 #1F3A38;">→</button>
+    <img src="{{ galleryImg }}" alt="{{ galleryAlt }}" style="width: 100%; height: 400px; object-fit: cover; display: block;">
+    <sc-if value="{{ galleryMany }}">
+    <button onClick="{{ galleryPrev }}" aria-label="Previous photo" style="position: absolute; left: 18px; top: 50%; transform: translateY(-50%); width: 46px; height: 46px; border: 2px solid #1F3A38; background: #F7F1E6; font-family: var(--tz-mono); font-size: 17px; cursor: pointer; box-shadow: 3px 3px 0 #1F3A38;">←</button>
+    <button onClick="{{ galleryNext }}" aria-label="Next photo" style="position: absolute; right: 18px; top: 50%; transform: translateY(-50%); width: 46px; height: 46px; border: 2px solid #1F3A38; background: #F7F1E6; font-family: var(--tz-mono); font-size: 17px; cursor: pointer; box-shadow: 3px 3px 0 #1F3A38;">→</button>
     <div style="position: absolute; left: 0; right: 0; bottom: 14px; display: flex; justify-content: center; gap: 8px;">
       <sc-for list="{{ galleryDots }}" as="g" hint-placeholder-count="4">
-        <button onClick="{{ g.go }}" style="width: 12px; height: 12px; border: 2px solid #F7F1E6; background: {{ g.bg }}; cursor: pointer; padding: 0;"></button>
+        <button onClick="{{ g.go }}" aria-label="{{ g.label }}" style="width: 12px; height: 12px; border: 2px solid #F7F1E6; background: {{ g.bg }}; cursor: pointer; padding: 0;"></button>
       </sc-for>
     </div>
     <span style="position: absolute; top: 14px; right: 18px; font-family: var(--tz-mono); font-size: 11px; background: rgba(20,32,31,0.7); color: #F7F1E6; padding: 5px 10px;">{{ galleryCount }}</span>
+    </sc-if>
   </section>
 
   <!-- Body -->
@@ -75,9 +68,7 @@ const template = `
     <!-- Left -->
     <div>
       <div style="font-family: var(--tz-mono); font-size: 12px; color: #A85A23; letter-spacing: 0.08em;">[Kuhusu — about]</div>
-      <p style="font-size: 17px; line-height: 1.6; margin: 12px 0 0;">
-        <em style="font-family: var(--tz-serif);">"The roads to the village don't scare us."</em> Ten years driving Kampala, Jinja, Mbale and everywhere the tarmac ends. Clean Land Cruiser and Hilux fleet, patient drivers, flight tracking for late arrivals, and honest quotes — fuel spelled out, no surprises.
-      </p>
+      <p style="font-size: 17px; line-height: 1.6; margin: 12px 0 0; white-space: pre-line;">{{ description }}</p>
 
       <!-- Services -->
       <div style="font-family: var(--tz-mono); font-size: 12px; color: #A85A23; letter-spacing: 0.08em; margin-top: 36px;">[Huduma — services &amp; guide rates]</div>
@@ -93,20 +84,20 @@ const template = `
           </div>
         </sc-for>
       </div>
-      <div style="font-size: 12px; color: #6E6155; margin-top: 8px;">Guide rates — final quotes come as offers on your posted need. 5–7% platform fee applies only when money moves through Twendezetu.</div>
+      <div style="font-size: 12px; color: #6E6155; margin-top: 8px;">{{ feeNote }}</div>
 
       <!-- Reviews -->
       <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-top: 36px; flex-wrap: wrap;">
         <span style="font-family: var(--tz-mono); font-size: 12px; color: #A85A23; letter-spacing: 0.08em;">[Maoni — reviews]</span>
-        <button onClick="{{ toggleWrite }}" style="font-family: var(--tz-mono); font-size: 12px; border: 2px solid #1F3A38; background: {{ writeBg }}; color: {{ writeFg }}; padding: 9px 14px; cursor: pointer;">{{ writeLabel }}</button>
+        <sc-if value="{{ canReview }}"><button onClick="{{ toggleWrite }}" aria-expanded="{{ writeOpen }}" style="font-family: var(--tz-mono); font-size: 12px; border: 2px solid #1F3A38; background: {{ writeBg }}; color: {{ writeFg }}; padding: 9px 14px; cursor: pointer;">{{ writeLabel }}</button></sc-if>
       </div>
 
       <!-- Rating summary + breakdown -->
       <div class="tw-2col" style="display: grid; grid-template-columns: 200px 1fr; gap: 24px; border: 2px solid #1F3A38; background: #FFFDF8; padding: 20px 22px; margin-top: 12px; align-items: center;">
         <div style="text-align: center; border-right: 2px solid #E3D9C6;">
           <div style="font-family: var(--tz-display); font-size: 52px; line-height: 1;">{{ avgRating }}</div>
-          <div style="font-family: var(--tz-mono); font-size: 13px; color: #A85A23;">★★★★★</div>
-          <div style="font-family: var(--tz-mono); font-size: 11px; color: #6E6155; margin-top: 4px;">{{ reviewCount }} reviews</div>
+          <div style="font-family: var(--tz-mono); font-size: 13px; color: #A85A23;" aria-hidden="true">{{ avgStars }}</div>
+          <div style="font-family: var(--tz-mono); font-size: 11px; color: #6E6155; margin-top: 4px;">{{ reviewCountLabel }}</div>
         </div>
         <div style="display: grid; gap: 6px;">
           <sc-for list="{{ breakdown }}" as="b" hint-placeholder-count="5">
@@ -122,18 +113,20 @@ const template = `
       <!-- Write review form (gated) -->
       <sc-if value="{{ writeOpen }}" hint-placeholder-val="{{ false }}">
         <div style="border: 2px solid #1F3A38; background: #1F3A38; color: #F7F1E6; padding: 20px 22px; margin-top: 12px;">
-          <div style="font-family: var(--tz-mono); font-size: 11px; color: #E8A472; letter-spacing: 0.08em;">[Andika maoni — you can review because booking #BK-5521 is marked complete]</div>
+          <div style="font-family: var(--tz-mono); font-size: 11px; color: #E8A472; letter-spacing: 0.08em;">[Andika maoni — {{ reviewBecause }}]</div>
           <div style="display: flex; gap: 6px; margin: 14px 0;">
             <sc-for list="{{ starPicker }}" as="st" hint-placeholder-count="5">
-              <button onClick="{{ st.pick }}" style="background: none; border: 0; cursor: pointer; font-size: 30px; line-height: 1; color: {{ st.color }};">★</button>
+              <button onClick="{{ st.pick }}" aria-label="{{ st.label }}" style="background: none; border: 0; cursor: pointer; font-size: 30px; line-height: 1; color: {{ st.color }};">★</button>
             </sc-for>
           </div>
-          <select onChange="{{ setJob }}" style="border: 2px solid rgba(247,241,230,0.4); background: #14201F; color: #F7F1E6; padding: 11px 14px; font-family: var(--tz-sans); font-size: 13.5px; outline: none; width: 100%; box-sizing: border-box; margin-bottom: 10px;">
-            <option>Which job? — Up-country, 2 days (Sep)</option><option>Airport pickup (Sep)</option><option>Wedding convoy (Oct)</option>
+          <sc-if value="{{ manyJobs }}">
+          <select value="{{ jobId }}" onChange="{{ setJob }}" aria-label="Which job" style="border: 2px solid rgba(247,241,230,0.4); background: #14201F; color: #F7F1E6; padding: 11px 14px; font-family: var(--tz-sans); font-size: 13.5px; outline: none; width: 100%; box-sizing: border-box; margin-bottom: 10px;">
+            <sc-for list="{{ reviewJobs }}" as="j"><option value="{{ j.id }}">{{ j.label }}</option></sc-for>
           </select>
-          <textarea rows="3" value="{{ draft }}" onChange="{{ setDraft }}" placeholder="How was it? Be specific — future customers rely on you." style="width: 100%; box-sizing: border-box; border: 2px solid rgba(247,241,230,0.4); background: rgba(247,241,230,0.06); color: #F7F1E6; padding: 12px 14px; font-family: var(--tz-sans); font-size: 14px; outline: none; resize: vertical;"></textarea>
+          </sc-if>
+          <textarea rows="3" value="{{ draft }}" onChange="{{ setDraft }}" maxlength="1200" aria-label="Your review" placeholder="How was it? Be specific — future customers rely on you." style="width: 100%; box-sizing: border-box; border: 2px solid rgba(247,241,230,0.4); background: rgba(247,241,230,0.06); color: #F7F1E6; padding: 12px 14px; font-family: var(--tz-sans); font-size: 14px; outline: none; resize: vertical;"></textarea>
           <div style="display: flex; gap: 8px; margin-top: 12px;">
-            <button onClick="{{ submitReview }}" style="font-family: var(--tz-display); font-size: 14px; text-transform: uppercase; background: #D97A3B; color: #14201F; border: 0; padding: 11px 22px; cursor: pointer;">Post review</button>
+            <button onClick="{{ submitReview }}" aria-busy="{{ postingReview }}" style="font-family: var(--tz-display); font-size: 14px; text-transform: uppercase; background: #D97A3B; color: #14201F; border: 0; padding: 11px 22px; cursor: pointer;">Post review</button>
             <button onClick="{{ toggleWrite }}" style="font-family: var(--tz-mono); font-size: 11.5px; border: 1px solid rgba(247,241,230,0.5); background: none; color: #F7F1E6; padding: 11px 16px; cursor: pointer;">CANCEL</button>
           </div>
           <sc-if value="{{ reviewError }}" hint-placeholder-val="{{ false }}">
@@ -143,6 +136,7 @@ const template = `
       </sc-if>
 
       <div style="display: grid; gap: 12px; margin-top: 12px;">
+        <sc-if value="{{ noReviews }}"><div style="border: 2px dashed #1F3A38; padding: 16px 18px; font-size: 13.5px; color: #6E6155;">No reviews yet. Reviews on Twendezetu only come from completed bookings.</div></sc-if>
         <sc-for list="{{ reviews }}" as="rv" hint-placeholder-count="3">
           <div style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 18px 20px;">
             <div style="display: flex; justify-content: space-between; gap: 12px; font-family: var(--tz-mono); font-size: 11.5px;">
@@ -153,7 +147,7 @@ const template = `
             <div style="font-size: 12.5px; color: #6E6155;">— {{ rv.who }}</div>
             <sc-if value="{{ rv.reply }}" hint-placeholder-val="{{ false }}">
               <div style="border-left: 3px solid #D97A3B; background: #EFE7D6; padding: 10px 14px; margin-top: 12px;">
-                <div style="font-family: var(--tz-mono); font-size: 10.5px; color: #A85A23;">↳ KATO 4X4 REPLIED</div>
+                <div style="font-family: var(--tz-mono); font-size: 10.5px; color: #A85A23;">↳ {{ nameUpper }} REPLIED</div>
                 <div style="font-size: 13px; color: #3A2F25; line-height: 1.5; margin-top: 4px;">{{ rv.reply }}</div>
               </div>
             </sc-if>
@@ -166,26 +160,42 @@ const template = `
     <aside class="tw-sticky" style="position: sticky; top: 100px; display: grid; gap: 16px;">
       <div style="border: 2px solid #1F3A38; background: #FFFDF8; box-shadow: 6px 6px 0 #1F3A38; padding: 22px;">
         <div style="font-family: var(--tz-mono); font-size: 11px; color: #A85A23; letter-spacing: 0.08em;">[Omba huduma — request]</div>
-        <div style="font-family: var(--tz-display); font-size: 24px; text-transform: uppercase; margin: 8px 0 4px;">Book Kato for your dates</div>
-        <p style="font-size: 13px; color: #6E6155; line-height: 1.5; margin: 0 0 14px;">Your contacts stay masked. Kato sees the job, not your phone number — until you accept.</p>
+        <div style="font-family: var(--tz-display); font-size: 24px; text-transform: uppercase; margin: 8px 0 4px;">Ask {{ name }} for a quote</div>
+        <p style="font-size: 13px; color: #6E6155; line-height: 1.5; margin: 0 0 14px;">Your contacts stay masked. {{ name }} sees the job, not your phone number or email.</p>
+        <sc-if value="{{ reqDone }}">
+          <div role="status" style="border: 2px solid #1F3A38; background: #1F3A38; color: #F7F1E6; padding: 14px 16px;">
+            <div style="font-family: var(--tz-display); font-size: 16px; text-transform: uppercase;">✓ Request sent</div>
+            <div style="font-size: 12.5px; color: rgba(247,241,230,0.82); line-height: 1.5; margin-top: 6px;">{{ reqDoneNote }}</div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ reqNotDone }}">
         <div style="display: grid; gap: 10px;">
-          <input type="date" value="2026-09-12" style="border: 2px solid #1F3A38; background: #F7F1E6; padding: 12px 14px; font-family: var(--tz-sans); font-size: 14px; outline: none;">
-          <input placeholder="Where to? e.g. Kampala → Jinja" style="border: 2px solid #1F3A38; background: #F7F1E6; padding: 12px 14px; font-family: var(--tz-sans); font-size: 14px; outline: none;">
-          <a href="/create-event" style="font-family: var(--tz-display); font-size: 16px; text-transform: uppercase; background: #D97A3B; color: #1F3A38; border: 2px solid #1F3A38; padding: 14px; text-align: center; text-decoration: none; box-shadow: 4px 4px 0 #1F3A38;">Request via platform →</a>
-          <button onClick="{{ toggleAsk }}" style="font-family: var(--tz-mono); font-size: 12px; border: 2px solid #1F3A38; background: {{ askBg }}; padding: 11px; cursor: pointer;">✉ ASK A QUESTION FIRST</button>
-          <sc-if value="{{ askOpen }}" hint-placeholder-val="{{ false }}">
-            <div style="display: grid; gap: 8px; border-top: 1px dashed #C9BFB1; padding-top: 12px;">
-              <textarea rows="3" value="{{ question }}" onChange="{{ setQuestion }}" placeholder="e.g. Can the Land Cruiser handle the road past Mbale after rain?" style="border: 2px solid #1F3A38; background: #F7F1E6; padding: 11px 13px; font-family: var(--tz-sans); font-size: 13.5px; outline: none; resize: vertical;"></textarea>
+          <input type="date" value="{{ reqDate }}" onChange="{{ setReqDate }}" aria-label="When" style="border: 2px solid #1F3A38; background: #F7F1E6; padding: 12px 14px; font-family: var(--tz-sans); font-size: 14px; outline: none;">
+          <textarea rows="3" value="{{ reqMsg }}" onChange="{{ setReqMsg }}" maxlength="2000" aria-label="What you need" placeholder="{{ reqPlaceholder }}" style="border: 2px solid #1F3A38; background: #F7F1E6; padding: 12px 14px; font-family: var(--tz-sans); font-size: 14px; outline: none; resize: vertical;"></textarea>
+          <sc-if value="{{ me.signedOut }}">
+            <input value="{{ reqName }}" onChange="{{ setReqName }}" autocomplete="name" aria-label="Your name" placeholder="Your name" style="border: 2px solid #1F3A38; background: #F7F1E6; padding: 12px 14px; font-family: var(--tz-sans); font-size: 14px; outline: none;">
+            <input type="email" value="{{ reqEmail }}" onChange="{{ setReqEmail }}" autocomplete="email" aria-label="Your email" placeholder="Email — replies come here, kept hidden" style="border: 2px solid #1F3A38; background: #F7F1E6; padding: 12px 14px; font-family: var(--tz-sans); font-size: 14px; outline: none;">
+          </sc-if>
+          <sc-if value="{{ reqError }}"><div role="alert" style="font-size: 12.5px; color: #B8463A;">{{ reqError }}</div></sc-if>
+          <button onClick="{{ sendReq }}" aria-busy="{{ sendingReq }}" style="font-family: var(--tz-display); font-size: 16px; text-transform: uppercase; background: #D97A3B; color: #1F3A38; border: 2px solid #1F3A38; padding: 14px; text-align: center; cursor: pointer; box-shadow: 4px 4px 0 #1F3A38;">Send request →</button>
+          <a href="/create-event?kind=need" style="font-family: var(--tz-mono); font-size: 11.5px; color: #A85A23; text-align: center;">or post a need and compare offers from several providers</a>
+        </div>
+        </sc-if>
+        <sc-if value="{{ me.signedIn }}">
+          <button onClick="{{ toggleAsk }}" aria-expanded="{{ askOpen }}" style="width: 100%; margin-top: 10px; font-family: var(--tz-mono); font-size: 12px; border: 2px solid #1F3A38; background: {{ askBg }}; padding: 11px; cursor: pointer;">✉ ASK A QUESTION FIRST</button>
+          <sc-if value="{{ askOpen }}">
+            <div style="display: grid; gap: 8px; border-top: 1px dashed #C9BFB1; padding-top: 12px; margin-top: 10px;">
+              <textarea rows="3" value="{{ question }}" onChange="{{ setQuestion }}" maxlength="1000" aria-label="Your question" placeholder="{{ askPlaceholder }}" style="border: 2px solid #1F3A38; background: #F7F1E6; padding: 11px 13px; font-family: var(--tz-sans); font-size: 13.5px; outline: none; resize: vertical;"></textarea>
               <button onClick="{{ sendAsk }}" style="font-family: var(--tz-mono); font-size: 12px; background: #1F3A38; color: #F7F1E6; border: 2px solid #1F3A38; padding: 11px; cursor: pointer;">SEND — MASKED THREAD OPENS →</button>
             </div>
           </sc-if>
-        </div>
+        </sc-if>
       </div>
 
       <div style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 20px 22px;">
         <div style="font-family: var(--tz-mono); font-size: 11px; color: #A85A23; letter-spacing: 0.08em;">[Share this provider]</div>
         <div style="display: flex; border: 2px solid #1F3A38; margin-top: 10px;">
-          <input value="twende.to/p/kato-4x4" readOnly style="flex: 1; min-width: 0; border: 0; background: #EFE7D6; font-family: var(--tz-mono); font-size: 12px; padding: 10px 12px; outline: none;">
+          <input value="{{ shareUrl }}" readOnly aria-label="Link to this provider" style="flex: 1; min-width: 0; border: 0; background: #EFE7D6; font-family: var(--tz-mono); font-size: 12px; padding: 10px 12px; outline: none;">
           <button onClick="{{ copyLink }}" style="border: 0; border-left: 2px solid #1F3A38; background: #D97A3B; font-family: var(--tz-mono); font-size: 11px; padding: 0 14px; cursor: pointer;">{{ copyLabel }}</button>
         </div>
         <div style="display: flex; gap: 8px; margin-top: 10px;">
@@ -205,8 +215,8 @@ const template = `
       </div>
 
       <div style="border: 2px solid #1F3A38; background: #1F3A38; color: #F7F1E6; padding: 20px 22px;">
-        <div style="font-family: var(--tz-mono); font-size: 11px; color: #E8A472; letter-spacing: 0.08em;">[Verified member]</div>
-        <div style="font-size: 13.5px; line-height: 1.55; margin-top: 8px; color: rgba(247,241,230,0.85);">Active 12-month membership · ID verified · payments protected when booked through the platform.</div>
+        <div style="font-family: var(--tz-mono); font-size: 11px; color: #E8A472; letter-spacing: 0.08em;">{{ trustTitle }}</div>
+        <div style="font-size: 13.5px; line-height: 1.55; margin-top: 8px; color: rgba(247,241,230,0.85);">{{ trustText }}</div>
       </div>
     </aside>
   </section>
@@ -217,11 +227,11 @@ const template = `
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
         <div>
           <div style="font-family: var(--tz-mono); font-size: 12px; color: #A85A23; letter-spacing: 0.08em;">[Watoa huduma wengine — more providers]</div>
-          <h2 style="font-family: var(--tz-display); font-size: 32px; text-transform: uppercase; margin: 6px 0 0;">Browse the directory<span style="color: #D97A3B;">.</span></h2>
+          <h2 style="font-family: var(--tz-display); font-size: 32px; text-transform: uppercase; margin: 6px 0 0;"><a href="{{ categoryHref }}" style="color: inherit; text-decoration: none;">More {{ category }}<span style="color: #D97A3B;">.</span></a></h2>
         </div>
         <div style="display: flex; gap: 8px;">
-          <button onClick="{{ dirPrev }}" style="width: 46px; height: 46px; border: 2px solid #1F3A38; background: #FFFDF8; font-family: var(--tz-mono); font-size: 17px; cursor: pointer; box-shadow: 3px 3px 0 #1F3A38;">←</button>
-          <button onClick="{{ dirNext }}" style="width: 46px; height: 46px; border: 2px solid #1F3A38; background: #FFFDF8; font-family: var(--tz-mono); font-size: 17px; cursor: pointer; box-shadow: 3px 3px 0 #1F3A38;">→</button>
+          <button onClick="{{ dirPrev }}" aria-label="Previous providers" style="width: 46px; height: 46px; border: 2px solid #1F3A38; background: #FFFDF8; font-family: var(--tz-mono); font-size: 17px; cursor: pointer; box-shadow: 3px 3px 0 #1F3A38;">←</button>
+          <button onClick="{{ dirNext }}" aria-label="More providers" style="width: 46px; height: 46px; border: 2px solid #1F3A38; background: #FFFDF8; font-family: var(--tz-mono); font-size: 17px; cursor: pointer; box-shadow: 3px 3px 0 #1F3A38;">→</button>
         </div>
       </div>
       <div style="overflow: hidden;">
@@ -253,9 +263,9 @@ const template = `
   <footer style="background: #1F3A38; color: #F7F1E6; padding: 32px 24px 0; overflow: hidden; border-top: 2px solid #1F3A38;">
     <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; padding-bottom: 24px; font-size: 14px; flex-wrap: wrap; gap: 12px;">
       <span style="color: rgba(247,241,230,0.75);">PROVIDERS: LIST YOUR SERVICE — 12-MONTH MEMBERSHIP</span>
-      <a href="/sign-in" style="color: #E8A472;">Join as a provider →</a>
+      <a href="/provider-dashboard" style="color: #E8A472;">List your service →</a>
     </div>
-    <div style="font-family: var(--tz-display); font-size: clamp(56px, 11vw, 180px); text-transform: uppercase; line-height: 0.78; text-align: center; transform: translateY(12%);">KATO 4X4</div>
+    <div aria-hidden="true" style="font-family: var(--tz-display); font-size: clamp(56px, 11vw, 180px); text-transform: uppercase; line-height: 0.78; text-align: center; transform: translateY(12%); white-space: nowrap;">{{ footerName }}</div>
   </footer>
 </div>
 `;

@@ -15,7 +15,10 @@ import { getSettings } from '../settings.js';
 import { COUNTRIES, PROVIDER_CATEGORIES, initials, monthYear, rateLabel, ratingLabel, relativeTime, shortName, stars } from '../../shared/format.js';
 import { awardReferral } from './referrals.js';
 import { uniqueSlug } from './events.js';
-import { findOrCreateThread, sendMessage } from './threads.js';
+import { appendMessage, findOrCreateThread, sendMessage } from './threads.js';
+import { maskContacts } from '../security/masking.js';
+import { safeEqual } from '../security/crypto.js';
+import { requestClaimKey, requestClaimPath } from './guest-requests.js';
 import { requireStepUp } from './identity.js';
 import { leadsForProvider } from './marketplace.js';
 
@@ -45,7 +48,7 @@ export async function listProviders({ category, city, q, limit = 60, excludeId }
     if (terms.length) {
       const rows = await prisma.$queryRaw`
         SELECT "id" FROM "Provider"
-         WHERE app_private.search_document("name", "headline", "city") @@ to_tsquery('simple', ${terms.map((term) => `${term}:*`).join(' & ')})
+         WHERE app_private.search_document("name", "headline", "city", "description") @@ to_tsquery('simple', ${terms.map((term) => `${term}:*`).join(' & ')})
          LIMIT 200`;
       where.id = { in: rows.map((row) => row.id) };
     }
@@ -147,14 +150,18 @@ async function listedProvider(slug) {
   return provider;
 }
 
+// A guest's request opens a conversation the provider answers from Messages
+// like any other. Replies reach the guest by email through the platform, so
+// neither side sees the other's contact details (see guest-requests.js).
+
 export async function requestService({ slug, viewer, name, email, message }) {
   const provider = await listedProvider(slug);
   if (viewer?.id === provider.ownerId) throw badRequest('That is your own listing.');
   const requesterName = (viewer?.name || name || '').trim();
   const requesterEmail = (viewer?.email || email || '').trim().toLowerCase();
   if (!requesterName || !requesterEmail) throw invalid('Add your name and email so replies can reach you.');
+  const text = message.trim().slice(0, 2000);
 
-  let threadId = null;
   if (viewer) {
     const thread = await transaction((tx) =>
       findOrCreateThread(tx, {
@@ -167,32 +174,65 @@ export async function requestService({ slug, viewer, name, email, message }) {
         ],
       }),
     );
-    await sendMessage(viewer, thread.id, { text: message });
-    threadId = thread.id;
+    await sendMessage(viewer, thread.id, { text });
+    await prisma.serviceRequest.create({
+      data: { providerId: provider.id, requesterId: viewer.id, name: requesterName, email: requesterEmail, message: text, threadId: thread.id },
+    });
+    return { sent: true, threadId: thread.id };
   }
 
+  const { text: masked } = maskContacts(text);
   await transaction(async (tx) => {
-    await tx.serviceRequest.create({
-      data: { providerId: provider.id, requesterId: viewer?.id || null, name: requesterName, email: requesterEmail, message: message.trim().slice(0, 2000), threadId },
+    const thread = await tx.thread.create({
+      data: {
+        kind: 'PROVIDER',
+        subject: `Request from ${shortName(requesterName)} (guest)`,
+        providerId: provider.id,
+        participants: { create: [{ userId: provider.ownerId, role: 'PROVIDER' }] },
+      },
+    });
+    await appendMessage(tx, { threadId: thread.id, kind: 'NOTICE', body: `Request from ${shortName(requesterName)}, sent without an account: “${masked}”` });
+    const request = await tx.serviceRequest.create({
+      data: { providerId: provider.id, requesterId: null, name: requesterName, email: requesterEmail, message: text, threadId: thread.id },
     });
     await notify(tx, {
       userId: provider.ownerId,
       topic: 'LEADS',
-      title: `New service request from ${shortName(requesterName)}`,
-      body: message.trim().slice(0, 200),
-      href: threadId ? `/messages?thread=${threadId}` : '/provider-dashboard',
+      title: `New request from ${shortName(requesterName)}`,
+      body: masked.slice(0, 200),
+      href: `/messages?thread=${thread.id}`,
     });
-    if (!viewer) {
-      await notifyGuest(tx, {
-        email: requesterEmail,
-        topic: 'OFFERS',
-        subject: `Your request to ${provider.name} was sent`,
-        body: `${provider.name} has your request. Replies come to this email address, and your contact details stay hidden from the provider until you choose to share them.`,
-        href: `/providers/${provider.slug}`,
-      });
-    }
+    await notifyGuest(tx, {
+      email: requesterEmail,
+      topic: 'OFFERS',
+      subject: `Your request to ${provider.name} was sent`,
+      body: `${provider.name} has your request and will reply through Twendezetu. Their replies come to this email, and your address stays hidden from them.\n\nTo reply, open the link below and sign in or create a free account. Keep this email private: the link joins the conversation to whoever opens it.`,
+      href: requestClaimPath(request.id),
+    });
   });
-  return { sent: true, threadId };
+  return { sent: true, threadId: null };
+}
+
+// Joins a guest request's conversation to the signed-in account.
+export async function claimServiceRequest(viewer, requestId, key) {
+  const request = await prisma.serviceRequest.findUnique({ where: { id: requestId } });
+  if (!request || typeof key !== 'string' || !safeEqual(key, requestClaimKey(request.id))) throw notFound('That link is not valid.');
+  if (!request.threadId) throw notFound('That request has no conversation.');
+  if (request.requesterId) {
+    if (request.requesterId !== viewer.id) throw forbidden('This request already belongs to another account.');
+    return { threadId: request.threadId };
+  }
+  const provider = await prisma.provider.findUnique({ where: { id: request.providerId }, select: { ownerId: true } });
+  if (provider.ownerId === viewer.id) throw badRequest('That is your own listing.');
+  await transaction(async (tx) => {
+    const claimed = await tx.serviceRequest.updateMany({ where: { id: request.id, requesterId: null }, data: { requesterId: viewer.id } });
+    if (!claimed.count) throw conflict('This request was just joined to another account.', 'claimed');
+    await tx.threadParticipant.create({ data: { threadId: request.threadId, userId: viewer.id, role: 'MEMBER', lastReadAt: null } });
+    await tx.thread.update({ where: { id: request.threadId }, data: { subject: `Service request · ${request.name.split(' ')[0]}` } });
+    await appendMessage(tx, { threadId: request.threadId, kind: 'NOTICE', body: `${shortName(viewer.name)} joined from their email. Replies now arrive here in Messages.` });
+    await audit(tx, { actorId: viewer.id, action: 'request.claimed', targetType: 'ServiceRequest', targetId: request.id });
+  });
+  return { threadId: request.threadId };
 }
 
 export async function askProvider(viewer, slug, question) {

@@ -9,6 +9,8 @@ import { myTwendeView } from './myTwende.js';
 import { messagesView } from './messages.js';
 import { walletView } from './wallet.js';
 import { createView } from './create.js';
+import { providerView } from './provider.js';
+import { providersView } from './providers.js';
 
 export const VIEWS = {
   home: homeView,
@@ -18,4 +20,6 @@ export const VIEWS = {
   messages: messagesView,
   wallet: walletView,
   create: createView,
+  provider: providerView,
+  providers: providersView,
 };

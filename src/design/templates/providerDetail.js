@@ -14,7 +14,7 @@ const template = `
       </nav>
     </div>
     <div style="display: flex; gap: 10px; align-items: center;">
-      <a href="/sign-in" style="font-size: 14px; font-weight: 600; color: #14201F; text-decoration: none; padding: 10px 16px;">Sign in</a>
+      <a href="{{ accountHref }}" style="font-size: 14px; font-weight: 600; color: #14201F; text-decoration: none; padding: 10px 16px;">{{ accountLabelPlain }}</a>
       <a href="/provider-dashboard" style="font-family: var(--tz-mono); font-size: 13px; background: #1F3A38; color: #F7F1E6; text-decoration: none; padding: 12px 20px; box-shadow: 4px 4px 0 #D97A3B;">FOR PROVIDERS →</a>
     </div>
   </header>
@@ -25,22 +25,24 @@ const template = `
   </div>
 
   <div style="max-width: 1200px; margin: 0 auto; padding: 20px 24px 0; font-family: var(--tz-mono); font-size: 12px; color: #6E6155;">
-    <a href="{{ backHref }}" style="color: #A85A23;">← Back to directory</a> · {{ category }}
+    <a href="/providers" style="color: #A85A23;">← Back to directory</a> · <a href="{{ categoryHref }}" style="color: #6E6155;">{{ category }}</a> · {{ place }}
   </div>
 
   <!-- Title -->
   <section style="max-width: 1200px; margin: 0 auto; padding: 16px 24px 24px;">
     <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
       <h1 style="font-family: var(--tz-display); font-size: clamp(38px, 6vw, 80px); text-transform: uppercase; line-height: 0.92; margin: 0;">{{ name }}<span style="color: #D97A3B;">.</span></h1>
-      <sc-if value="{{ isVerified }}" hint-placeholder-val="{{ true }}">
-        <span style="font-family: var(--tz-mono); font-size: 11px; background: #1F3A38; color: #F7F1E6; padding: 6px 12px;">✓ VERIFIED</span>
+      <sc-if value="{{ isVerified }}">
+        <span style="font-family: var(--tz-mono); font-size: 11px; background: #1F3A38; color: #F7F1E6; padding: 6px 12px;">✓ ID VERIFIED</span>
       </sc-if>
+      <sc-if value="{{ canFollow }}"><button onClick="{{ toggleFollow }}" aria-pressed="{{ following }}" style="font-family: var(--tz-mono); font-size: 11px; border: 2px solid #1F3A38; background: {{ followBg }}; color: {{ followFg }}; padding: 6px 12px; cursor: pointer;">{{ followLabel }}</button></sc-if>
     </div>
     <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; font-family: var(--tz-mono); font-size: 13px;">
       <span style="background: #1F3A38; color: #F7F1E6; padding: 8px 14px;">{{ category }}</span>
       <span style="border: 2px solid #1F3A38; padding: 6px 14px;">{{ city }}</span>
-      <span style="border: 2px solid #1F3A38; color: #A85A23; padding: 6px 14px;">★ {{ rating }} · {{ jobs }} jobs</span>
-      <span style="background: #D97A3B; border: 2px solid #1F3A38; color: #1F3A38; padding: 6px 14px;">{{ rate }}</span>
+      <span style="border: 2px solid #1F3A38; color: #A85A23; padding: 6px 14px;">{{ ratingChip }}</span>
+      <sc-if value="{{ rate }}"><span style="background: #D97A3B; border: 2px solid #1F3A38; color: #1F3A38; padding: 6px 14px;">{{ rate }}</span></sc-if>
+      <sc-if value="{{ response }}"><span style="border: 2px solid #1F3A38; padding: 6px 14px;">{{ response }}</span></sc-if>
     </div>
   </section>
 
@@ -50,16 +52,28 @@ const template = `
       <div>
         <img src="{{ img }}" alt="{{ name }}" style="width: 100%; aspect-ratio: 16/10; object-fit: cover; border: 2px solid #1F3A38; display: block; box-shadow: 6px 6px 0 #1F3A38;">
         <h2 style="font-family: var(--tz-display); font-size: 26px; text-transform: uppercase; margin: 32px 0 10px;">About<span style="color: #D97A3B;">.</span></h2>
-        <p style="font-size: 16px; line-height: 1.6; color: #3A2F25; max-width: 640px;">{{ description }}</p>
+        <p style="font-size: 16px; line-height: 1.6; color: #3A2F25; max-width: 640px; white-space: pre-line;">{{ description }}</p>
+        <sc-if value="{{ hasServices }}">
+          <h2 style="font-family: var(--tz-display); font-size: 26px; text-transform: uppercase; margin: 30px 0 12px;">Services<span style="color: #D97A3B;">.</span></h2>
+          <div style="border: 2px solid #1F3A38; max-width: 640px;">
+            <sc-for list="{{ services }}" as="sv">
+              <div style="display: grid; grid-template-columns: 1fr auto; gap: 16px; padding: 14px 16px; border-bottom: 1px solid #E3D9C6; background: #FFFDF8; align-items: center;">
+                <div><div style="font-weight: 700; font-size: 14.5px;">{{ sv.title }}</div><div style="font-size: 13px; color: #6E6155; margin-top: 2px;">{{ sv.desc }}</div></div>
+                <span style="font-family: var(--tz-mono); font-size: 12.5px; color: #A85A23; white-space: nowrap;">{{ sv.rate }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
 
         <!-- Reviews -->
         <h2 style="font-family: var(--tz-display); font-size: 26px; text-transform: uppercase; margin: 30px 0 12px;">Reviews<span style="color: #D97A3B;">.</span></h2>
         <div style="display: grid; gap: 12px; max-width: 640px;">
+          <sc-if value="{{ noReviews }}"><div style="border: 2px dashed #1F3A38; padding: 14px 16px; font-size: 13.5px; color: #6E6155;">No reviews yet. Reviews on Twendezetu only come from completed bookings.</div></sc-if>
           <sc-for list="{{ reviews }}" as="rv" hint-placeholder-count="3">
             <div style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 14px 16px;">
               <div style="display: flex; justify-content: space-between; gap: 10px; font-family: var(--tz-mono); font-size: 11px;">
                 <span style="color: #A85A23;">{{ rv.stars }} · {{ rv.job }}</span>
-                <span style="color: #6E6155;">{{ rv.name }}</span>
+                <span style="color: #6E6155;">{{ rv.who }}</span>
               </div>
               <div style="font-size: 14px; color: #3A2F25; line-height: 1.5; margin-top: 8px;">{{ rv.body }}</div>
             </div>
@@ -71,39 +85,43 @@ const template = `
       <aside class="tw-sticky" style="position: sticky; top: 92px;">
         <div style="border: 2px solid #1F3A38; background: #FFFDF8; box-shadow: 6px 6px 0 #1F3A38;">
           <div style="padding: 18px 20px; border-bottom: 2px solid #1F3A38;">
-            <div style="font-family: var(--tz-display); font-size: 20px; text-transform: uppercase;">{{ rate }}</div>
-            <div style="font-family: var(--tz-mono); font-size: 11px; color: #6E6155; margin-top: 2px;">★ {{ rating }} · {{ jobs }} completed jobs</div>
+            <div style="font-family: var(--tz-display); font-size: 20px; text-transform: uppercase;">{{ rateOrAsk }}</div>
+            <div style="font-family: var(--tz-mono); font-size: 11px; color: #6E6155; margin-top: 2px;">{{ ratingChip }}</div>
           </div>
           <div style="padding: 18px 20px; display: grid; gap: 10px;">
 
             <!-- Request a quote (guest) -->
-            <button onClick="{{ toggleReq }}" style="width: 100%; font-family: var(--tz-display); font-size: 16px; text-transform: uppercase; background: {{ reqBg }}; color: {{ reqFg }}; border: 2px solid #1F3A38; padding: 13px; cursor: pointer; box-shadow: 4px 4px 0 #D97A3B;">{{ reqBtnLabel }}</button>
+            <button onClick="{{ toggleReq }}" aria-expanded="{{ reqOpen }}" style="width: 100%; font-family: var(--tz-display); font-size: 16px; text-transform: uppercase; background: {{ reqBg }}; color: {{ reqFg }}; border: 2px solid #1F3A38; padding: 13px; cursor: pointer; box-shadow: 4px 4px 0 #D97A3B;">{{ reqBtnLabel }}</button>
             <sc-if value="{{ reqOpen }}" hint-placeholder-val="{{ false }}">
               <sc-if value="{{ reqDone }}" hint-placeholder-val="{{ false }}">
                 <div style="border: 2px solid #1F3A38; background: #1F3A38; color: #F7F1E6; padding: 14px 16px;">
                   <div style="font-family: var(--tz-display); font-size: 16px; text-transform: uppercase;">✓ Request sent</div>
-                  <div style="font-size: 12.5px; color: rgba(247,241,230,0.82); line-height: 1.5; margin-top: 6px;">{{ name }} will reply in-platform. Your contact stays masked until you reveal it. No account needed — create one to track replies.</div>
+                  <div style="font-size: 12.5px; color: rgba(247,241,230,0.82); line-height: 1.5; margin-top: 6px;">{{ reqDoneNote }}</div>
                 </div>
               </sc-if>
               <sc-if value="{{ reqNotDone }}" hint-placeholder-val="{{ true }}">
                 <div style="display: grid; gap: 8px;">
                   <div style="font-family: var(--tz-mono); font-size: 10.5px; color: #A85A23;">[Request a service — masked, via platform]</div>
-                  <input placeholder="Your name" value="{{ reqName }}" onChange="{{ setReqName }}" style="border: 2px solid #1F3A38; background: #F7F1E6; padding: 10px 12px; font-family: var(--tz-sans); font-size: 13.5px; outline: none;">
-                  <input placeholder="Email (stays masked)" value="{{ reqEmail }}" onChange="{{ setReqEmail }}" style="border: 2px solid #1F3A38; background: #F7F1E6; padding: 10px 12px; font-family: var(--tz-sans); font-size: 13.5px; outline: none;">
-                  <textarea rows="3" placeholder="What do you need? Dates, city, budget." value="{{ reqMsg }}" onChange="{{ setReqMsg }}" style="border: 2px solid #1F3A38; background: #F7F1E6; padding: 10px 12px; font-family: var(--tz-sans); font-size: 13.5px; outline: none; resize: vertical;"></textarea>
-                  <button onClick="{{ sendReq }}" style="font-family: var(--tz-mono); font-size: 12px; background: #1F3A38; color: #F7F1E6; border: 2px solid #1F3A38; padding: 11px; cursor: pointer;">SEND REQUEST</button>
+                  <sc-if value="{{ me.signedOut }}">
+                  <input placeholder="Your name" autocomplete="name" aria-label="Your name" value="{{ reqName }}" onChange="{{ setReqName }}" style="border: 2px solid #1F3A38; background: #F7F1E6; padding: 10px 12px; font-family: var(--tz-sans); font-size: 13.5px; outline: none;">
+                  <input type="email" placeholder="Email — replies come here, kept hidden" autocomplete="email" aria-label="Your email" value="{{ reqEmail }}" onChange="{{ setReqEmail }}" style="border: 2px solid #1F3A38; background: #F7F1E6; padding: 10px 12px; font-family: var(--tz-sans); font-size: 13.5px; outline: none;">
+                  </sc-if>
+                  <textarea rows="3" placeholder="What do you need? Dates, city, budget." aria-label="What you need" maxlength="2000" value="{{ reqMsg }}" onChange="{{ setReqMsg }}" style="border: 2px solid #1F3A38; background: #F7F1E6; padding: 10px 12px; font-family: var(--tz-sans); font-size: 13.5px; outline: none; resize: vertical;"></textarea>
+                  <button onClick="{{ sendReq }}" aria-busy="{{ sendingReq }}" style="font-family: var(--tz-mono); font-size: 12px; background: #1F3A38; color: #F7F1E6; border: 2px solid #1F3A38; padding: 11px; cursor: pointer;">SEND REQUEST</button>
                   <sc-if value="{{ reqError }}" hint-placeholder-val="{{ false }}">
-                    <div style="font-size: 12px; color: #B8463A;">{{ reqError }}</div>
+                    <div role="alert" style="font-size: 12px; color: #B8463A;">{{ reqError }}</div>
                   </sc-if>
                 </div>
               </sc-if>
             </sc-if>
 
             <!-- Ask a question (guest) -->
-            <button onClick="{{ toggleAsk }}" style="width: 100%; font-family: var(--tz-mono); font-size: 12px; background: {{ askBg }}; color: #14201F; border: 2px solid #1F3A38; padding: 11px; cursor: pointer;">✎ ASK A QUESTION</button>
+            <sc-if value="{{ me.signedIn }}">
+            <button onClick="{{ toggleAsk }}" aria-expanded="{{ askOpen }}" style="width: 100%; font-family: var(--tz-mono); font-size: 12px; background: {{ askBg }}; color: #14201F; border: 2px solid #1F3A38; padding: 11px; cursor: pointer;">✎ ASK A QUESTION</button>
+            </sc-if>
             <sc-if value="{{ askOpen }}" hint-placeholder-val="{{ false }}">
               <div style="display: grid; gap: 8px;">
-                <textarea rows="2" placeholder="Ask about availability, travel, pricing…" value="{{ question }}" onChange="{{ setQuestion }}" style="border: 2px solid #1F3A38; background: #F7F1E6; padding: 10px 12px; font-family: var(--tz-sans); font-size: 13.5px; outline: none; resize: vertical;"></textarea>
+                <textarea rows="2" placeholder="Ask about availability, travel, pricing…" aria-label="Your question" maxlength="1000" value="{{ question }}" onChange="{{ setQuestion }}" style="border: 2px solid #1F3A38; background: #F7F1E6; padding: 10px 12px; font-family: var(--tz-sans); font-size: 13.5px; outline: none; resize: vertical;"></textarea>
                 <button onClick="{{ sendAsk }}" style="font-family: var(--tz-mono); font-size: 12px; background: #D97A3B; color: #14201F; border: 2px solid #1F3A38; padding: 11px; cursor: pointer;">SEND QUESTION</button>
               </div>
             </sc-if>
@@ -112,7 +130,7 @@ const template = `
             <div style="border-top: 2px solid #1F3A38; padding-top: 14px;">
               <div style="font-family: var(--tz-mono); font-size: 11px; color: #A85A23; letter-spacing: 0.08em; margin-bottom: 8px;">[Share this provider]</div>
               <div style="display: flex; border: 2px solid #1F3A38; margin-bottom: 8px;">
-                <input value="{{ shareUrl }}" readOnly style="flex: 1; min-width: 0; border: 0; background: #EFE7D6; font-family: var(--tz-mono); font-size: 11.5px; padding: 10px 11px; outline: none;">
+                <input value="{{ shareUrl }}" readOnly aria-label="Link to this provider" style="flex: 1; min-width: 0; border: 0; background: #EFE7D6; font-family: var(--tz-mono); font-size: 11.5px; padding: 10px 11px; outline: none;">
                 <button onClick="{{ copyLink }}" style="border: 0; border-left: 2px solid #1F3A38; background: #D97A3B; font-family: var(--tz-mono); font-size: 11px; padding: 0 12px; cursor: pointer;">{{ copyLabel }}</button>
               </div>
               <div style="display: flex; gap: 6px;">
