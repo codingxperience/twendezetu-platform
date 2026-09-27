@@ -43,7 +43,9 @@ const { storeFile } = await import('../src/server/storage.js');
 const { EVENT_CATALOG } = await import('./seed/events-content.mjs');
 const { PROVIDER_CATALOG } = await import('./seed/providers-content.mjs');
 
-export const DEMO_PASSWORD = 'karibu-twende-2026';
+// A hosted demo sets SEED_DEMO_PASSWORD so the demo accounts, staff ones
+// included, cannot be opened with the password printed in the README.
+export const DEMO_PASSWORD = process.env.SEED_DEMO_PASSWORD || 'karibu-twende-2026';
 const DAY = 86_400_000;
 const now = new Date();
 
@@ -913,7 +915,7 @@ async function main() {
 
   const [users, eventCount, providerCount, entries] = await Promise.all([prisma.user.count(), prisma.event.count(), prisma.provider.count(), prisma.journalEntry.count()]);
   console.log(`✓ Seeded ${users} people, ${eventCount} events, ${providerCount} providers, ${entries} ledger entries.`);
-  console.log(`  Sign in as amina@example.com, kato@example.com, events@example.com, admin@example.com or finance@example.com with "${DEMO_PASSWORD}".`);
+  console.log(`  Sign in as amina@example.com, kato@example.com, events@example.com, admin@example.com or finance@example.com with ${process.env.SEED_DEMO_PASSWORD ? 'the password in SEED_DEMO_PASSWORD' : `"${DEMO_PASSWORD}"`}.`);
 }
 
 main()
