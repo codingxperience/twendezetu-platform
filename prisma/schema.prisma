@@ -1,7 +1,18 @@
-// Twendezetu data model. Supabase Postgres is the system database; Prisma uses
-// the pooled DATABASE_URL at runtime and DIRECT_URL for migrations. All foreign
-// keys are explicit, all owner-scoped tables index on the owner column for fast
-// lookup.
+// Twendezetu data model.
+//
+// Conventions
+// • Money is stored as integers in the currency's minor unit (ISO 4217
+//   exponent: USD/KES/TZS cents, UGX/RWF whole units). Points ("PTS") are
+//   whole points, 100 points = 1 USD.
+// • Every balance lives in the double-entry ledger (LedgerAccount /
+//   JournalEntry / JournalLine). Database triggers keep balances in step with
+//   journal lines, reject overdrafts and refuse unbalanced entries — see
+//   migrations/20260926120000_platform/migration.sql.
+// • Counters such as Event.goingCount or Provider.ratingCount are
+//   denormalised for fast listing and are only ever changed inside the same
+//   transaction as the rows they count.
+// • Row Level Security is enabled on every table and the Supabase API roles
+//   (anon, authenticated) have no grants: the only way in is this server.
 
 generator client {
   provider = "prisma-client-js"
@@ -13,188 +24,1569 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// ── Users ──────────────────────────────────────────────
-model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String
-  name         String
-  city         String   @default("Nairobi")
-  phone        String?
-  role         String   @default("customer") // customer | vendor | admin
-  avatarUrl    String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+// ─────────────────────────────────────────────────────────────────────────
+// Identity & access
+// ─────────────────────────────────────────────────────────────────────────
 
-  vendor       Vendor?       @relation("VendorOwner")
-  bookings     Booking[]     @relation("CustomerBookings")
-  favorites    Favorite[]
-  reviews      Review[]
-  sentMessages Message[]     @relation("MessageSender")
-  sessions     Session[]
+enum Role {
+  MEMBER
+  MODERATOR
+  FINANCE
+  ADMIN
+}
+
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+  DELETED
+}
+
+enum Locale {
+  EN
+  SW
+}
+
+model User {
+  id                String        @id @default(cuid())
+  email             String        @unique
+  emailVerifiedAt   DateTime?
+  passwordHash      String
+  passwordChangedAt DateTime?
+  name              String
+  handle            String        @unique
+  phone             String?
+  phoneVerifiedAt   DateTime?
+  city              String?
+  country           String?
+  locale            Locale        @default(EN)
+  currency          String        @default("USD")
+  avatarUrl         String?
+  role              Role          @default(MEMBER)
+  status            AccountStatus @default(ACTIVE)
+  suspendedAt       DateTime?
+  suspendedReason   String?
+  twoFactorEnabled  Boolean       @default(false)
+  quietHours        Boolean       @default(true)
+  weeklyDigest      Boolean       @default(false)
+  referredById      String?
+  lastSeenAt        DateTime?
+  deletedAt         DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  referredBy        User?                    @relation("Referrals", fields: [referredById], references: [id], onDelete: SetNull)
+  referrals         User[]                   @relation("Referrals")
+  sessions          Session[]
+  oneTimeCodes      OneTimeCode[]
+  notificationPrefs NotificationPreference[]
+  paymentMethods    PaymentMethod[]
+  organizers        Organizer[]
+  eventsCreated     Event[]                  @relation("EventCreator")
+  follows           Follow[]
+  rsvps             Rsvp[]
+  savedEvents       SavedEvent[]
+  orders            Order[]
+  tickets           Ticket[]
+  waitlistEntries   WaitlistEntry[]
+  scans             CheckInScan[]
+  needs             Need[]
+  bookingsAsClient  Booking[]                @relation("BookingCustomer")
+  participations    ThreadParticipant[]
+  messages          Message[]
+  provider          Provider?
+  reviews           Review[]
+  serviceRequests   ServiceRequest[]
+  poolsCreated      Pool[]
+  contributions     PoolContribution[]
+  splitsOrganized   Split[]
+  splitShares       SplitShare[]
+  payouts           Payout[]
+  disputesOpened    Dispute[]                @relation("DisputeOpener")
+  disputesAgainst   Dispute[]                @relation("DisputeRespondent")
+  reportsFiled      Report[]                 @relation("ReportReporter")
+  rewardsEarned     ReferralReward[]         @relation("RewardReferrer")
+  rewardsTriggered  ReferralReward[]         @relation("RewardReferee")
+  notifications     Notification[]
+  files             FileObject[]
+
+  @@index([referredById])
+  @@index([status])
 }
 
 model Session {
-  id        String   @id @default(cuid())
-  userId    String
-  token     String   @unique
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-  userAgent String?
-  ipAddress String?
+  id         String    @id @default(cuid())
+  userId     String
+  tokenHash  String    @unique
+  mfaPending Boolean   @default(false)
+  userAgent  String?
+  ipAddress  String?
+  createdAt  DateTime  @default(now())
+  lastSeenAt DateTime  @default(now())
+  expiresAt  DateTime
+  revokedAt  DateTime?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId])
-  @@index([token])
+  @@index([userId, revokedAt])
+  @@index([expiresAt])
 }
 
-// ── Vendors & packages ─────────────────────────────────
-model Vendor {
-  id           String   @id @default(cuid())
-  slug         String   @unique
-  ownerId      String?  @unique
-  name         String
-  type         String
-  category     String   // venues | catering | photo | decor | djs | mcs | packages | transport
-  city         String
-  country      String
-  description  String
-  rating       Float    @default(4.9)
-  reviewsCount Int      @default(0)
-  basePrice    Int      // in KES cents-of-cents, simplified to whole KES
-  unit         String?  // 'per guest', null = total
-  capacity     String?
-  tags         String   // comma-separated; SQLite has no string[]
-  highlights   String   // comma-separated
-  hostName     String
-  hostYears    Int      @default(3)
-  superhost    Boolean  @default(false)
-  coverImage   String
-  gallery      String   // comma-separated URLs
-  published    Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  owner     User?      @relation("VendorOwner", fields: [ownerId], references: [id])
-  packages  Package[]
-  bookings  Booking[]
-  favorites Favorite[]
-  inquiries Inquiry[]
-  reviews   Review[]
-
-  @@index([category])
-  @@index([city])
-  @@index([country])
+enum OtpPurpose {
+  PHONE_VERIFY
+  TWO_FACTOR
+  PASSWORD_RESET
 }
 
-model Package {
-  id          String  @id @default(cuid())
-  vendorId    String
-  name        String
-  subtitle    String
-  price       Int
-  includes    String  // comma-separated
-  featured    Boolean @default(false)
-  sortOrder   Int     @default(0)
+model OneTimeCode {
+  id         String     @id @default(cuid())
+  userId     String?
+  purpose    OtpPurpose
+  target     String
+  codeHash   String
+  attempts   Int        @default(0)
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime   @default(now())
 
-  vendor   Vendor    @relation(fields: [vendorId], references: [id], onDelete: Cascade)
-  bookings Booking[]
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([vendorId])
+  @@index([purpose, target, createdAt])
+  @@index([userId, purpose])
 }
 
-// ── Bookings & conversations ───────────────────────────
-model Booking {
-  id              String   @id @default(cuid())
-  customerId      String
-  vendorId        String
-  packageId       String
-  eventDate       DateTime
-  guests          Int
-  contactName     String
-  contactPhone    String
-  notes           String?
-  addOns          String   @default("") // comma-separated addon ids
-  subtotal        Int
-  serviceFee      Int
-  vat             Int
-  total           Int
-  depositAmount   Int
-  currency        String   @default("KES")
-  status          String   @default("confirmed") // pending_payment | confirmed | cancelled | completed
-  paymentStatus   String   @default("deposit_paid") // none | deposit_paid | paid_in_full | refunded
-  stripePaymentId String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+enum NotificationTopic {
+  REMINDERS
+  OFFERS
+  LEADS
+  MONEY
+  SOCIAL
+  NEWS
+}
 
-  customer User    @relation("CustomerBookings", fields: [customerId], references: [id], onDelete: Cascade)
-  vendor   Vendor  @relation(fields: [vendorId], references: [id])
-  package  Package @relation(fields: [packageId], references: [id])
+model NotificationPreference {
+  userId   String
+  topic    NotificationTopic
+  inApp    Boolean           @default(true)
+  email    Boolean           @default(true)
+  sms      Boolean           @default(false)
+  whatsapp Boolean           @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, topic])
+}
+
+enum PaymentMethodKind {
+  CARD
+  MPESA
+  MTN_MOMO
+  AIRTEL_MONEY
+  BANK
+}
+
+// Only masked labels and last digits are stored in the clear. Full account
+// numbers for payouts are encrypted with DATA_ENCRYPTION_KEY; card numbers
+// never reach this server (they stay with the card processor).
+model PaymentMethod {
+  id               String            @id @default(cuid())
+  userId           String
+  kind             PaymentMethodKind
+  label            String
+  last4            String
+  accountEnc       String?
+  processorRef     String?
+  expMonth         Int?
+  expYear          Int?
+  isDefault        Boolean           @default(false)
+  usableForPayouts Boolean           @default(false)
+  createdAt        DateTime          @default(now())
+  deletedAt        DateTime?
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payouts Payout[]
+
+  @@index([userId, deletedAt])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  action     String
+  targetType String?
+  targetId   String?
+  ipAddress  String?
+  meta       Json?
+  createdAt  DateTime @default(now())
+
+  @@index([actorId, createdAt])
+  @@index([targetType, targetId])
+  @@index([action, createdAt])
+}
+
+model PlatformSetting {
+  key         String   @id
+  value       Json
+  updatedById String?
+  updatedAt   DateTime @updatedAt
+}
+
+model IdempotencyRecord {
+  scope       String
+  key         String
+  requestHash String
+  status      Int?
+  response    Json?
+  createdAt   DateTime @default(now())
+
+  @@id([scope, key])
+  @@index([createdAt])
+}
+
+// Generic cell rate limiter state. `tat` is the theoretical arrival time of
+// the next request; see src/server/security/rate-limit.js.
+model RateLimitBucket {
+  key String   @id
+  tat DateTime
+
+  @@index([tat])
+}
+
+model FxRate {
+  currency  String   @id
+  perUsd    Decimal  @db.Decimal(18, 6)
+  source    String
+  updatedAt DateTime @updatedAt
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Files
+// ─────────────────────────────────────────────────────────────────────────
+
+enum FilePurpose {
+  AVATAR
+  PROVIDER_MEDIA
+  EVENT_COVER
+  KYC_ID
+  KYC_PROOF
+  KYC_PORTFOLIO
+  MESSAGE
+  DISPUTE_EVIDENCE
+}
+
+enum FileVisibility {
+  PUBLIC
+  PRIVATE
+}
+
+enum StorageDriver {
+  SUPABASE
+  DATABASE
+}
+
+model FileObject {
+  id         String         @id @default(cuid())
+  ownerId    String
+  purpose    FilePurpose
+  visibility FileVisibility
+  driver     StorageDriver
+  bucket     String
+  key        String
+  name       String
+  mime       String
+  size       Int
+  sha256     String
+  data       Bytes?
+  createdAt  DateTime       @default(now())
+
+  owner    User              @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   messages Message[]
-  review   Review?
+  evidence DisputeEvidence[]
 
-  @@index([customerId])
-  @@index([vendorId])
-  @@index([eventDate])
+  @@index([ownerId, purpose])
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Events, tickets & RSVPs
+// ─────────────────────────────────────────────────────────────────────────
+
+enum EventCategory {
+  NYAMA_CHOMA
+  MUSIC
+  COMMUNITY
+  WEDDINGS
+  FAITH
+  SPORTS
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  PAUSED
+  CANCELLED
+  ARCHIVED
+}
+
+model Organizer {
+  id             String    @id @default(cuid())
+  slug           String    @unique
+  name           String
+  ownerId        String
+  city           String?
+  verifiedAt     DateTime?
+  followersCount Int       @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  events    Event[]
+  followers Follow[]
+
+  @@index([ownerId])
+}
+
+model Follow {
+  id          String   @id @default(cuid())
+  followerId  String
+  organizerId String?
+  providerId  String?
+  createdAt   DateTime @default(now())
+
+  follower  User       @relation(fields: [followerId], references: [id], onDelete: Cascade)
+  organizer Organizer? @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+  provider  Provider?  @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, organizerId])
+  @@unique([followerId, providerId])
+  @@index([organizerId])
+  @@index([providerId])
+}
+
+model Event {
+  id               String        @id @default(cuid())
+  slug             String        @unique
+  organizerId      String
+  createdById      String
+  title            String
+  category         EventCategory
+  blurb            String
+  description      String
+  coverUrl         String
+  venue            String
+  city             String
+  country          String
+  timezone         String
+  startsAt         DateTime
+  endsAt           DateTime?
+  currency         String
+  isFree           Boolean       @default(true)
+  priceFromMinor   Int?
+  capacity         Int?
+  status           EventStatus   @default(DRAFT)
+  badge            String?
+  featuredRank     Int?
+  hiddenAt         DateTime?
+  hiddenReason     String?
+  allowGuestRsvp   Boolean       @default(true)
+  allowComments    Boolean       @default(false)
+  goingCount       Int           @default(0)
+  viewCount        Int           @default(0)
+  shareCount       Int           @default(0)
+  publishedAt      DateTime?
+  cancelledAt      DateTime?
+  payoutReleasedAt DateTime?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  organizer Organizer           @relation(fields: [organizerId], references: [id], onDelete: Restrict)
+  createdBy User                @relation("EventCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  schedule  EventScheduleItem[]
+  tiers     TicketTier[]
+  promos    PromoCode[]
+  orders    Order[]
+  tickets   Ticket[]
+  scans     CheckInScan[]
+  waitlist  WaitlistEntry[]
+  rsvps     Rsvp[]
+  saves     SavedEvent[]
+  stats     EventStat[]
+  needs     Need[]
+  pools     Pool[]
+  splits    Split[]
+  threads   Thread[]
+
+  @@index([status, startsAt])
+  @@index([category, status, startsAt])
+  @@index([organizerId])
+  @@index([featuredRank])
+}
+
+model EventScheduleItem {
+  id          String @id @default(cuid())
+  eventId     String
+  timeLabel   String
+  title       String
+  description String
+  tag         String
+  sortOrder   Int    @default(0)
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId, sortOrder])
+}
+
+enum TierKind {
+  ONLINE
+  DOOR
+}
+
+model TicketTier {
+  id             String    @id @default(cuid())
+  eventId        String
+  name           String
+  description    String
+  tag            String?
+  kind           TierKind  @default(ONLINE)
+  priceMinor     Int
+  compareAtMinor Int?
+  currency       String
+  capacity       Int?
+  sold           Int       @default(0)
+  salesEndAt     DateTime?
+  sortOrder      Int       @default(0)
+  active         Boolean   @default(true)
+
+  event    Event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  items    OrderItem[]
+  tickets  Ticket[]
+  waitlist WaitlistEntry[]
+  splits   Split[]
+
+  @@index([eventId, sortOrder])
+}
+
+enum PromoKind {
+  PERCENT
+  FIXED
+}
+
+model PromoCode {
+  id               String    @id @default(cuid())
+  eventId          String
+  code             String
+  kind             PromoKind
+  value            Int
+  minSubtotalMinor Int       @default(0)
+  maxRedemptions   Int?
+  redeemedCount    Int       @default(0)
+  startsAt         DateTime?
+  endsAt           DateTime?
+  active           Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+
+  event  Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  orders Order[]
+
+  @@unique([eventId, code])
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  RESERVED
+  CANCELLED
+  EXPIRED
+  REFUNDED
+}
+
+enum PaymentChannel {
+  CARD
+  POINTS
+  DOOR
+  SPLIT
+}
+
+model Order {
+  id            String         @id @default(cuid())
+  reference     String         @unique
+  eventId       String
+  buyerId       String?
+  buyerName     String
+  buyerEmail    String
+  currency      String
+  subtotalMinor Int
+  discountMinor Int            @default(0)
+  feeMinor      Int
+  totalMinor    Int
+  pointsSpent   Int?
+  // Running total of partial refunds; a full refund returns what is left.
+  refundedMinor Int            @default(0)
+  channel       PaymentChannel
+  status        OrderStatus    @default(PENDING)
+  promoCodeId   String?
+  referrerId    String?
+  source        String?
+  expiresAt     DateTime?
+  paidAt        DateTime?
+  cancelledAt   DateTime?
+  refundedAt    DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  event      Event       @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  buyer      User?       @relation(fields: [buyerId], references: [id], onDelete: SetNull)
+  promoCode  PromoCode?  @relation(fields: [promoCodeId], references: [id], onDelete: SetNull)
+  items      OrderItem[]
+  tickets    Ticket[]
+  splitShare SplitShare?
+  disputes   Dispute[]
+
+  @@index([eventId, status])
+  @@index([buyerId, createdAt])
+  @@index([buyerEmail])
+  @@index([status, expiresAt])
+}
+
+model OrderItem {
+  id             String @id @default(cuid())
+  orderId        String
+  tierId         String
+  quantity       Int
+  unitPriceMinor Int
+
+  order Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  tier  TicketTier @relation(fields: [tierId], references: [id], onDelete: Restrict)
+
+  @@index([orderId])
+}
+
+enum TicketStatus {
+  VALID
+  CHECKED_IN
+  VOID
+}
+
+model Ticket {
+  id            String       @id @default(cuid())
+  code          String       @unique
+  orderId       String
+  eventId       String
+  tierId        String
+  ownerId       String?
+  holderName    String
+  status        TicketStatus @default(VALID)
+  checkedInAt   DateTime?
+  checkedInById String?
+  voidedAt      DateTime?
+  createdAt     DateTime     @default(now())
+
+  order Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  event Event         @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  tier  TicketTier    @relation(fields: [tierId], references: [id], onDelete: Restrict)
+  owner User?         @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  scans CheckInScan[]
+
+  @@index([eventId, status])
+  @@index([ownerId])
+  @@index([orderId])
+}
+
+enum ScanResult {
+  ADMITTED
+  DUPLICATE
+  INVALID
+}
+
+model CheckInScan {
+  id          String     @id @default(cuid())
+  eventId     String
+  ticketId    String?
+  scannedById String
+  input       String
+  result      ScanResult
+  createdAt   DateTime   @default(now())
+
+  event     Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  ticket    Ticket? @relation(fields: [ticketId], references: [id], onDelete: SetNull)
+  scannedBy User    @relation(fields: [scannedById], references: [id], onDelete: Restrict)
+
+  @@index([eventId, createdAt])
+}
+
+model WaitlistEntry {
+  id         String    @id @default(cuid())
+  eventId    String
+  tierId     String
+  userId     String?
+  email      String
+  name       String?
+  notifiedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  event Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  tier  TicketTier @relation(fields: [tierId], references: [id], onDelete: Cascade)
+  user  User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@unique([tierId, email])
+  @@index([eventId])
+}
+
+enum RsvpStatus {
+  GOING
+  INTERESTED
+  CANCELLED
+}
+
+model Rsvp {
+  id              String     @id @default(cuid())
+  eventId         String
+  userId          String?
+  name            String
+  email           String
+  partySize       Int        @default(1)
+  status          RsvpStatus @default(GOING)
+  reminderPlan    String     @default("7d,1d,2h")
+  calendarAddedAt DateTime?
+  referrerId      String?
+  source          String?
+  manageTokenHash String?    @unique
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@unique([eventId, email])
+  @@index([userId, status])
+  @@index([referrerId])
+}
+
+model SavedEvent {
+  userId    String
+  eventId   String
+  createdAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@id([userId, eventId])
+  @@index([eventId])
+}
+
+// Daily roll-up per traffic source. Incremented with an upsert so a busy
+// event never produces one row per page view.
+model EventStat {
+  eventId   String
+  day       DateTime @db.Date
+  source    String
+  views     Int      @default(0)
+  ctaClicks Int      @default(0)
+  shares    Int      @default(0)
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, day, source])
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Needs board, offers & bookings
+// ─────────────────────────────────────────────────────────────────────────
+
+enum ProviderCategory {
+  MUSIC_DJS
+  CATERING
+  TENTS_EQUIPMENT
+  TRANSPORT
+  PHOTOGRAPHY
+  DECOR_MC
+}
+
+enum NeedStatus {
+  OPEN
+  PAUSED
+  ACCEPTED
+  COMPLETED
+  CLOSED
+}
+
+model Need {
+  id                     String           @id @default(cuid())
+  slug                   String           @unique
+  posterId               String
+  title                  String
+  description            String
+  category               ProviderCategory
+  city                   String
+  country                String
+  startsOn               DateTime?        @db.Date
+  endsOn                 DateTime?        @db.Date
+  budgetMinor            Int?
+  currency               String
+  relatedEventId         String?
+  status                 NeedStatus       @default(OPEN)
+  closesAt               DateTime?
+  revealContactsOnAccept Boolean          @default(false)
+  notifyOnOffers         Boolean          @default(true)
+  weeklyDigest           Boolean          @default(false)
+  allowComments          Boolean          @default(false)
+  viewCount              Int              @default(0)
+  shareCount             Int              @default(0)
+  offerCount             Int              @default(0)
+  closedReason           String?
+  hiddenAt               DateTime?
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
+
+  poster       User      @relation(fields: [posterId], references: [id], onDelete: Cascade)
+  relatedEvent Event?    @relation(fields: [relatedEventId], references: [id], onDelete: SetNull)
+  offers       Offer[]
+  bookings     Booking[]
+  threads      Thread[]
+  pools        Pool[]
+
+  @@index([status, category, city])
+  @@index([posterId, createdAt])
+}
+
+enum OfferStatus {
+  OPEN
+  COUNTERED
+  ACCEPTED
+  DECLINED
+  WITHDRAWN
+  EXPIRED
+}
+
+model Offer {
+  id          String      @id @default(cuid())
+  reference   String      @unique
+  needId      String?
+  providerId  String
+  threadId    String
+  title       String
+  note        String
+  priceMinor  Int
+  currency    String
+  status      OfferStatus @default(OPEN)
+  counterNote String?
+  respondedAt DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  need     Need?     @relation(fields: [needId], references: [id], onDelete: Cascade)
+  provider Provider  @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  thread   Thread    @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  booking  Booking?
+  messages Message[]
+
+  @@index([needId, status])
+  @@index([providerId, status])
+  @@index([threadId])
+}
+
+enum BookingStatus {
+  PENDING_PAYMENT
+  ESCROWED
+  RELEASED
+  CANCELLED
+  DISPUTED
+  REFUNDED
+}
+
+model Booking {
+  id              String        @id @default(cuid())
+  reference       String        @unique
+  offerId         String?       @unique
+  needId          String?
+  customerId      String
+  providerId      String
+  threadId        String?
+  title           String
+  serviceStartsOn DateTime?     @db.Date
+  serviceEndsOn   DateTime?     @db.Date
+  amountMinor     Int
+  currency        String
+  feeBps          Int
+  feeMinor        Int
+  status          BookingStatus @default(PENDING_PAYMENT)
+  escrowedAt      DateTime?
+  releaseAfter    DateTime?
+  releasedAt      DateTime?
+  cancelledAt     DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  offer    Offer?    @relation(fields: [offerId], references: [id], onDelete: SetNull)
+  need     Need?     @relation(fields: [needId], references: [id], onDelete: SetNull)
+  customer User      @relation("BookingCustomer", fields: [customerId], references: [id], onDelete: Restrict)
+  provider Provider  @relation(fields: [providerId], references: [id], onDelete: Restrict)
+  review   Review?
+  disputes Dispute[]
+
+  @@index([customerId, createdAt])
+  @@index([providerId, status])
+  @@index([status, releaseAfter])
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Masked conversations
+// ─────────────────────────────────────────────────────────────────────────
+
+enum ThreadKind {
+  NEED
+  PROVIDER
+  EVENT
+  SUPPORT
+}
+
+enum ParticipantRole {
+  POSTER
+  PROVIDER
+  ORGANIZER
+  MEMBER
+}
+
+model Thread {
+  id                 String     @id @default(cuid())
+  kind               ThreadKind
+  subject            String
+  needId             String?
+  providerId         String?
+  eventId            String?
+  contactsRevealedAt DateTime?
+  lastMessageAt      DateTime   @default(now())
+  createdAt          DateTime   @default(now())
+
+  need         Need?               @relation(fields: [needId], references: [id], onDelete: SetNull)
+  provider     Provider?           @relation(fields: [providerId], references: [id], onDelete: SetNull)
+  event        Event?              @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  participants ThreadParticipant[]
+  messages     Message[]
+  offers       Offer[]
+
+  @@index([needId])
+  @@index([providerId])
+}
+
+model ThreadParticipant {
+  threadId   String
+  userId     String
+  role       ParticipantRole
+  lastReadAt DateTime?
+  archivedAt DateTime?
+  joinedAt   DateTime        @default(now())
+
+  thread Thread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([threadId, userId])
+  @@index([userId])
+}
+
+enum MessageKind {
+  TEXT
+  OFFER
+  NOTICE
+  FILE
 }
 
 model Message {
-  id        String   @id @default(cuid())
-  bookingId String
-  senderId  String
-  fromRole  String   // customer | vendor | system
+  id        String      @id @default(cuid())
+  threadId  String
+  senderId  String?
+  kind      MessageKind @default(TEXT)
   body      String
-  createdAt DateTime @default(now())
-  readAt    DateTime?
+  offerId   String?
+  fileId    String?
+  redacted  Boolean     @default(false)
+  flagged   Boolean     @default(false)
+  createdAt DateTime    @default(now())
 
-  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  sender  User    @relation("MessageSender", fields: [senderId], references: [id])
+  thread Thread      @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  sender User?       @relation(fields: [senderId], references: [id], onDelete: SetNull)
+  offer  Offer?      @relation(fields: [offerId], references: [id], onDelete: SetNull)
+  file   FileObject? @relation(fields: [fileId], references: [id], onDelete: SetNull)
 
-  @@index([bookingId])
+  @@index([threadId, createdAt])
 }
 
-// ── Marketplace state ──────────────────────────────────
-model Favorite {
-  userId    String
-  vendorId  String
-  createdAt DateTime @default(now())
+// ─────────────────────────────────────────────────────────────────────────
+// Providers, reviews & verification
+// ─────────────────────────────────────────────────────────────────────────
 
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  vendor Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
-
-  @@id([userId, vendorId])
-  @@index([userId])
+enum ProviderStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
 }
 
-model Inquiry {
-  id           String   @id @default(cuid())
-  vendorId     String
-  customerName String
-  customerId   String?
-  event        String
-  eventDate    DateTime
-  message      String?
-  status       String   @default("new") // new | replied | won | lost
-  createdAt    DateTime @default(now())
+model Provider {
+  id               String           @id @default(cuid())
+  slug             String           @unique
+  ownerId          String           @unique
+  name             String
+  category         ProviderCategory
+  city             String
+  country          String
+  headline         String
+  description      String
+  coverUrl         String
+  rateMinor        Int?
+  rateCurrency     String
+  rateUnit         String?
+  serviceAreas     String[]
+  yearsActive      Int?
+  status           ProviderStatus   @default(DRAFT)
+  verifiedAt       DateTime?
+  ratingSum        Int              @default(0)
+  ratingCount      Int              @default(0)
+  jobsCompleted    Int              @default(0)
+  profileViews     Int              @default(0)
+  membershipEndsAt DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
 
-  vendor Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  owner        User                     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  services     ProviderService[]
+  media        ProviderMedia[]
+  reviews      Review[]
+  requests     ServiceRequest[]
+  offers       Offer[]
+  bookings     Booking[]
+  threads      Thread[]
+  followers    Follow[]
+  stats        ProviderStat[]
+  verification VerificationApplication?
+  memberships  Membership[]
 
-  @@index([vendorId])
+  @@index([category, status])
+  @@index([city])
+}
+
+model ProviderService {
+  id          String  @id @default(cuid())
+  providerId  String
+  title       String
+  description String
+  rateMinor   Int?
+  currency    String
+  rateUnit    String?
+  sortOrder   Int     @default(0)
+
+  provider Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@index([providerId, sortOrder])
+}
+
+model ProviderMedia {
+  id         String @id @default(cuid())
+  providerId String
+  url        String
+  alt        String
+  sortOrder  Int    @default(0)
+
+  provider Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@index([providerId, sortOrder])
 }
 
 model Review {
-  id        String   @id @default(cuid())
-  bookingId String   @unique
-  vendorId  String
-  customerId String
-  rating    Int      // 1-5
-  body      String
+  id         String    @id @default(cuid())
+  providerId String
+  authorId   String
+  bookingId  String?   @unique
+  rating     Int
+  jobLabel   String?
+  body       String
+  reply      String?
+  repliedAt  DateTime?
+  hiddenAt   DateTime?
+  createdAt  DateTime  @default(now())
+
+  provider Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  author   User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  booking  Booking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+
+  @@unique([providerId, authorId])
+  @@index([providerId, createdAt])
+}
+
+enum RequestStatus {
+  NEW
+  REPLIED
+  CLOSED
+}
+
+model ServiceRequest {
+  id          String        @id @default(cuid())
+  providerId  String
+  requesterId String?
+  name        String
+  email       String
+  message     String
+  threadId    String?
+  status      RequestStatus @default(NEW)
+  createdAt   DateTime      @default(now())
+
+  provider  Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  requester User?    @relation(fields: [requesterId], references: [id], onDelete: SetNull)
+
+  @@index([providerId, status])
+}
+
+model ProviderStat {
+  providerId String
+  day        DateTime @db.Date
+  views      Int      @default(0)
+
+  provider Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@id([providerId, day])
+}
+
+enum VerificationStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  NEEDS_INFO
+  REJECTED
+}
+
+enum ProofRoute {
+  FORMAL
+  PORTFOLIO
+}
+
+model VerificationApplication {
+  id               String             @id @default(cuid())
+  providerId       String             @unique
+  status           VerificationStatus @default(DRAFT)
+  businessName     String?
+  category         ProviderCategory?
+  cities           String?
+  yearsActive      Int?
+  description      String?
+  idName           String?
+  idNumberEnc      String?
+  idFileId         String?
+  proofRoute       ProofRoute         @default(FORMAL)
+  proofNumber      String?
+  proofFileId      String?
+  portfolioFileIds String[]
+  referenceOne     String?
+  referenceTwo     String?
+  phone            String?
+  phoneVerifiedAt  DateTime?
+  payoutKind       PaymentMethodKind?
+  payoutAccountEnc String?
+  payoutLast4      String?
+  submittedAt      DateTime?
+  reviewedAt       DateTime?
+  reviewerId       String?
+  reviewNote       String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  provider Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@index([status, submittedAt])
+}
+
+model Membership {
+  id             String   @id @default(cuid())
+  providerId     String
+  startsAt       DateTime
+  endsAt         DateTime
+  amountMinor    Int
+  currency       String
+  journalEntryId String?
+  createdAt      DateTime @default(now())
+
+  provider Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@index([providerId, endsAt])
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Money: double-entry ledger, payments, payouts, pools, split pay
+// ─────────────────────────────────────────────────────────────────────────
+
+enum LedgerAccountKind {
+  USER_WALLET
+  EARNINGS
+  EVENT_ESCROW
+  BOOKING_ESCROW
+  POOL
+  PAYOUT_CLEARING
+  PAYMENT_CLEARING
+  FX_CONVERSION
+  PLATFORM_REVENUE
+  PLATFORM_PROMOTIONS
+}
+
+model LedgerAccount {
+  id            String            @id @default(cuid())
+  kind          LedgerAccountKind
+  ownerKey      String
+  currency      String
+  balance       BigInt            @default(0)
+  allowNegative Boolean           @default(false)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  lines   JournalLine[]
+  payouts Payout[]
+
+  @@unique([kind, ownerKey, currency])
+}
+
+enum EntryKind {
+  TOPUP
+  TRANSFER
+  POOL_CONTRIBUTION
+  POOL_RELEASE
+  TICKET_SALE
+  BOOKING_ESCROW
+  ESCROW_RELEASE
+  REFUND
+  CASHOUT
+  PAYOUT
+  PAYOUT_REVERSAL
+  REFERRAL_REWARD
+  MEMBERSHIP
+  CONVERSION
+  ADJUSTMENT
+}
+
+model JournalEntry {
+  id             String    @id @default(cuid())
+  kind           EntryKind
+  memo           String
+  reference      String?
+  idempotencyKey String?   @unique
+  actorId        String?
+  meta           Json?
+  createdAt      DateTime  @default(now())
+
+  lines JournalLine[]
+
+  @@index([reference])
+  @@index([kind, createdAt])
+}
+
+model JournalLine {
+  id        BigInt   @id @default(autoincrement())
+  entryId   String
+  accountId String
+  amount    BigInt
+  currency  String
   createdAt DateTime @default(now())
 
-  booking  Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  vendor   Vendor  @relation(fields: [vendorId], references: [id], onDelete: Cascade)
-  customer User    @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  entry   JournalEntry  @relation(fields: [entryId], references: [id], onDelete: Restrict)
+  account LedgerAccount @relation(fields: [accountId], references: [id], onDelete: Restrict)
 
-  @@index([vendorId])
+  @@index([accountId, id])
+  @@index([entryId])
+}
+
+enum PaymentPurpose {
+  TOPUP
+  ORDER
+  BOOKING
+  MEMBERSHIP
+}
+
+enum PaymentProcessor {
+  STRIPE
+  MOCK
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+// A charge against an outside processor. Money only enters the ledger once
+// the processor confirms it (webhook or synchronous mock confirmation).
+model Payment {
+  id           String           @id @default(cuid())
+  purpose      PaymentPurpose
+  processor    PaymentProcessor
+  processorRef String?          @unique
+  userId       String?
+  subjectId    String
+  amountMinor  Int
+  currency     String
+  status       PaymentStatus    @default(PENDING)
+  failure      String?
+  meta         Json?
+  succeededAt  DateTime?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@index([subjectId])
+  @@index([userId, createdAt])
+}
+
+enum PayoutStatus {
+  REQUESTED
+  APPROVED
+  PAID
+  FAILED
+  CANCELLED
+}
+
+model Payout {
+  id               String       @id @default(cuid())
+  reference        String       @unique
+  userId           String
+  accountId        String
+  methodId         String
+  destinationLabel String
+  amountMinor      Int
+  feeMinor         Int
+  currency         String
+  status           PayoutStatus @default(REQUESTED)
+  batchId          String?
+  externalRef      String?
+  failure          String?
+  requestedAt      DateTime     @default(now())
+  approvedAt       DateTime?
+  paidAt           DateTime?
+
+  user    User          @relation(fields: [userId], references: [id], onDelete: Restrict)
+  account LedgerAccount @relation(fields: [accountId], references: [id], onDelete: Restrict)
+  method  PaymentMethod @relation(fields: [methodId], references: [id], onDelete: Restrict)
+  batch   PayoutBatch?  @relation(fields: [batchId], references: [id], onDelete: SetNull)
+
+  @@index([status, requestedAt])
+  @@index([userId, requestedAt])
+}
+
+model PayoutBatch {
+  id           String   @id @default(cuid())
+  reference    String   @unique
+  approvedById String
+  approvedAt   DateTime @default(now())
+  payoutCount  Int
+  totals       Json
+
+  payouts Payout[]
+}
+
+enum PoolStatus {
+  OPEN
+  FUNDED
+  RELEASED
+  CLOSED
+}
+
+model Pool {
+  id               String     @id @default(cuid())
+  slug             String     @unique
+  creatorId        String
+  title            String
+  purpose          String
+  eventId          String?
+  needId           String?
+  goalPoints       Int
+  raisedPoints     Int        @default(0)
+  contributorCount Int        @default(0)
+  status           PoolStatus @default(OPEN)
+  closesAt         DateTime?
+  // Set when a large release is waiting on a finance review.
+  releaseRequestedAt DateTime?
+  releasedAt       DateTime?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  creator       User               @relation(fields: [creatorId], references: [id], onDelete: Restrict)
+  event         Event?             @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  need          Need?              @relation(fields: [needId], references: [id], onDelete: SetNull)
+  contributions PoolContribution[]
+
+  @@index([creatorId])
+  @@index([status, closesAt])
+}
+
+model PoolContribution {
+  id             String   @id @default(cuid())
+  poolId         String
+  userId         String
+  points         Int
+  note           String?
+  journalEntryId String
+  createdAt      DateTime @default(now())
+
+  pool Pool @relation(fields: [poolId], references: [id], onDelete: Restrict)
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([poolId, createdAt])
+  @@index([userId])
+}
+
+enum SplitStatus {
+  OPEN
+  COMPLETED
+  CANCELLED
+}
+
+model Split {
+  id          String      @id @default(cuid())
+  slug        String      @unique
+  eventId     String
+  tierId      String
+  organizerId String
+  shareMinor  Int
+  currency    String
+  status      SplitStatus @default(OPEN)
+  expiresAt   DateTime
+  createdAt   DateTime    @default(now())
+  completedAt DateTime?
+
+  event     Event        @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  tier      TicketTier   @relation(fields: [tierId], references: [id], onDelete: Restrict)
+  organizer User         @relation(fields: [organizerId], references: [id], onDelete: Restrict)
+  shares    SplitShare[]
+
+  @@index([organizerId])
+}
+
+enum ShareStatus {
+  PENDING
+  PAID
+}
+
+model SplitShare {
+  id         String      @id @default(cuid())
+  splitId    String
+  position   Int
+  name       String
+  email      String?
+  userId     String?
+  status     ShareStatus @default(PENDING)
+  orderId    String?     @unique
+  remindedAt DateTime?
+  paidAt     DateTime?
+
+  split Split  @relation(fields: [splitId], references: [id], onDelete: Cascade)
+  user  User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+  order Order? @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  @@unique([splitId, position])
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Trust & safety
+// ─────────────────────────────────────────────────────────────────────────
+
+enum DisputeReason {
+  EVENT_CANCELLED
+  NO_SHOW
+  NOT_AS_DESCRIBED
+  CHARGED_INCORRECTLY
+}
+
+enum DisputeStatus {
+  OPEN
+  ESCALATED
+  RESOLVED_REFUNDED
+  RESOLVED_PARTIAL
+  RESOLVED_DENIED
+  WITHDRAWN
+}
+
+model Dispute {
+  id           String        @id @default(cuid())
+  reference    String        @unique
+  openedById   String
+  respondentId String?
+  orderId      String?
+  bookingId    String?
+  reason       DisputeReason
+  detail       String
+  amountMinor  Int
+  currency     String
+  status       DisputeStatus @default(OPEN)
+  respondBy    DateTime
+  refundMinor  Int?
+  resolution   String?
+  resolvedById String?
+  resolvedAt   DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  openedBy   User              @relation("DisputeOpener", fields: [openedById], references: [id], onDelete: Restrict)
+  respondent User?             @relation("DisputeRespondent", fields: [respondentId], references: [id], onDelete: SetNull)
+  order      Order?            @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  booking    Booking?          @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+  evidence   DisputeEvidence[]
+  timeline   DisputeEvent[]
+
+  @@index([status, respondBy])
+  @@index([openedById])
+}
+
+model DisputeEvidence {
+  id         String   @id @default(cuid())
+  disputeId  String
+  fileId     String
+  uploadedBy String
+  createdAt  DateTime @default(now())
+
+  dispute Dispute    @relation(fields: [disputeId], references: [id], onDelete: Cascade)
+  file    FileObject @relation(fields: [fileId], references: [id], onDelete: Restrict)
+
+  @@unique([disputeId, fileId])
+}
+
+model DisputeEvent {
+  id        String   @id @default(cuid())
+  disputeId String
+  actorId   String?
+  kind      String
+  note      String
+  createdAt DateTime @default(now())
+
+  dispute Dispute @relation(fields: [disputeId], references: [id], onDelete: Cascade)
+
+  @@index([disputeId, createdAt])
+}
+
+enum ReportTarget {
+  USER
+  THREAD
+  MESSAGE
+  EVENT
+  NEED
+  PROVIDER
+  REVIEW
+}
+
+enum ReportReason {
+  SCAM
+  OFF_PLATFORM_PAYMENT
+  HARASSMENT
+  IMPERSONATION
+  SPAM
+  OTHER
+}
+
+enum Severity {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum ReportStatus {
+  OPEN
+  DISMISSED
+  WARNED
+  SUSPENDED
+}
+
+model Report {
+  id           String       @id @default(cuid())
+  reference    String       @unique
+  reporterId   String?
+  targetType   ReportTarget
+  targetId     String
+  targetUserId String?
+  reason       ReportReason
+  detail       String?
+  severity     Severity
+  automated    Boolean      @default(false)
+  status       ReportStatus @default(OPEN)
+  resolvedById String?
+  resolvedAt   DateTime?
+  createdAt    DateTime     @default(now())
+
+  reporter User? @relation("ReportReporter", fields: [reporterId], references: [id], onDelete: SetNull)
+
+  @@index([status, severity, createdAt])
+  @@index([targetType, targetId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Growth & notifications
+// ─────────────────────────────────────────────────────────────────────────
+
+enum ReferralMilestone {
+  JOINED
+  FIRST_TICKET
+  FIRST_POST
+  BECAME_PROVIDER
+}
+
+model ReferralReward {
+  id             String            @id @default(cuid())
+  referrerId     String
+  refereeId      String
+  milestone      ReferralMilestone
+  points         Int
+  journalEntryId String
+  createdAt      DateTime          @default(now())
+
+  referrer User @relation("RewardReferrer", fields: [referrerId], references: [id], onDelete: Cascade)
+  referee  User @relation("RewardReferee", fields: [refereeId], references: [id], onDelete: Cascade)
+
+  @@unique([refereeId, milestone])
+  @@index([referrerId, createdAt])
+}
+
+model Notification {
+  id        String            @id @default(cuid())
+  userId    String
+  topic     NotificationTopic
+  title     String
+  body      String
+  href      String?
+  readAt    DateTime?
+  createdAt DateTime          @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([userId, readAt])
+}
+
+enum Channel {
+  IN_APP
+  EMAIL
+  SMS
+  WHATSAPP
+}
+
+enum OutboxStatus {
+  PENDING
+  SENT
+  FAILED
+  SKIPPED
+  CANCELLED
+}
+
+// Transactional outbox. Rows are written in the same transaction as the
+// change that caused them and delivered by the dispatch job, so a crash can
+// never lose a receipt or send one for a change that rolled back.
+model OutboundMessage {
+  id        String            @id @default(cuid())
+  userId    String?
+  channel   Channel
+  topic     NotificationTopic
+  to        String
+  subject   String
+  body      String
+  href      String?
+  dedupeKey String?           @unique
+  status    OutboxStatus      @default(PENDING)
+  attempts  Int               @default(0)
+  sendAfter DateTime          @default(now())
+  sentAt    DateTime?
+  lastError String?
+  createdAt DateTime          @default(now())
+
+  @@index([status, sendAfter])
+  @@index([userId])
 }

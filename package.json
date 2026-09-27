@@ -1,14 +1,20 @@
 {
   "name": "twendezetu-platform",
   "version": "1.0.0",
-  "description": "Twendezetu — full-stack East African event marketplace. Next.js + Prisma + Stripe.",
-  "private": false,
+  "description": "Twendezetu \u2014 events, needs, providers and community money for East Africa and the diaspora. Next.js + Prisma + Supabase Postgres.",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20.12"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
     "build:with-migrate": "npm run db:deploy && npm run build",
     "start": "next start",
     "lint": "next lint",
+    "test": "node --test 'tests/unit/*.test.mjs'",
+    "test:integration": "node --test --test-concurrency=1 'tests/integration/*.test.mjs'",
     "db:deploy": "node scripts/prisma-migrate-deploy.mjs",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
@@ -22,14 +28,12 @@
   "dependencies": {
     "@prisma/client": "5.22.0",
     "bcryptjs": "2.4.3",
-    "jose": "5.9.6",
     "next": "15.5.20",
+    "qrcode": "1.5.4",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "stripe": "17.4.0",
-    "swr": "2.3.0",
-    "zod": "3.23.8",
-    "zustand": "5.0.1"
+    "zod": "3.23.8"
   },
   "devDependencies": {
     "eslint": "9.15.0",

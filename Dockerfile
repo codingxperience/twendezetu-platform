@@ -1,4 +1,5 @@
-# Multi-stage build producing a minimal runtime image.
+# Multi-stage build producing a minimal runtime image. Node 20 satisfies the
+# engines field (>=20.12).
 # Suitable for Railway, Fly.io, Render, Google Cloud Run, etc.
 
 FROM node:20-alpine AS deps
@@ -26,4 +27,6 @@ COPY --from=builder /app/package.json ./package.json
 RUN chown -R nextjs:nextjs /app
 USER nextjs
 EXPOSE 3000
+# /api/health answers 503 when the database is unreachable or misconfigured.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 CMD wget -q -O /dev/null http://127.0.0.1:3000/api/health || exit 1
 CMD ["npm", "start"]

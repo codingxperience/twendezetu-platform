@@ -1,46 +1,23 @@
-import { ClaudeDesignPage } from '@/components/ClaudeDesignPage';
-import { findProviderBySlug } from '@/design/providers-catalog';
-import { ogImagesFor } from '@/design/events-catalog';
+import { notFound } from 'next/navigation';
+import ProviderView from '../../_views/provider';
+import { prisma } from '@/server/db';
+import { getViewer } from '@/server/viewer';
+import { providerView } from '@/server/views/provider';
+import { previewMetadata } from '@/server/og';
 
-const SITE = 'Twendezetu';
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const provider = findProviderBySlug(slug);
-
-  if (!provider) {
-    return {
-      title: `Provider · ${SITE}`,
-      description: 'Discover trusted providers across East Africa and the diaspora.',
-    };
-  }
-
-  const title = `${provider.name} · ${provider.cat} · ${provider.city}`;
-  const description = provider.description;
-  const url = `/providers/${provider.slug}`;
-
-  return {
-    title: `${provider.name} — ${SITE}`,
-    description,
-    alternates: { canonical: url },
-    openGraph: {
-      title: provider.name,
-      description,
-      url,
-      type: 'website',
-      siteName: SITE,
-      images: ogImagesFor(provider.img, provider.name),
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: provider.name,
-      description,
-      images: ogImagesFor(provider.img, provider.name).map((image) => image.url),
-    },
-  };
+  const provider = await prisma.provider.findUnique({ where: { slug }, select: { name: true, headline: true, coverUrl: true, status: true, slug: true } });
+  if (!provider || provider.status !== 'ACTIVE') return { title: 'Provider — Twendezetu', robots: { index: false } };
+  return previewMetadata({ title: provider.name, description: provider.headline, path: `/providers/${provider.slug}`, image: provider.coverUrl });
 }
 
-export default async function ProviderDetailPage({ params }) {
+export default async function ProviderPage({ params }) {
   const { slug } = await params;
-  return <ClaudeDesignPage page="providerDetail" initialState={{ slug }} />;
+  const viewer = await getViewer();
+  const data = await providerView(viewer, { slug });
+  if (!data) notFound();
+  return <ProviderView data={data} params={{ slug }} />;
 }

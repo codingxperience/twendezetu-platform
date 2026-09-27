@@ -1,7 +1,3 @@
-import { getCurrentUser } from '@/lib/auth';
-import { ok } from '@/lib/api';
+import { route } from '@/server/http';
 
-export async function GET() {
-  const user = await getCurrentUser();
-  return ok({ user });
-}
+export const GET = route({ auth: 'optional' }, async ({ viewer }) => ({ user: viewer || null }));

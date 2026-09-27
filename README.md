@@ -1,125 +1,135 @@
-# Twendezetu — Platform
+# Twendezetu
 
-A full-stack East African event marketplace. Real database, real auth, real booking flow, payment-ready.
+Where the East African diaspora finds its events and the people who make
+them happen. Members RSVP and buy tickets, post needs ("a photographer for
+a ruracio in Kiambu") and take offers from providers, chip in to group
+pools, split a table's tickets by link, and pay with cards or Twende
+points. Providers and organizers get paid through escrow, with disputes,
+payouts and a finance console behind it.
 
-**Tech:** Next.js 15 (App Router) · Prisma · Supabase Postgres · JWT cookies · Stripe · Zustand + SWR
-
----
-
-## What's inside
-
-- **Marketing homepage** — featured vendors, eight cities across four countries, curated package editorial
-- **Browse** — category, city, search, and sort filters backed by real database queries
-- **Vendor detail pages** — gallery, packages, dynamic pricing, share, save-to-favorites
-- **4-step booking flow** — event details, contact, review, deposit payment (Stripe-ready)
-- **Customer dashboard** — upcoming/past events, booking detail with two-way messaging, cancellation
-- **Vendor dashboard** — inquiries, bookings, revenue tile, public-listing link
-- **Saved vendors, inbox, account preferences**
-- **REST API** — `/api/auth/*`, `/api/vendors`, `/api/bookings`, `/api/bookings/:id/messages`, `/api/favorites`, `/api/inquiries`, `/api/payments/intent`
+**Stack:** Next.js 15 (App Router, React 19) · Prisma 5 · Postgres
+(Supabase) · Stripe · Resend · Africa's Talking · Supabase Storage ·
+optional Upstash Redis.
 
 ---
 
-## Quick start
+## Running it locally
+
+Requires Node 20.12 or newer and a Postgres database (local, or a Supabase
+project).
 
 ```bash
-git clone https://github.com/codingxperience/twendezetu-platform.git
-cd twendezetu-platform
 npm install
-cp .env.example .env
-
-# Fill DATABASE_URL and DIRECT_URL from Supabase Connect > ORM > Prisma.
-# Apply migrations when setting up or changing the schema:
-npm run db:deploy
-npm run db:seed
+cp .env.example .env        # fill DATABASE_URL, DIRECT_URL and AUTH_SECRET
+npm run db:deploy           # migrations, then row-level security lockdown
+npm run db:seed             # demo data (refuses to run on a database with real accounts)
 npm run dev
 ```
 
-Visit http://localhost:3000.
+Everything else in `.env.example` is optional in development. Without
+Stripe, card payments succeed instantly in test mode; without email and SMS
+keys, messages and verification codes are written to the server log.
 
-### Demo accounts (all use password `demo1234`)
+### Demo accounts
 
-| Email              | Role     | City    |
-|--------------------|----------|---------|
-| wanjiku@demo.tz    | customer | Nairobi |
-| david@demo.tz      | customer | Kampala |
-| aisha@demo.tz      | vendor   | Kampala (Mwalimu Studios) |
-| mama@demo.tz       | vendor   | Nairobi (Sarova Garden)   |
+All use the password `karibu-twende-2026`.
+
+| Email                | Who                                                              |
+|----------------------|------------------------------------------------------------------|
+| amina@example.com    | Member in Jersey City: tickets, a split, pools, needs, a dispute |
+| kato@example.com     | Provider, Kato 4x4 & Tours (Kampala), verified, with bookings    |
+| events@example.com   | Organizer of the catalogue events, with payouts                  |
+| admin@example.com    | Administrator: moderation, cases, users, verification            |
+| finance@example.com  | Finance: ledger, escrow, withdrawals, pool reviews               |
+| trust@example.com    | Moderator                                                        |
+
+---
+
+## How it is built
+
+```
+src/app/            routes: pages (server components) and /api route handlers
+src/server/views/   one loader per page: gathers exactly what the page shows
+src/server/services domain logic: checkout, marketplace, disputes, payouts, …
+src/server/         ledger, database, config, notifications, security, storage
+src/design/         page templates (markup) and page logic (state and actions)
+src/shared/         money, time zones and formatting, used on both sides
+prisma/             schema, migrations, seed
+tests/              unit tests and database tests
+```
+
+A page request runs a loader in `src/server/views`, which calls services and
+returns plain data. The page's logic module in `src/design/pages` turns that
+into what the template binds to, and sends every action to an API route.
+API routes (`src/server/http.js`) share one pipeline: session, roles,
+input validation with zod, rate limits, idempotency keys and error
+mapping.
+
+### Money
+
+- **One ledger.** Every movement of value is a double-entry journal entry
+  that balances in each currency. Postgres applies each line to its account,
+  refuses overdrafts, checks balance at commit, and forbids editing or
+  deleting journal rows. Balances cannot be written directly.
+- **Escrow.** Ticket money waits in event escrow until 48 hours after the
+  event; booking money waits until the customer confirms the job (or 72
+  hours after it). An open dispute freezes either.
+- **Points.** One point is one US cent. Paying in points rounds the points
+  owed up, and turning money into points rounds down, so a conversion never
+  hands out more than it takes in.
+- **Refunds** accumulate on the order, so a partial refund followed by a
+  cancellation never pays out twice.
+- **Fees** live in `src/server/fees.js` and every page reads them from there.
+
+### Privacy and safety
+
+Contact details in conversations stay hidden until an offer is accepted,
+and messages asking for payment off the platform are flagged for the trust
+team. See [SECURITY.md](SECURITY.md) for how accounts, data and money are
+protected.
+
+---
+
+## Scripts
+
+| Command                    | What it does                                                   |
+|----------------------------|----------------------------------------------------------------|
+| `npm run dev`              | Development server on port 3000                                |
+| `npm run build`            | Prisma client and production build (no database needed)        |
+| `npm run db:deploy`        | Apply migrations, then re-apply the row-level security lockdown |
+| `npm run db:seed`          | Replace the database with demo data                            |
+| `npm test`                 | Unit tests, no database                                        |
+| `npm run test:integration` | Database tests against `DATABASE_URL`, always rolled back      |
+| `npm run lint`             | ESLint                                                         |
 
 ---
 
 ## Deploying
 
-### Vercel (recommended)
+### Vercel
 
-1. Push to GitHub.
-2. Import the repo at [vercel.com/new](https://vercel.com/new).
-3. Add environment variables from `.env.example` (at minimum `AUTH_SECRET`, `DATABASE_URL`, and `DIRECT_URL`).
-4. Use Supabase's Prisma connection strings: transaction pooler for `DATABASE_URL`, session pooler for `DIRECT_URL`.
-5. Run `npm run db:deploy` before deploying schema changes, then deploy. The normal build does not need a live database connection.
+1. Import the repository and set the variables from `.env.example`. In
+   production `DATA_ENCRYPTION_KEY` is required.
+2. Point `DATABASE_URL` at the Supabase transaction pooler and `DIRECT_URL`
+   at the session pooler.
+3. Run `npm run db:deploy` against the production database before
+   deploying a schema change.
+4. Add the Stripe webhook `https://YOUR_DOMAIN/api/payments/stripe/webhook`.
+5. Set `CRON_SECRET`. `vercel.json` runs every scheduled job once a day,
+   which is the Hobby plan's limit. For timely escrow releases, reminders and
+   notifications, have any scheduler call `/api/cron/tick` every few minutes
+   with `Authorization: Bearer <CRON_SECRET>`; without `?all=1` it runs the
+   frequent jobs every time and the hourly, daily and weekly ones when due.
 
-### GitHub Pages
-
-GitHub Pages is not a supported deployment target for this app. Twendezetu uses
-Next.js API routes, Prisma, database-backed auth, and server-rendered pages;
-GitHub Pages only serves static files. A GitHub Pages URL for this repository
-will return 404 unless you replace the app with a static export, which would
-remove the booking, auth, dashboard, and API functionality.
-
-### Railway / Fly.io / Render
-
-The included `Dockerfile` is multi-stage and production-ready.
+### Containers (Railway, Fly.io, Render, Cloud Run)
 
 ```bash
 docker build -t twendezetu .
-docker run -p 3000:3000 -e AUTH_SECRET=... twendezetu
+docker run -p 3000:3000 --env-file .env twendezetu
 ```
 
-Set `AUTH_SECRET`, `DATABASE_URL`, and `DIRECT_URL` when running the container. `DATABASE_URL` should point at the Supabase transaction pooler; `DIRECT_URL` should point at the Supabase session pooler for migrations. Run `npm run db:deploy` as an explicit release step before deploying schema changes.
+The image runs as a non-root user and reports health from `/api/health`,
+which returns 503 when the database is unreachable or a table is missing
+row-level security. Run `npm run db:deploy` as a release step.
 
----
-
-## Stripe payments
-
-Without `STRIPE_SECRET_KEY` the booking flow uses **mock mode**: deposits are recorded but no money moves. To enable live payments:
-
-1. Create a Stripe account at [stripe.com](https://stripe.com).
-2. Set `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET` in your `.env` or hosting provider.
-3. Test in dev with card `4242 4242 4242 4242` · expiry `12/34` · CVC `123`.
-4. Configure a webhook at `https://yourdomain/api/payments/intent` for real-time confirmations (the route is scaffolded for handler expansion).
-
----
-
-## What's not in this release (deliberately scoped out)
-
-- **Email/SMS sending** — scaffolded in env vars; logs to stdout without provider keys. Add Resend (`RESEND_API_KEY`) and Africa's Talking for production.
-- **File uploads** — vendor images are URL strings. For uploads, plug in Cloudflare R2 / Vercel Blob and add an `/api/uploads` route.
-- **Admin / vendor approval** — schema supports `role: admin` but the moderation UI is not built.
-- **Real-time messaging** — current implementation polls via SWR. Swap in Pusher Channels or a WebSocket route for live chat.
-- **Rate limiting** — recommend Upstash Redis + a middleware before opening to the public.
-- **Multi-region currency feed** — currency rates are hardcoded estimates in `src/lib/currency.js`; refresh from a feed on a cron.
-
----
-
-## Repo layout
-
-```
-src/
-├── app/
-│   ├── api/              REST API (auth, vendors, bookings, favorites, …)
-│   ├── browse/           marketplace browse page
-│   ├── vendors/[id]/     vendor detail
-│   ├── book/[id]/        4-step booking flow
-│   ├── confirm/[id]/     booking confirmation
-│   ├── dashboard/        customer dashboard + bookings/[id]
-│   ├── vendor-dashboard/ vendor dashboard
-│   ├── sign-in/, sign-up/, favorites/, inbox/, account/, about/
-│   └── layout.jsx, page.jsx, globals.css, tokens.css
-├── components/           Header, Footer, VendorCard, Photo, Icon, …
-├── lib/                  prisma.js, auth.js, api.js, api-client.js, swr.js, currency.js, data.js
-└── store/                zustand UI store (locale + booking draft)
-
-prisma/
-├── schema.prisma         User, Vendor, Package, Booking, Message, Favorite, Inquiry, Review
-├── seed.mjs              Kenya/Uganda-balanced catalogue + demo users
-└── migrations/
-```
+GitHub Pages cannot host this app: it needs a server and a database.

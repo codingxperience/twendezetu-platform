@@ -1,7 +1,8 @@
-import { destroySession } from '@/lib/auth';
-import { ok } from '@/lib/api';
+import { clearSessionCookie, readSessionCookie, route, withStatus } from '@/server/http';
+import { revokeSessionByToken } from '@/server/security/sessions';
 
-export async function POST() {
-  await destroySession();
-  return ok({ ok: true });
-}
+export const POST = route({ auth: 'none', limit: false }, async () => {
+  await revokeSessionByToken(await readSessionCookie());
+  await clearSessionCookie();
+  return withStatus(200, { signedOut: true });
+});

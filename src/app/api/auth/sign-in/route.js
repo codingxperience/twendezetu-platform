@@ -1,33 +1,10 @@
-import { z } from 'zod';
-import { prisma } from '@/lib/prisma';
-import { verifyPassword, createSession } from '@/lib/auth';
-import { ok, badRequest, zodError, serverError } from '@/lib/api';
+import { route, setSessionCookie, withStatus } from '@/server/http';
+import { schemas } from '@/server/schemas';
+import { signIn } from '@/server/services/identity';
 
-const Body = z.object({
-  email: z.string().email(),
-  password: z.string().min(1),
+// Per-IP and per-account limits are applied inside signIn, keyed on the email.
+export const POST = route({ auth: 'none', body: schemas.signIn, limit: false }, async ({ body, ip, req }) => {
+  const result = await signIn({ email: body.email, password: body.password, ipAddress: ip, userAgent: req.headers.get('user-agent') });
+  await setSessionCookie(result.session.token, result.session.expiresAt);
+  return withStatus(200, { twoFactorRequired: result.mfaRequired, phoneHint: result.phoneHint });
 });
-
-export async function POST(req) {
-  let body;
-  try { body = Body.parse(await req.json()); } catch (e) { return zodError(e); }
-
-  const user = await prisma.user.findUnique({
-    where: { email: body.email.toLowerCase().trim() },
-    select: { id: true, email: true, name: true, role: true, city: true, passwordHash: true },
-  });
-  if (!user) return badRequest('Invalid email or password.');
-
-  const okPw = await verifyPassword(body.password, user.passwordHash);
-  if (!okPw) return badRequest('Invalid email or password.');
-
-  try {
-    await createSession(user.id, req);
-  } catch (e) {
-    console.error(e);
-    return serverError('Could not create session.');
-  }
-
-  const { passwordHash, ...safe } = user;
-  return ok({ user: safe });
-}

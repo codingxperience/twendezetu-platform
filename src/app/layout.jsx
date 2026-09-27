@@ -1,6 +1,13 @@
+import { Anton, Geist, Geist_Mono, Instrument_Serif } from 'next/font/google';
 import './globals.css';
-import { Toaster } from '@/components/Toaster';
-import { ThemeApplier } from '@/components/ThemeApplier';
+
+// Fonts are downloaded at build time and served from this site, so pages
+// never wait on (or report visitors to) a third-party font host.
+const anton = Anton({ weight: '400', subsets: ['latin'], display: 'swap', variable: '--font-anton' });
+const geist = Geist({ subsets: ['latin'], display: 'swap', variable: '--font-geist' });
+const geistMono = Geist_Mono({ weight: ['400', '500'], subsets: ['latin'], display: 'swap', variable: '--font-geist-mono' });
+const instrumentSerif = Instrument_Serif({ weight: '400', style: ['normal', 'italic'], subsets: ['latin'], display: 'swap', variable: '--font-instrument-serif' });
+const fontVariables = [anton.variable, geist.variable, geistMono.variable, instrumentSerif.variable].join(' ');
 
 // Resolve a public, crawlable base URL for social/OG previews.
 // A localhost NEXT_PUBLIC_APP_URL (dev default) must never leak into a deploy's
@@ -45,16 +52,10 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-      </head>
+    <html lang="en" className={fontVariables}>
       <body>
         <a href="#main" className="tz-skip">Skip to content</a>
-        <ThemeApplier />
         {children}
-        <Toaster />
       </body>
     </html>
   );
