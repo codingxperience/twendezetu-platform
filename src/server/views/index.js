@@ -20,6 +20,7 @@ import { disputesView } from './disputes.js';
 import { organizerAnalyticsView } from './organizerAnalytics.js';
 import { organizerPayoutsView } from './organizerPayouts.js';
 import { referralRewardsView } from './referralRewards.js';
+import { splitPayView } from './splitPay.js';
 
 export const VIEWS = {
   home: homeView,
@@ -40,4 +41,5 @@ export const VIEWS = {
   organizerAnalytics: organizerAnalyticsView,
   organizerPayouts: organizerPayoutsView,
   referralRewards: referralRewardsView,
+  splitPay: splitPayView,
 };

@@ -80,7 +80,7 @@ const template = `
               </sc-for>
               <div style="display: flex; gap: 8px; margin-top: 4px; flex-wrap: wrap;">
                 <button onClick="{{ splitPay }}" style="font-family: var(--tz-mono); font-size: 11.5px; border: 2px solid #1F3A38; background: #1F3A38; color: #F7F1E6; padding: 10px 14px; cursor: pointer;">⬡ SPLIT-PAY LINK</button>
-                <a href="/my-twende?tab=upcoming" style="font-family: var(--tz-mono); font-size: 11.5px; border: 2px solid #1F3A38; background: #F7F1E6; color: #14201F; padding: 10px 14px; text-decoration: none;">MY SPLITS →</a>
+                <a href="/split-pay" style="font-family: var(--tz-mono); font-size: 11.5px; border: 2px solid #1F3A38; background: #F7F1E6; color: #14201F; padding: 10px 14px; text-decoration: none;">MY SPLITS →</a>
                 <span style="align-self: center; font-family: var(--tz-mono); font-size: 11px; color: #6E6155;">{{ guestCount }} guests · one QR each</span>
               </div>
             </div>

@@ -81,9 +81,11 @@ export async function splitView(slug, viewer) {
   if (!split) return null;
   const isOrganizer = viewer?.id === split.organizerId;
   const paid = split.shares.filter((share) => share.status === 'PAID').length;
+  const open = split.status === 'OPEN' && split.expiresAt > new Date();
   return {
     slug: split.slug,
-    status: split.status,
+    status: open ? 'OPEN' : split.status === 'OPEN' ? 'EXPIRED' : split.status,
+    open,
     eventTitle: split.event.title,
     eventSlug: split.event.slug,
     tierName: split.tier.name,
@@ -98,18 +100,24 @@ export async function splitView(slug, viewer) {
     remaining: formatMoney((split.shares.length - paid) * split.shareMinor, split.currency),
     pct: `${Math.round((paid / split.shares.length) * 100)}%`,
     expiresAt: split.expiresAt.toISOString(),
-    shares: split.shares.map((share) => ({
-      position: share.position,
-      init: initials(share.name),
-      name: `${shortName(share.name)}${share.userId && share.userId === viewer?.id ? ' (you)' : ''}`,
-      paid: share.status === 'PAID',
-      meta: share.status === 'PAID'
-        ? 'paid · QR issued'
-        : share.position === 0 ? 'organizer of this split'
-          : share.email ? (isOrganizer ? share.email.replace(/^(.{2}).*(@.*)$/, '$1…$2') : 'invited by email') : 'via share link',
-      canRemind: isOrganizer && share.status === 'PENDING' && Boolean(share.email) && (!share.remindedAt || Date.now() - share.remindedAt.getTime() > 12 * 3600 * 1000),
-      reminded: Boolean(share.remindedAt),
-    })),
+    lifetimeHours: LIMITS.splitLifetimeHours,
+    shares: split.shares.map((share) => {
+      const mine = Boolean(viewer && share.userId === viewer.id);
+      return {
+        position: share.position,
+        init: initials(share.name),
+        name: `${shortName(share.name)}${mine ? ' (you)' : ''}`,
+        mine,
+        paid: share.status === 'PAID',
+        canPay: open && share.status === 'PENDING',
+        meta: share.status === 'PAID'
+          ? 'paid · QR ticket issued'
+          : share.position === 0 ? 'started this split'
+            : share.email ? (isOrganizer ? share.email.replace(/^(.{2}).*(@.*)$/, '$1…$2') : 'invited by email') : 'pays via the link',
+        canRemind: isOrganizer && open && share.status === 'PENDING' && Boolean(share.email) && (!share.remindedAt || Date.now() - share.remindedAt.getTime() > 12 * 3600 * 1000),
+        reminded: Boolean(share.remindedAt),
+      };
+    }),
   };
 }
 
@@ -137,7 +145,9 @@ async function createShareOrder(tx, split, share, { buyerId, buyerName, buyerEma
       totalMinor: split.shareMinor,
       channel,
       status: 'PENDING',
-      expiresAt: channel === 'CARD' ? split.expiresAt : null,
+      // An abandoned card payment frees the share after the normal checkout
+      // hold, not when the whole split ends.
+      expiresAt: channel === 'CARD' ? new Date(Math.min(split.expiresAt.getTime(), Date.now() + LIMITS.orderHoldMinutes * 60 * 1000)) : null,
       items: { create: [{ tierId: split.tierId, quantity: 1, unitPriceMinor: split.tier.priceMinor }] },
     },
   });
@@ -169,6 +179,9 @@ export async function payShare({ slug, position, viewer, name, email, channel, c
     const buyerEmail = (viewer?.email || email || share.email || '').trim().toLowerCase();
     if (!buyerEmail) throw invalid('Add your email so we can send your QR ticket.');
     const order = await createShareOrder(tx, split, share, { buyerId: viewer?.id || null, buyerName, buyerEmail, channel });
+    // A member paying a seat for themselves becomes its holder; covering
+    // everyone else's seats does not.
+    if (viewer && !share.userId && !stepUpDone) await tx.splitShare.update({ where: { id: share.id }, data: { userId: viewer.id } });
 
     if (channel === 'POINTS') {
       const points = pointsFor(order.totalMinor, order.currency, rates);
@@ -295,8 +308,19 @@ export async function expireSplits() {
   return stale.length;
 }
 
+// Splits someone started or holds a seat in, newest first.
 export async function splitsForUser(userId) {
-  const splits = await prisma.split.findMany({ where: { organizerId: userId }, orderBy: { createdAt: 'desc' }, take: 5, select: { slug: true } });
-  return splits.map((split) => split.slug);
+  const splits = await prisma.split.findMany({
+    where: { OR: [{ organizerId: userId }, { shares: { some: { userId } } }] },
+    orderBy: { createdAt: 'desc' },
+    take: 10,
+    include: { event: { select: { title: true } }, shares: { select: { status: true } } },
+  });
+  return splits.map((split) => ({
+    slug: split.slug,
+    title: split.event.title,
+    paid: split.shares.filter((share) => share.status === 'PAID').length,
+    total: split.shares.length,
+    status: split.status === 'OPEN' && split.expiresAt < new Date() ? 'EXPIRED' : split.status,
+  }));
 }
-
