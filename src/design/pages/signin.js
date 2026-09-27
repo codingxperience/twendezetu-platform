@@ -71,11 +71,11 @@ export function values(state, set, ctx) {
         if (result.twoFactorRequired) {
           return set((current) => ({ ...current, step: 'twoFactor', phoneHint: result.phoneHint, password: '', busy: {} }));
         }
-        return go(next || '/my-twende');
+        return go(next || result.home || '/my-twende');
       }
       if (state.step === 'twoFactor') {
-        await ctx.api.post('/api/auth/two-factor', { code: state.code.trim() });
-        return go(next || '/my-twende');
+        const result = await ctx.api.post('/api/auth/two-factor', { code: state.code.trim() });
+        return go(next || result.home || '/my-twende');
       }
       if (state.step === 'forgot') {
         if (!EMAIL_PATTERN.test(email)) return fail('Enter a valid email address.');
@@ -86,7 +86,7 @@ export function values(state, set, ctx) {
         if (state.password.length < MIN_PASSWORD) return fail(`Use at least ${MIN_PASSWORD} characters.`);
         if (state.password !== state.confirm) return fail('The two passwords do not match.');
         const result = await ctx.api.post('/api/auth/password/reset', { token: ctx.params.reset, password: state.password });
-        if (result.signedIn) return go(next || '/my-twende');
+        if (result.signedIn) return go(next || result.home || '/my-twende');
         return set((current) => ({
           ...current,
           step: 'credentials',

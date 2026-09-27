@@ -13,7 +13,7 @@ import { randomToken, sha256 } from '../security/crypto.js';
 import { notify, sendText } from '../notify/index.js';
 import { emailConfigured, passwordResetEmail, sendEmailNow } from '../notify/dispatch.js';
 import { awardReferral } from './referrals.js';
-import { isStaff } from '../security/staff.js';
+import { homeFor, isStaff } from '../security/staff.js';
 import { enforceRateLimit } from '../security/rate-limit.js';
 import { balancesByCurrency, balanceOf, accounts } from '../ledger.js';
 import { COUNTRIES, maskEmail, slugify } from '../../shared/format.js';
@@ -108,7 +108,7 @@ export async function signIn({ email, password, ipAddress, userAgent }) {
 
   const user = await prisma.user.findUnique({
     where: { email: normalizedEmail },
-    select: { id: true, passwordHash: true, status: true, twoFactorEnabled: true, phone: true, phoneVerifiedAt: true, name: true },
+    select: { id: true, passwordHash: true, status: true, twoFactorEnabled: true, phone: true, phoneVerifiedAt: true, name: true, role: true },
   });
 
   if (!user || user.status === 'DELETED') {
@@ -134,10 +134,10 @@ export async function signIn({ email, password, ipAddress, userAgent }) {
     await sendTwoFactorCode(user.id, user.phone);
   }
   await audit(prisma, { actorId: user.id, action: mfa ? 'auth.sign_in_mfa_challenge' : 'auth.signed_in', targetType: 'User', targetId: user.id, ipAddress });
-  return { userId: user.id, session, mfaRequired: Boolean(mfa), phoneHint: mfa ? maskPhone(user.phone) : null };
+  return { userId: user.id, session, mfaRequired: Boolean(mfa), phoneHint: mfa ? maskPhone(user.phone) : null, home: homeFor(user) };
 }
 
-function smsConfigured() {
+export function smsConfigured() {
   const { apiKey, username } = config().sms;
   return Boolean(apiKey && username);
 }
@@ -240,7 +240,7 @@ export async function setTwoFactor(user, { enabled, password }) {
       body: enabled
         ? 'Sign-ins, sends and withdrawals now need a code texted to your verified number.'
         : 'If this was not you, change your password now and turn two-step back on.',
-      href: '/settings?section=security',
+      href: '/settings?tab=security',
     });
   });
   return { enabled: Boolean(enabled) };
@@ -266,7 +266,7 @@ export async function changePassword(user, { currentPassword, newPassword, sessi
       urgent: true,
       title: 'Your password was changed',
       body: 'All other devices were signed out. If this was not you, reset your password immediately.',
-      href: '/settings?section=security',
+      href: '/settings?tab=security',
     });
   });
   const signedOutSessions = await revokeAllSessions(user.id, { exceptSessionId: sessionId });
@@ -354,7 +354,7 @@ async function findResetCode(token) {
   if (raw.length < 20 || raw.length > 200) return null;
   return prisma.oneTimeCode.findFirst({
     where: { purpose: 'PASSWORD_RESET', codeHash: sha256(raw) },
-    include: { user: { select: { id: true, email: true, name: true, status: true, passwordHash: true, emailVerifiedAt: true, twoFactorEnabled: true, phone: true, phoneVerifiedAt: true } } },
+    include: { user: { select: { id: true, email: true, name: true, status: true, role: true, passwordHash: true, emailVerifiedAt: true, twoFactorEnabled: true, phone: true, phoneVerifiedAt: true } } },
   });
 }
 
@@ -413,16 +413,16 @@ export async function resetPassword({ token, newPassword, ipAddress, userAgent }
       urgent: true,
       title: 'Your password was reset',
       body: 'Your Twendezetu password was changed with a reset link and every device was signed out. If this was not you, reset it again now and contact support.',
-      href: '/settings?section=security',
+      href: '/settings?tab=security',
     });
   });
   await revokeAllSessions(user.id);
 
   const twoStep = Boolean(user.twoFactorEnabled && user.phone && user.phoneVerifiedAt);
-  if (twoStep) return { signedIn: false, email: user.email };
+  if (twoStep) return { signedIn: false, email: user.email, home: homeFor(user) };
   const session = await createSession(user.id, { ipAddress, userAgent });
   await audit(prisma, { actorId: user.id, action: 'auth.signed_in', targetType: 'User', targetId: user.id, ipAddress });
-  return { signedIn: true, email: user.email, session };
+  return { signedIn: true, email: user.email, session, home: homeFor(user) };
 }
 
 // ── Profile ───────────────────────────────────────────────────────────────

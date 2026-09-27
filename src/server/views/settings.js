@@ -4,7 +4,8 @@ import { prisma } from '../db.js';
 import { unauthorized } from '../errors.js';
 import { notificationSettings, paymentMethods } from '../services/account.js';
 import { listSessions } from '../security/sessions.js';
-import { maskPhone } from '../services/identity.js';
+import { maskPhone, smsConfigured } from '../services/identity.js';
+import { staffTwoFactorMissing } from '../security/staff.js';
 import { timezoneFor } from '../notify/preferences.js';
 import { COUNTRIES, relativeTime } from '../../shared/format.js';
 import { DISPLAY_CURRENCIES } from '../../shared/money.js';
@@ -52,6 +53,11 @@ export async function settingsView(viewer, { session } = {}) {
     methods: methods.map((method) => ({ id: method.id, kind: method.kind, label: method.label, isDefault: method.isDefault, payouts: method.usableForPayouts, added: relativeTime(method.createdAt) })),
     security: {
       twoFactor: account.twoFactorEnabled,
+      // Staff whose console stays closed until two-step is on, and whether
+      // this site can send the texts that turning it on needs.
+      staffLocked: staffTwoFactorMissing(viewer),
+      console: viewer.role === 'FINANCE' ? 'finance' : 'admin',
+      textsAvailable: smsConfigured(),
       passwordChanged: account.passwordChangedAt ? relativeTime(account.passwordChangedAt) : null,
       memberSince: account.createdAt.getUTCFullYear(),
     },

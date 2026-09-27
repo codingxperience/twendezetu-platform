@@ -245,6 +245,12 @@ export function values(state, set, ctx) {
     setNewBank: (event) => set((current) => ({ ...current, newBank: event.target.value })),
     saveMethod,
 
+    staffLocked: security.staffLocked,
+    staffLockedText: !security.textsAvailable
+      ? `Your ${security.console} console opens once two-step verification is on. Text messages are not set up on this site yet, so it cannot be turned on: the site owner needs to add the text message (SMS) settings first.`
+      : profile.phoneVerified
+        ? `Your ${security.console} console opens once two-step verification is on. Turn it on below; after that we text you a code at each sign-in.`
+        : `Your ${security.console} console opens once two-step verification is on. It texts a code to your phone, so first verify your number under Profile, then turn it on below.`,
     securityRows: [
       {
         title: 'Two-step verification',
