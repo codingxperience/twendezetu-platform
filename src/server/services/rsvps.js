@@ -41,6 +41,14 @@ async function scheduleReminders(tx, rsvp, event) {
   }
 }
 
+// After an event moves, every reminder is re-timed to the new start.
+export async function rescheduleEventReminders(tx, eventId) {
+  const event = await tx.event.findUnique({ where: { id: eventId }, select: { title: true, slug: true, startsAt: true, timezone: true, venue: true } });
+  const rsvps = await tx.rsvp.findMany({ where: { eventId, status: 'GOING' } });
+  for (const rsvp of rsvps) await scheduleReminders(tx, rsvp, event);
+  return rsvps.length;
+}
+
 // Adjusts goingCount by `delta` people, refusing to pass capacity.
 async function adjustGoing(tx, eventId, delta) {
   if (!delta) return;

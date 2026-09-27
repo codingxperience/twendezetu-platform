@@ -11,7 +11,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { renderTemplate } from './render';
-import { hydrateTextareas, morphChildren } from './morph';
+import { hydrateFormValues, morphChildren } from './morph';
 import { api } from './api';
 
 // When two-step verification is on, money moves need a texted code. This
@@ -126,13 +126,13 @@ export function DesignView({ template, logic, data, view, params, viewer }) {
     if (!root) return;
     if (!mounted.current) {
       mounted.current = true;
-      hydrateTextareas(root);
+      hydrateFormValues(root);
       if (rendered.html === initialHtml) return;
     }
     const next = document.createElement('template');
     next.innerHTML = rendered.html;
     morphChildren(root, next.content);
-    hydrateTextareas(root);
+    hydrateFormValues(root);
   }, [rendered.html, initialHtml]);
 
   useEffect(() => {

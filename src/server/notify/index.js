@@ -42,10 +42,11 @@ export async function notify(tx, message) {
   }
 }
 
-// For people without an account (guest RSVPs, ticket buyers, service
-// requesters): email only.
-export async function notifyGuest(tx, { email, topic, subject, body, href = null, dedupeKey, sendAfter }) {
-  await queue(tx, { userId: null, channel: 'EMAIL', topic, to: email, subject, body, href, sendAfter: sendAfter || new Date(), dedupeKey: key(dedupeKey, 'email') });
+// Email only: for people without an account (guest RSVPs, ticket buyers,
+// service requesters), and for mail a member asked for by name, such as the
+// weekly digest, which follows its own switch rather than a topic.
+export async function notifyGuest(tx, { email, topic, subject, body, href = null, dedupeKey, sendAfter, userId = null }) {
+  await queue(tx, { userId, channel: 'EMAIL', topic, to: email, subject, body, href, sendAfter: sendAfter || new Date(), dedupeKey: key(dedupeKey, 'email') });
 }
 
 // Direct text message to a phone number (verification codes).
@@ -65,15 +66,16 @@ function key(base, channel) {
 }
 
 async function queue(tx, row) {
-  if (row.dedupeKey) {
-    // A scheduled message that was cancelled earlier (say, a reminder plan
-    // that changed) is revived rather than duplicated.
-    await tx.outboundMessage.upsert({
-      where: { dedupeKey: row.dedupeKey },
-      create: row,
-      update: { status: 'PENDING', sendAfter: row.sendAfter, subject: row.subject, body: row.body, to: row.to, attempts: 0, lastError: null },
-    });
+  if (!row.dedupeKey) {
+    await tx.outboundMessage.create({ data: row });
     return;
   }
-  await tx.outboundMessage.create({ data: row });
+  // A message with this key is sent at most once. One still waiting, or
+  // cancelled earlier (say, a reminder plan that changed), is refreshed and
+  // revived; one already sent or being sent is left alone.
+  const { count } = await tx.outboundMessage.updateMany({
+    where: { dedupeKey: row.dedupeKey, status: { in: ['PENDING', 'CANCELLED'] } },
+    data: { status: 'PENDING', sendAfter: row.sendAfter, subject: row.subject, body: row.body, to: row.to, attempts: 0, lastError: null },
+  });
+  if (!count) await tx.outboundMessage.createMany({ data: [row], skipDuplicates: true });
 }

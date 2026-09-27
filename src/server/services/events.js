@@ -8,6 +8,7 @@ import { checkRateLimit } from '../security/rate-limit.js';
 import { config } from '../config.js';
 import { notify, notifyGuest } from '../notify/index.js';
 import { awardReferral } from './referrals.js';
+import { rescheduleEventReminders } from './rsvps.js';
 import { COUNTRIES, EVENT_CATEGORIES, dayLabel, priceLabel, slugify, timeLabel } from '../../shared/format.js';
 import { isCurrency } from '../../shared/money.js';
 
@@ -211,6 +212,119 @@ export async function createEvent(user, input) {
     await audit(tx, { actorId: user.id, action: 'event.created', targetType: 'Event', targetId: event.id });
     return event;
   });
+}
+
+// Editing a posted event. The link (slug), country and currency stay fixed:
+// orders, escrow and shared links depend on them. Once anyone holds a ticket
+// the event cannot switch between free and ticketed, and no tier can shrink
+// below what it has sold. When the time or place changes, everyone going is
+// told and their reminders move with it.
+export async function updateEvent(user, eventId, input) {
+  const current = await prisma.event.findUnique({
+    where: { id: eventId },
+    include: { tiers: true, organizer: { select: { ownerId: true } }, _count: { select: { orders: { where: { status: { in: ['PENDING', 'PAID', 'RESERVED'] } } } } } },
+  });
+  if (!current) throw notFound();
+  const staff = ['ADMIN', 'MODERATOR'].includes(user.role);
+  if (current.createdById !== user.id && current.organizer.ownerId !== user.id && !staff) throw forbidden();
+  if (['CANCELLED', 'ARCHIVED'].includes(current.status)) throw badRequest('This event was cancelled, so it can no longer be edited.');
+  if ((current.endsAt || current.startsAt) < new Date()) throw badRequest('This event has already happened.');
+  if (input.country !== current.country || (input.currency && input.currency !== current.currency)) {
+    throw badRequest('The country and currency are fixed once an event is posted. Post a new event for a different country.');
+  }
+
+  const startsAt = new Date(input.startsAt);
+  if (Number.isNaN(startsAt.getTime())) throw invalid('Pick a start time.');
+  if (startsAt.getTime() !== current.startsAt.getTime() && startsAt < new Date()) throw invalid('Pick a start time in the future.');
+  const endsAt = input.endsAt ? new Date(input.endsAt) : null;
+  if (endsAt && endsAt <= startsAt) throw invalid('The end time must be after the start.');
+  const hasOrders = current._count.orders > 0;
+  if (Boolean(input.isFree) !== current.isFree && hasOrders) {
+    throw badRequest('People already hold tickets, so the event cannot switch between free and ticketed.');
+  }
+  if (input.capacity != null && input.capacity < current.goingCount) throw invalid(`${current.goingCount} people are already going, so capacity cannot go below that.`);
+
+  const online = current.tiers.filter((tier) => tier.kind === 'ONLINE');
+  const byId = new Map(online.map((tier) => [tier.id, tier]));
+  const incoming = input.isFree ? [] : input.tiers || [];
+  for (const tier of incoming) {
+    if (tier.id && !byId.has(tier.id)) throw badRequest('One of those ticket tiers does not belong to this event.');
+    const existing = tier.id && byId.get(tier.id);
+    if (existing && tier.capacity != null && tier.capacity < existing.sold) throw invalid(`${existing.name} has already sold ${existing.sold}, so its quantity cannot go below that.`);
+  }
+  if (!input.isFree && !incoming.length) throw invalid('Add at least one ticket tier, or make the event free.');
+
+  const moved = startsAt.getTime() !== current.startsAt.getTime()
+    || (endsAt?.getTime() ?? null) !== (current.endsAt?.getTime() ?? null)
+    || input.venue.trim() !== current.venue
+    || input.city.trim() !== current.city;
+
+  return transaction(async (tx) => {
+    // Tiers left out stop selling; tickets they already sold stay valid.
+    const kept = new Set(incoming.filter((tier) => tier.id).map((tier) => tier.id));
+    const dropped = online.filter((tier) => tier.active && !kept.has(tier.id)).map((tier) => tier.id);
+    if (dropped.length) await tx.ticketTier.updateMany({ where: { id: { in: dropped } }, data: { active: false } });
+    for (const [index, tier] of incoming.entries()) {
+      const data = { name: tier.name.trim(), description: tier.description?.trim() || '', priceMinor: tier.priceMinor, capacity: tier.capacity ?? null, sortOrder: index, active: true };
+      if (tier.id) await tx.ticketTier.update({ where: { id: tier.id }, data });
+      else await tx.ticketTier.create({ data: { ...data, eventId: current.id, currency: current.currency, kind: 'ONLINE' } });
+    }
+    const paidPrices = incoming.map((tier) => tier.priceMinor).filter((price) => price > 0);
+
+    const event = await tx.event.update({
+      where: { id: current.id },
+      data: {
+        title: input.title.trim(),
+        category: input.category,
+        blurb: input.blurb.trim(),
+        description: input.description.trim(),
+        coverUrl: input.coverUrl,
+        venue: input.venue.trim(),
+        city: input.city.trim(),
+        startsAt,
+        endsAt,
+        isFree: Boolean(input.isFree),
+        priceFromMinor: paidPrices.length ? Math.min(...paidPrices) : null,
+        capacity: input.capacity ?? null,
+        allowGuestRsvp: input.allowGuestRsvp !== false,
+      },
+      select: { id: true, slug: true, status: true, title: true, startsAt: true, timezone: true, venue: true, city: true },
+    });
+
+    if (input.schedule) {
+      await tx.eventScheduleItem.deleteMany({ where: { eventId: current.id } });
+      await tx.eventScheduleItem.createMany({ data: input.schedule.map((item, index) => ({ ...item, eventId: current.id, sortOrder: index })) });
+    }
+
+    let told = 0;
+    if (moved && event.status === 'PUBLISHED') {
+      await rescheduleEventReminders(tx, event.id);
+      const going = await tx.rsvp.findMany({ where: { eventId: event.id, status: 'GOING' }, select: { userId: true, email: true } });
+      const title = `Change to ${event.title}`;
+      const body = `It is now ${dayLabel(event.startsAt, event.timezone)} · ${timeLabel(event.startsAt, event.timezone)} at ${event.venue}, ${event.city}. Your reminders have moved with it.`;
+      const href = `/events/${event.slug}`;
+      const stamp = startsAt.getTime().toString(36);
+      for (const person of going) {
+        if (person.userId) await notify(tx, { userId: person.userId, topic: 'REMINDERS', title, body, href, urgent: true, dedupeKey: `moved:${event.id}:${stamp}:${person.userId}` });
+        else await notifyGuest(tx, { email: person.email, topic: 'REMINDERS', subject: title, body, href, dedupeKey: `moved:${event.id}:${stamp}:${person.email}` });
+      }
+      told = going.length;
+    }
+    await audit(tx, { actorId: user.id, action: 'event.updated', targetType: 'Event', targetId: event.id, meta: { moved } });
+    return { slug: event.slug, status: event.status, told };
+  });
+}
+
+// The form's starting values when someone edits their event.
+export async function eventForEditing(user, slug) {
+  const event = await prisma.event.findUnique({
+    where: { slug },
+    include: { tiers: { where: { kind: 'ONLINE', active: true }, orderBy: { sortOrder: 'asc' } }, organizer: { select: { name: true, ownerId: true } } },
+  });
+  if (!event) return null;
+  const staff = ['ADMIN', 'MODERATOR'].includes(user.role);
+  if (event.createdById !== user.id && event.organizer.ownerId !== user.id && !staff) return null;
+  return event;
 }
 
 async function ownedEvent(user, eventId) {

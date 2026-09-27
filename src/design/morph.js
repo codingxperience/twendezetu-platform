@@ -86,13 +86,14 @@ export function morphChildren(from, to) {
   }
 }
 
-// Textareas written as <textarea value="…"></textarea> in templates get their
-// text on first paint too.
-export function hydrateTextareas(root) {
-  for (const area of root.querySelectorAll('textarea[value]')) {
-    if (!bound.has(area)) {
-      area.value = area.getAttribute('value');
-      bound.add(area);
+// Browsers ignore a value attribute on <textarea> and <select>. Templates
+// write one anyway (<select value="KE">), so apply it when the element first
+// appears: on first paint, or when a render inserts it.
+export function hydrateFormValues(root) {
+  for (const field of root.querySelectorAll('textarea[value], select[value]')) {
+    if (!bound.has(field)) {
+      field.value = field.getAttribute('value');
+      bound.add(field);
     }
   }
 }

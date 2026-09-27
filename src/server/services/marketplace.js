@@ -113,15 +113,62 @@ export async function createNeed(user, input) {
         dedupeKey: `lead:${created.id}:${provider.ownerId}`,
       });
     }
-    return created;
+    return { ...created, notified: providers.length };
   });
-  return { slug: need.slug, id: need.id };
+  return { slug: need.slug, id: need.id, notified: need.notified };
+}
+
+// Editing a need while it is still taking offers. Country and currency stay
+// fixed (offers were priced in that currency). Providers with an offer on the
+// table see a note in their thread; nobody else is re-notified.
+export async function updateNeed(user, needId, input) {
+  const need = await ownNeed(user, needId);
+  if (!['OPEN', 'PAUSED'].includes(need.status)) throw badRequest('Only a need that is still taking offers can be edited.');
+  if (input.country !== need.country || (input.currency && input.currency !== need.currency)) {
+    throw badRequest('The country and currency are fixed once a need is posted, because offers were priced in them.');
+  }
+  const startsOn = input.startsOn ? new Date(input.startsOn) : null;
+  const endsOn = input.endsOn ? new Date(input.endsOn) : null;
+  if (startsOn && endsOn && endsOn < startsOn) throw invalid('The end date must be on or after the start date.');
+  const closesAt = input.closesAt ? new Date(input.closesAt) : null;
+  if (closesAt && closesAt < new Date()) throw invalid('The offer window must close in the future.');
+
+  await transaction(async (tx) => {
+    await tx.need.update({
+      where: { id: need.id },
+      data: {
+        title: input.title.trim(),
+        description: input.description.trim(),
+        category: input.category,
+        city: input.city.trim(),
+        startsOn,
+        endsOn,
+        budgetMinor: input.budgetMinor ?? null,
+        closesAt,
+        revealContactsOnAccept: Boolean(input.revealContactsOnAccept),
+        notifyOnOffers: input.notifyOnOffers !== false,
+        weeklyDigest: Boolean(input.weeklyDigest),
+      },
+    });
+    const live = await tx.offer.findMany({ where: { needId: need.id, status: { in: ['OPEN', 'COUNTERED'] } }, select: { threadId: true } });
+    for (const { threadId } of live) {
+      await appendMessage(tx, { threadId, kind: 'NOTICE', body: 'The poster updated the details of this need. Check them before the job, and revise your offer if it changes your price.' });
+    }
+    await audit(tx, { actorId: user.id, action: 'need.updated', targetType: 'Need', targetId: need.id });
+  });
+  return { id: need.id, slug: need.slug };
 }
 
 async function ownNeed(user, needId) {
   const need = await prisma.need.findUnique({ where: { id: needId } });
   if (!need) throw notFound();
   if (need.posterId !== user.id && !['ADMIN', 'MODERATOR'].includes(user.role)) throw forbidden();
+  return need;
+}
+
+export async function needForEditing(user, needId) {
+  const need = await prisma.need.findUnique({ where: { id: needId } });
+  if (!need || (need.posterId !== user.id && !['ADMIN', 'MODERATOR'].includes(user.role))) return null;
   return need;
 }
 

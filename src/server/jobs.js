@@ -12,6 +12,7 @@ import { expireSplits } from './services/splits.js';
 import { releaseDueBookings } from './services/marketplace.js';
 import { releaseEventEscrows } from './services/payouts.js';
 import { escalateOverdueDisputes } from './services/disputes.js';
+import { sendWeeklyDigests } from './services/digest.js';
 
 const EVERY_RUN = {
   expireStaleOrders,
@@ -34,6 +35,10 @@ const DAILY = {
   refreshFxRates: refreshRates,
 };
 
+const WEEKLY = {
+  sendWeeklyDigests,
+};
+
 async function runGroup(group) {
   const results = {};
   for (const [name, job] of Object.entries(group)) {
@@ -54,9 +59,11 @@ export async function runScheduledJobs(now = new Date()) {
   // are every five minutes, so the minute check has a five minute window.
   if (now.getUTCMinutes() < 5) Object.assign(results, await runGroup(HOURLY));
   if (now.getUTCHours() === 3 && now.getUTCMinutes() < 5) Object.assign(results, await runGroup(DAILY));
+  // Monday 04:00 UTC: early morning across East Africa, before the US wakes.
+  if (now.getUTCDay() === 1 && now.getUTCHours() === 4 && now.getUTCMinutes() < 5) Object.assign(results, await runGroup(WEEKLY));
   return results;
 }
 
 export async function runAllJobs() {
-  return { ...(await runGroup(EVERY_RUN)), ...(await runGroup(HOURLY)), ...(await runGroup(DAILY)) };
+  return { ...(await runGroup(EVERY_RUN)), ...(await runGroup(HOURLY)), ...(await runGroup(DAILY)), ...(await runGroup(WEEKLY)) };
 }

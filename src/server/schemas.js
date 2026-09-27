@@ -192,6 +192,13 @@ export const schemas = {
   payoutAction: z.object({ action: z.enum(['paid', 'failed']), externalRef: optionalText(80), reason: optionalText(200) }),
 };
 
+// Editing reuses the posting rules. Tiers carry their id so existing ones
+// are updated rather than replaced.
+schemas.updateEvent = schemas.createEvent.omit({ publish: true, organizerName: true }).extend({
+  tiers: z.array(z.object({ id: id.optional(), name: text(60), description: optionalText(200), priceMinor: minor, capacity: z.number().int().positive().max(1_000_000).optional() })).max(8).optional(),
+});
+schemas.updateNeed = schemas.createNeed.omit({ relatedEventSlug: true });
+
 export const querySchemas = {
   events: z.object({ category: eventCategory.optional(), city: z.string().max(80).optional(), q: z.string().max(80).optional(), limit: z.coerce.number().int().min(1).max(100).optional() }),
   providers: z.object({ category: providerCategory.optional(), city: z.string().max(80).optional(), q: z.string().max(80).optional(), limit: z.coerce.number().int().min(1).max(100).optional() }),
