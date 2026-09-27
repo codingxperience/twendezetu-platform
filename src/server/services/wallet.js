@@ -57,6 +57,8 @@ function describe(line) {
       return { icon: '<', title: `Cash-out to ${meta.destination}`, meta: `${when} · flat fee ${meta.fee} pts · ${meta.reference}` };
     case 'REFUND':
       return { icon: '↺', title: entry.memo, meta: `${when} · refund` };
+    case 'CONVERSION':
+      return { icon: '+', title: 'From your business earnings', meta: `${when} · ${formatMoney(meta.amountMinor || 0, meta.currency || 'USD')} converted` };
     case 'REFERRAL_REWARD':
       return { icon: '★', title: entry.memo, meta: `${when} · referral reward` };
     case 'PAYOUT_REVERSAL':
@@ -252,7 +254,9 @@ export async function walletStatementCsv(userId) {
 export function csvCell(value) {
   const text = String(value ?? '');
   // Leading =, +, - or @ would be read as a formula by spreadsheet apps.
-  const safe = /^[=+\-@\t\r]/.test(text) ? `'${text}` : text;
+  // Plain numbers (negative amounts included) are left as numbers.
+  const numeric = /^-?\d+(\.\d+)?$/.test(text);
+  const safe = !numeric && /^[=+\-@\t\r]/.test(text) ? `'${text}` : text;
   return /[",\r\n]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
 }
 

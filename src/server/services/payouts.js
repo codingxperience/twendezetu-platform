@@ -6,7 +6,9 @@ import { audit } from '../audit.js';
 import { badRequest, conflict, invalid, notFound } from '../errors.js';
 import { accounts, balancesByCurrency, post, statement } from '../ledger.js';
 import { ESCROW, FEES } from '../fees.js';
-import { formatCompact, formatMoney } from '../../shared/money.js';
+import { formatCompact, formatMoney, toMajor } from '../../shared/money.js';
+import { getRates } from '../fx.js';
+import { csvCell } from './wallet.js';
 import { notify } from '../notify/index.js';
 import { reference } from '../security/crypto.js';
 import { requireStepUp } from './identity.js';
@@ -68,6 +70,52 @@ export async function requestWithdrawal(user, { currency, amountMinor, methodId,
   return { reference: payoutReference, net: amountMinor - fee, fee };
 }
 
+// Moves business earnings into the owner's personal points wallet, to spend
+// on tickets, bookings or pools. No fee: the money stays on the platform.
+// Points are rounded down, so a conversion never credits more than it takes.
+export async function earningsToPoints(user, { currency, amountMinor, code }) {
+  if (!Number.isInteger(amountMinor) || amountMinor <= 0) throw invalid('Enter an amount above 0.');
+  const rates = await getRates();
+  const rate = currency === 'USD' ? 1 : rates[currency];
+  if (!rate) throw badRequest('Points conversion is not available in that currency.');
+  const points = Math.floor((toMajor(amountMinor, currency) / rate) * 100);
+  if (points < 1) throw invalid('That amount is worth less than one point.');
+  await requireStepUp(user, code);
+
+  await transaction(async (tx) => {
+    await post(tx, {
+      kind: 'CONVERSION',
+      memo: `Business earnings to points (${formatMoney(amountMinor, currency)})`,
+      reference: user.id,
+      actorId: user.id,
+      meta: { currency, amountMinor, points, rate },
+      lines: [
+        { account: accounts.earnings(user.id, currency), amount: -amountMinor },
+        { account: accounts.fx(currency), amount: amountMinor },
+        { account: accounts.fx('PTS'), amount: -points },
+        { account: accounts.wallet(user.id), amount: points },
+      ],
+    });
+    await audit(tx, { actorId: user.id, action: 'earnings.to_points', targetType: 'User', targetId: user.id, meta: { currency, amountMinor, points } });
+  });
+  return { points, amount: formatMoney(amountMinor, currency) };
+}
+
+export async function earningsStatementCsv(userId, currency) {
+  const rows = [['date', 'type', 'description', 'detail', 'amount', 'currency']];
+  let cursor;
+  for (let page = 0; page < 40; page += 1) {
+    const result = await statement(prisma, accounts.earnings(userId, currency), { take: 250, cursor });
+    for (const line of result.lines) {
+      const row = earningsRow(line);
+      rows.push([new Date(line.createdAt).toISOString(), line.entry.kind, row.title, row.meta, String(toMajor(line.amount, currency)), currency]);
+    }
+    if (!result.nextCursor) break;
+    cursor = result.nextCursor;
+  }
+  return rows.map((row) => row.map(csvCell).join(',')).join('\r\n');
+}
+
 // ── Provider wallet view ──────────────────────────────────────────────────
 
 function earningsRow(line) {
@@ -92,6 +140,8 @@ function earningsRow(line) {
       return { icon: '↺', type: 'PAYOUTS', title: 'Withdrawal returned', meta: `${when} · ${meta.reason || ''}`.trim(), amount: `+${amount}`, in: true };
     case 'REFUND':
       return { icon: 'R', type: 'FEES', title: entry.memo, meta: `${when} · REFUND AFTER RELEASE`, amount: `−${amount}`, in: false };
+    case 'CONVERSION':
+      return { icon: 'P', type: 'PAYOUTS', title: 'Moved to your points wallet', meta: `${when} · ${Number(meta.points || 0).toLocaleString('en-US')} POINTS`, amount: `−${amount}`, in: false };
     default:
       return { icon: '·', type: 'FEES', title: entry.memo, meta: when, amount: `${line.amount < 0 ? '−' : '+'}${amount}`, in: line.amount > 0 };
   }

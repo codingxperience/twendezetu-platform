@@ -13,6 +13,7 @@ import { providerView } from './provider.js';
 import { providersView } from './providers.js';
 import { providerDashboardView } from './providerDashboard.js';
 import { providerVerificationView } from './providerVerification.js';
+import { providerWalletView } from './providerWallet.js';
 
 export const VIEWS = {
   home: homeView,
@@ -26,4 +27,5 @@ export const VIEWS = {
   providers: providersView,
   providerDashboard: providerDashboardView,
   providerVerification: providerVerificationView,
+  providerWallet: providerWalletView,
 };

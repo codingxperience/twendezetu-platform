@@ -179,6 +179,7 @@ export const schemas = {
   createPool: z.object({ title: text(80, 3), purpose: optionalText(160), goalPoints: z.number().int().min(100).max(100_000_000), eventSlug: z.string().max(80).optional(), closesAt: isoDate.optional() }),
   contribute: z.object({ points: z.number().int().positive().max(500_000), note: optionalText(140) }),
   withdrawal: z.object({ currency: currency, amount: text(40), methodId: id, code }),
+  earningsToPoints: z.object({ currency: currency, amount: text(40), code }),
 
   createSplit: z.object({ eventSlug: text(80), tierId: id, guests: z.array(z.object({ name: text(80), email: email.optional() })).min(1).max(9) }),
   payShare: z.object({ channel: z.enum(['CARD', 'POINTS']), name: optionalText(80), email: email.optional(), code }),
