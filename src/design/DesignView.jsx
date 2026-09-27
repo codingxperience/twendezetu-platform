@@ -68,12 +68,19 @@ export function DesignView({ template, logic, data, view, params, viewer }) {
     toastTimer.current = window.setTimeout(() => setState((current) => ({ ...current, toast: null })), ms);
   }, []);
 
+  // Always reloads what the page shows now: timers set up in onMount keep
+  // the first reload they were given, and a client navigation can change
+  // the params since. A response that lands after such a change is dropped.
+  const paramsRef = useRef(params);
+  paramsRef.current = params;
   const reload = useCallback(async () => {
     if (!view) return;
-    const query = new URLSearchParams(Object.entries(params || {}).filter(([, value]) => value != null && value !== '')).toString();
+    const queryOf = (values) => new URLSearchParams(Object.entries(values || {}).filter(([, value]) => value != null && value !== '')).toString();
+    const query = queryOf(paramsRef.current);
     const fresh = await api.get(`/api/views/${view}${query ? `?${query}` : ''}`);
+    if (queryOf(paramsRef.current) !== query) return;
     setState((current) => ({ ...current, data: fresh }));
-  }, [view, params]);
+  }, [view]);
 
   // Runs an async action with a busy flag, error toasts and sign-in redirects.
   const run = useCallback(

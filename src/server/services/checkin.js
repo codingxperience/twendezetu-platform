@@ -23,6 +23,8 @@ export async function checkinEvents(user) {
     where: {
       OR: [{ createdById: user.id }, { organizer: { ownerId: user.id } }],
       status: { in: ['PUBLISHED', 'PAUSED'] },
+      // Only ticketed events have QR codes to scan.
+      isFree: false,
       startsAt: { gte: new Date(Date.now() - 2 * 86_400_000) },
     },
     orderBy: { startsAt: 'asc' },
