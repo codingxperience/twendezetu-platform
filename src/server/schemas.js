@@ -17,6 +17,15 @@ const minor = z.number().int().nonnegative().max(1_000_000_000_000);
 const handle = z.string().trim().toLowerCase().regex(/^[a-z0-9][a-z0-9-]{2,31}$/).optional();
 const source = z.string().trim().toLowerCase().max(20).optional();
 const isoDate = z.string().trim().refine((value) => !Number.isNaN(Date.parse(value)), 'Enter a valid date.');
+// Images people attach to listings and events: one of our own uploads, a
+// bundled asset, or a plain https link. Quotes, brackets and spaces are
+// refused outright, so a URL can never break out of an attribute or a CSS
+// url() wherever it is rendered.
+const imageUrl = z
+  .string()
+  .trim()
+  .max(500)
+  .refine((value) => /^(\/api\/files\/[A-Za-z0-9_-]{1,64}|\/assets\/[A-Za-z0-9/_.-]{1,200}|https:\/\/[^\s"'()<>\\`]+)$/.test(value), 'Use an uploaded image or an https link.');
 
 export const schemas = {
   signUp: z.object({
@@ -61,7 +70,7 @@ export const schemas = {
     category: eventCategory,
     blurb: text(240, 10),
     description: text(4000, 20),
-    coverUrl: z.string().trim().max(500).refine((value) => value.startsWith('/') || value.startsWith('https://'), 'Use an uploaded image or an https link.'),
+    coverUrl: imageUrl,
     venue: text(200, 3),
     city: text(80, 2),
     country,
@@ -146,7 +155,8 @@ export const schemas = {
     country: country.optional(),
     headline: optionalText(160),
     description: optionalText(3000),
-    coverUrl: z.string().trim().max(500).optional(),
+    coverUrl: imageUrl.optional(),
+    media: z.array(z.object({ url: imageUrl, alt: optionalText(120) })).max(8).optional(),
     rate: optionalText(40),
     rateUnit: optionalText(20),
     serviceAreas: z.array(text(80)).max(12).optional(),

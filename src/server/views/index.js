@@ -11,6 +11,7 @@ import { walletView } from './wallet.js';
 import { createView } from './create.js';
 import { providerView } from './provider.js';
 import { providersView } from './providers.js';
+import { providerDashboardView } from './providerDashboard.js';
 
 export const VIEWS = {
   home: homeView,
@@ -22,4 +23,5 @@ export const VIEWS = {
   create: createView,
   provider: providerView,
   providers: providersView,
+  providerDashboard: providerDashboardView,
 };

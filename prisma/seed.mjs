@@ -160,7 +160,7 @@ function parseRate(label, currency, rates) {
 
 const PEOPLE = [
   { key: 'amina', name: 'Amina Mushi', email: 'amina@example.com', city: 'Jersey City', country: 'US', phone: '+12015550112' },
-  { key: 'kato', name: 'Ssemakula Kato', email: 'kato@example.com', city: 'Kampala', country: 'UG', phone: '+256772000214' },
+  { key: 'kato', name: 'Kato Ssemakula', email: 'kato@example.com', city: 'Kampala', country: 'UG', phone: '+256772000214' },
   { key: 'desk', name: 'Twendezetu Events Desk', email: 'events@example.com', city: 'Jersey City', country: 'US' },
   { key: 'joel', name: 'Joel Mwangi', email: 'joel@example.com', city: 'Hartford', country: 'US', referrer: 'amina', phone: '+18605550147' },
   { key: 'faridah', name: 'Faridah Kamau', email: 'faridah@example.com', city: 'Hartford', country: 'US', referrer: 'amina', phone: '+18605550163' },

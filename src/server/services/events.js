@@ -11,6 +11,7 @@ import { awardReferral } from './referrals.js';
 import { rescheduleEventReminders } from './rsvps.js';
 import { COUNTRIES, EVENT_CATEGORIES, dayLabel, priceLabel, slugify, timeLabel } from '../../shared/format.js';
 import { isCurrency } from '../../shared/money.js';
+import { fold, icsDate, icsEscape } from '../ics.js';
 
 const PUBLIC_EVENT = { status: 'PUBLISHED', hiddenAt: null };
 
@@ -437,27 +438,6 @@ async function incrementStat(eventId, source, column) {
 
 // ── Calendar ──────────────────────────────────────────────────────────────
 
-function icsEscape(value) {
-  return String(value).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
-}
-
-function icsDate(date) {
-  return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
-}
-
-// Folds lines at 75 octets as RFC 5545 requires.
-function fold(line) {
-  const out = [];
-  let rest = line;
-  while (Buffer.byteLength(rest) > 75) {
-    let cut = 75;
-    while (Buffer.byteLength(rest.slice(0, cut)) > 75) cut -= 1;
-    out.push(rest.slice(0, cut));
-    rest = ` ${rest.slice(cut)}`;
-  }
-  out.push(rest);
-  return out.join('\r\n');
-}
 
 export function eventCalendar(event, reminderPlan = '7d,1d,2h') {
   const url = `${config().appUrl}/events/${event.slug}`;

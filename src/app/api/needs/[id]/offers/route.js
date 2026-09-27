@@ -5,7 +5,7 @@ import { schemas } from '@/server/schemas';
 import { submitOffer } from '@/server/services/marketplace';
 import { parseMoneyInput } from '@/shared/money';
 
-export const POST = route({ auth: 'required', body: schemas.offer }, async ({ body, viewer, params }) => {
+export const POST = route({ auth: 'required', body: schemas.offer, idempotent: true, limit: [{ policy: 'member.write', by: 'user' }] }, async ({ body, viewer, params }) => {
   const need = await prisma.need.findUnique({ where: { id: params.id }, select: { currency: true } });
   if (!need) throw notFound();
   const priceMinor = parseMoneyInput(body.price, need.currency);

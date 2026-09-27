@@ -239,7 +239,7 @@ const template = `
           <sc-for list="{{ directory }}" as="pv" hint-placeholder-count="0">
             <a href="{{ pv.href }}" style="flex: 0 0 300px; border: 2px solid #1F3A38; background: #FFFDF8; text-decoration: none; color: #14201F; display: block;" style-hover="box-shadow: 5px 5px 0 #D97A3B;">
               <div style="position: relative;">
-                <div role="img" aria-label="{{ pv.name }}" style="background-image: url('{{ pv.img }}'); background-size: cover; background-position: center; width: 100%; height: 160px; border-bottom: 2px solid #1F3A38; background-color: #EFE7D6;"></div>
+                <img src="{{ pv.img }}" alt="" loading="lazy" style="width: 100%; height: 160px; object-fit: cover; display: block; border-bottom: 2px solid #1F3A38; background: #EFE7D6;">
                 <span style="position: absolute; top: 10px; left: 10px; background: #F7F1E6; border: 2px solid #1F3A38; font-family: var(--tz-mono); font-size: 10px; padding: 3px 8px;">{{ pv.cat }}</span>
               </div>
               <div style="padding: 14px 16px;">

@@ -13,6 +13,7 @@ import { releaseDueBookings } from './services/marketplace.js';
 import { releaseEventEscrows } from './services/payouts.js';
 import { escalateOverdueDisputes } from './services/disputes.js';
 import { sendWeeklyDigests } from './services/digest.js';
+import { remindMembershipRenewals } from './services/providers.js';
 
 const EVERY_RUN = {
   expireStaleOrders,
@@ -33,6 +34,7 @@ const HOURLY = {
 
 const DAILY = {
   refreshFxRates: refreshRates,
+  remindMembershipRenewals,
 };
 
 const WEEKLY = {

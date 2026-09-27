@@ -22,8 +22,10 @@ export const PUT = route({ auth: 'required', body: schemas.listing }, async ({ b
     provider: await saveListing(viewer, {
       ...body,
       rateMinor: price(body.rate),
+      // A rate sent without a unit is a starting price: clear any old unit.
+      rateUnit: body.rate === undefined ? undefined : body.rateUnit || null,
       rateCurrency: currency,
-      services: body.services?.map((service) => ({ ...service, rateMinor: price(service.rate) })),
+      services: body.services?.map((service) => ({ ...service, rateMinor: price(service.rate), rateUnit: service.rateUnit || null })),
     }),
   });
 });

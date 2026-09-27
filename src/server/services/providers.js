@@ -21,6 +21,8 @@ import { safeEqual } from '../security/crypto.js';
 import { requestClaimKey, requestClaimPath } from './guest-requests.js';
 import { requireStepUp } from './identity.js';
 import { leadsForProvider } from './marketplace.js';
+import { fold, icsDate, icsEscape } from '../ics.js';
+import { config } from '../config.js';
 
 export function providerCard(provider) {
   return {
@@ -436,6 +438,64 @@ export async function activateMembershipFromPayment(tx, payment) {
   return 'fulfilled';
 }
 
+// Reminds providers before their listing lapses: 14 days out and 3 days
+// out, once each per membership period.
+export async function remindMembershipRenewals(now = new Date()) {
+  let sent = 0;
+  for (const days of [14, 3]) {
+    const from = new Date(now.getTime() + (days - 1) * 86_400_000);
+    const to = new Date(now.getTime() + days * 86_400_000);
+    const due = await prisma.provider.findMany({ where: { status: 'ACTIVE', membershipEndsAt: { gt: from, lte: to } } });
+    for (const provider of due) {
+      const quote = membershipQuote(provider, now);
+      await transaction((tx) =>
+        notify(tx, {
+          userId: provider.ownerId,
+          topic: 'MONEY',
+          title: days === 3 ? 'Your listing lapses in 3 days' : 'Renew your listing',
+          body: `${provider.name} stays live until ${provider.membershipEndsAt.toDateString()}. Renewing costs ${formatMoney(quote.amount, quote.currency)} for 12 more months; after that date the listing is hidden until you renew.`,
+          href: '/provider-dashboard',
+          dedupeKey: `membership:${provider.id}:${provider.membershipEndsAt.toISOString().slice(0, 10)}:${days}`,
+        }),
+      );
+      sent += 1;
+    }
+  }
+  return sent;
+}
+
+// A provider's bookings as a calendar file, for Google, Apple or Outlook.
+// Bookings are for whole days, so they are all-day entries.
+export async function providerBookingsCalendar(user) {
+  const provider = await prisma.provider.findUnique({ where: { ownerId: user.id }, select: { id: true, name: true } });
+  if (!provider) throw notFound();
+  const bookings = await prisma.booking.findMany({
+    where: { providerId: provider.id, status: { in: ['PENDING_PAYMENT', 'ESCROWED', 'RELEASED'] }, serviceStartsOn: { not: null } },
+    select: { id: true, reference: true, title: true, status: true, serviceStartsOn: true, serviceEndsOn: true, threadId: true },
+  });
+  const day = (date) => date.toISOString().slice(0, 10).replace(/-/g, '');
+  const events = bookings.flatMap((booking) => {
+    const last = booking.serviceEndsOn || booking.serviceStartsOn;
+    const end = new Date(last.getTime() + 86_400_000); // DTEND is exclusive
+    const link = `${config().appUrl}/messages${booking.threadId ? `?thread=${booking.threadId}` : ''}`;
+    const state = booking.status === 'PENDING_PAYMENT' ? 'Waiting for payment' : booking.status === 'ESCROWED' ? 'Paid into escrow' : 'Complete';
+    return [
+      'BEGIN:VEVENT',
+      `UID:${booking.id}@twendezetu`,
+      `DTSTAMP:${icsDate(new Date())}`,
+      `DTSTART;VALUE=DATE:${day(booking.serviceStartsOn)}`,
+      `DTEND;VALUE=DATE:${day(end)}`,
+      `SUMMARY:${icsEscape(`${booking.title} (${booking.reference})`)}`,
+      `DESCRIPTION:${icsEscape(`${state}. Conversation: ${link}`)}`,
+      `URL:${link}`,
+      `STATUS:${booking.status === 'PENDING_PAYMENT' ? 'TENTATIVE' : 'CONFIRMED'}`,
+      'END:VEVENT',
+    ];
+  });
+  const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Twendezetu//Provider bookings//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', `X-WR-CALNAME:${icsEscape(`${provider.name} · Twendezetu`)}`, ...events, 'END:VCALENDAR'];
+  return `${lines.map(fold).join('\r\n')}\r\n`;
+}
+
 // ── Reviews ───────────────────────────────────────────────────────────────
 
 // Reviews come only from completed bookings, which is what makes them worth
@@ -496,7 +556,7 @@ export async function providerDashboard(user) {
     prisma.providerStat.findMany({ where: { providerId: provider.id, day: { gte: since56 } }, select: { day: true, views: true } }),
     prisma.booking.findMany({
       where: { providerId: provider.id, status: { in: ['PENDING_PAYMENT', 'ESCROWED', 'RELEASED'] }, serviceStartsOn: { not: null } },
-      select: { id: true, title: true, status: true, serviceStartsOn: true, serviceEndsOn: true, reference: true },
+      select: { id: true, title: true, status: true, serviceStartsOn: true, serviceEndsOn: true, reference: true, threadId: true },
     }),
     prisma.notification.findMany({ where: { userId: user.id }, orderBy: { createdAt: 'desc' }, take: 5 }),
     prisma.serviceRequest.findMany({ where: { providerId: provider.id, status: 'NEW' }, orderBy: { createdAt: 'desc' }, take: 5 }),
