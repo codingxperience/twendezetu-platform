@@ -6,10 +6,12 @@ import { homeView } from './home.js';
 import { eventView } from './event.js';
 import { checkoutView } from './checkout.js';
 import { myTwendeView } from './myTwende.js';
+import { messagesView } from './messages.js';
 
 export const VIEWS = {
   home: homeView,
   event: eventView,
   checkout: checkoutView,
   myTwende: myTwendeView,
+  messages: messagesView,
 };

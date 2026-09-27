@@ -361,6 +361,10 @@ a { color: inherit; }
   background: #1F3A38;
 }
 
+@media (min-width: 901px) {
+  .claude-design .tw-mobile-only { display: none !important; }
+}
+
 @media (max-width: 900px) {
   .claude-design .tw-nav { display: none !important; }
   .claude-design .tw-main,
@@ -369,6 +373,9 @@ a { color: inherit; }
   .claude-design .tw-3col { grid-template-columns: 1fr !important; }
   .claude-design .tw-4col { grid-template-columns: repeat(2, 1fr) !important; }
   .claude-design .tw-threads { display: none !important; }
+  /* Messages: the thread list and the open conversation take turns. */
+  .claude-design .tw-messages[data-view="list"] .tw-threads { display: block !important; border-right: 0 !important; }
+  .claude-design .tw-messages[data-view="list"] .tw-convo { display: none !important; }
   .claude-design .tw-sticky { position: static !important; }
 }
 

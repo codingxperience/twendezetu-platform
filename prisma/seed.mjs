@@ -640,6 +640,38 @@ async function setBackdated(model, where, date) {
   await prisma[model].updateMany({ where, data: { createdAt: date } });
 }
 
+// Seeded conversations are written in one burst. Spread each one back in
+// time so the inbox reads like real use: the busiest thread was active under
+// an hour ago, older ones hours or days ago, with minutes between replies.
+async function spreadConversations(at) {
+  const threads = await prisma.thread.findMany({
+    include: { messages: { orderBy: { createdAt: 'asc' }, select: { id: true } }, participants: { select: { userId: true, lastReadAt: true } } },
+    orderBy: { lastMessageAt: 'desc' },
+  });
+  const endsAgo = [0.7, 2.5, 5, 19, 28, 49, 75, 120, 170];
+  const gapsMinutes = [6, 14, 3, 22, 9, 41, 12, 5, 27];
+  for (const [index, thread] of threads.entries()) {
+    const end = at - (endsAgo[index % endsAgo.length] + Math.floor(index / endsAgo.length) * 24) * 3_600_000;
+    let when = end;
+    const stamps = [];
+    for (let i = thread.messages.length - 1; i >= 0; i -= 1) {
+      stamps[i] = new Date(when);
+      when -= gapsMinutes[(index + i) % gapsMinutes.length] * 60_000;
+    }
+    for (const [i, message] of thread.messages.entries()) {
+      await prisma.message.update({ where: { id: message.id }, data: { createdAt: stamps[i] } });
+    }
+    const last = stamps.at(-1) || new Date(end);
+    await prisma.thread.update({ where: { id: thread.id }, data: { lastMessageAt: last, createdAt: stamps[0] || last } });
+    // Read stays read and unread stays unread at the new times.
+    for (const participant of thread.participants) {
+      const hadRead = participant.lastReadAt && participant.lastReadAt >= thread.lastMessageAt;
+      const lastReadAt = hadRead ? last : participant.lastReadAt ? new Date(last.getTime() - 60_000) : null;
+      await prisma.threadParticipant.update({ where: { threadId_userId: { threadId: thread.id, userId: participant.userId } }, data: { lastReadAt } });
+    }
+  }
+}
+
 async function main() {
   await guard();
   console.log('— Clearing demo database');
@@ -804,6 +836,7 @@ async function main() {
   await setBackdated('need', { id: airport.id }, new Date(now - 27 * DAY));
   await setBackdated('need', { id: driver.id }, new Date(now - 3 * DAY));
   await setBackdated('need', { id: tents.id }, new Date(now - 3 * DAY));
+  await spreadConversations(now);
   // Nothing seeded should be emailed or texted.
   await prisma.outboundMessage.updateMany({ where: { status: 'PENDING' }, data: { status: 'CANCELLED' } });
 

@@ -15,6 +15,7 @@ import { formatMoney } from '../../shared/money.js';
 import { initials, messageStamp, ratingLabel, shortName, threadStamp } from '../../shared/format.js';
 import { reference } from '../security/crypto.js';
 import { maskPhone } from './identity.js';
+import { timezoneFor } from '../notify/preferences.js';
 
 export const NOTICES = {
   masked: 'Contact details are masked until an offer is accepted.',
@@ -153,7 +154,7 @@ const THREAD_INCLUDE = {
   need: { select: { slug: true, title: true, posterId: true } },
 };
 
-export async function listThreads(userId) {
+export async function listThreads(userId, timeZone = 'UTC') {
   const memberships = await prisma.threadParticipant.findMany({
     where: { userId, archivedAt: null },
     include: {
@@ -179,7 +180,7 @@ export async function listThreads(userId) {
       id: thread.id,
       name: counterpart.name,
       re: thread.subject.toUpperCase(),
-      time: threadStamp(thread.lastMessageAt),
+      time: threadStamp(thread.lastMessageAt, timeZone),
       unread: Boolean(last && last.senderId !== userId && (!lastReadAt || lastReadAt < thread.lastMessageAt)),
       preview,
     };
@@ -207,6 +208,7 @@ export async function threadDetail(user, threadId) {
     contacts = { email: other.email, phone: other.phoneVerifiedAt ? other.phone : null };
   }
   const isPoster = thread.need?.posterId === user.id;
+  const timeZone = timezoneFor(user.country);
 
   const messages = thread.messages.map((message) => {
     const mine = message.senderId === user.id;
@@ -215,9 +217,9 @@ export async function threadDetail(user, threadId) {
       kind: message.kind,
       mine,
       who: mine ? 'YOU' : message.senderId ? counterpart.name.toUpperCase() : 'TWENDEZETU',
-      time: messageStamp(message.createdAt),
+      time: messageStamp(message.createdAt, timeZone),
       text: message.body,
-      file: message.file ? { id: message.file.id, name: message.file.name, href: `/api/files/${message.file.id}` } : null,
+      file: message.file ? { id: message.file.id, name: message.file.name, image: message.file.mime.startsWith('image/'), href: `/api/files/${message.file.id}` } : null,
     };
     if (message.kind !== 'OFFER' || !message.offer) return base;
     const offer = message.offer;

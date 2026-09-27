@@ -9,7 +9,7 @@ import { messageStamp } from '../../shared/format.js';
 export async function checkinEventFor(user, slug) {
   const event = await prisma.event.findUnique({
     where: { slug },
-    select: { id: true, slug: true, title: true, startsAt: true, createdById: true, organizer: { select: { ownerId: true } } },
+    select: { id: true, slug: true, title: true, startsAt: true, timezone: true, createdById: true, organizer: { select: { ownerId: true } } },
   });
   if (!event) throw notFound();
   const staff = ['ADMIN', 'MODERATOR'].includes(user.role);
@@ -32,7 +32,9 @@ export async function checkinEvents(user) {
   return events;
 }
 
-export async function checkinStats(eventId) {
+// Times are shown in the event's own time zone: the people reading them are
+// at the gate.
+export async function checkinStats(eventId, timeZone = 'UTC') {
   const [admitted, total, blocked, log] = await Promise.all([
     prisma.ticket.count({ where: { eventId, status: 'CHECKED_IN' } }),
     prisma.ticket.count({ where: { eventId, status: { not: 'VOID' } } }),
@@ -54,7 +56,7 @@ export async function checkinStats(eventId) {
       name: scan.ticket?.holderName || 'Unknown QR',
       note: scan.result === 'ADMITTED' ? 'Valid ticket' : scan.result === 'DUPLICATE' ? 'Second scan blocked' : 'Not valid for this event',
       status: scan.result,
-      time: messageStamp(scan.createdAt),
+      time: messageStamp(scan.createdAt, timeZone),
     })),
   };
 }
@@ -82,7 +84,7 @@ export async function scanTicket(user, slug, input) {
 
   if (ticket && ticket.eventId === event.id && ticket.status === 'CHECKED_IN') {
     await prisma.checkInScan.create({ data: { eventId: event.id, ticketId: ticket.id, scannedById: user.id, input: raw, result: 'DUPLICATE' } });
-    return { result: 'DUPLICATE', title: '✕ Already in', sub: `${ticket.code} was scanned at ${messageStamp(ticket.checkedInAt)}` };
+    return { result: 'DUPLICATE', title: '✕ Already in', sub: `${ticket.code} was scanned at ${messageStamp(ticket.checkedInAt, event.timezone)}` };
   }
 
   await prisma.checkInScan.create({

@@ -97,16 +97,19 @@ export function relativeTime(date, now = new Date()) {
 }
 
 // "TUE", "10:14" style stamps for message threads.
-export function threadStamp(date, now = new Date()) {
-  const sameDay = date.toDateString() === now.toDateString();
-  if (sameDay) return new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit' }).format(date);
-  if (now - date < 6 * 24 * 3600 * 1000) return new Intl.DateTimeFormat('en-US', { weekday: 'short' }).format(date).toUpperCase();
-  return shortDate(date);
+// Conversation list stamps in the reader's time zone: "14:05" today,
+// "TUE" this week, "3 OCT" before that.
+export function threadStamp(date, timeZone = 'UTC', now = new Date()) {
+  const day = (value) => new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(value);
+  if (day(date) === day(now)) return new Intl.DateTimeFormat('en-GB', { timeZone, hour: '2-digit', minute: '2-digit' }).format(date);
+  if (now - date < 6 * 24 * 3600 * 1000) return new Intl.DateTimeFormat('en-US', { timeZone, weekday: 'short' }).format(date).toUpperCase();
+  return shortDate(date, timeZone);
 }
 
-export function messageStamp(date) {
-  const weekday = new Intl.DateTimeFormat('en-US', { weekday: 'short' }).format(date).toUpperCase();
-  const time = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit' }).format(date);
+// "TUE 14:05" in the given time zone.
+export function messageStamp(date, timeZone = 'UTC') {
+  const weekday = new Intl.DateTimeFormat('en-US', { timeZone, weekday: 'short' }).format(date).toUpperCase();
+  const time = new Intl.DateTimeFormat('en-GB', { timeZone, hour: '2-digit', minute: '2-digit' }).format(date);
   return `${weekday} ${time}`;
 }
 

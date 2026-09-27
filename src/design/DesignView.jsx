@@ -155,8 +155,10 @@ export function DesignView({ template, logic, data, view, params, viewer }) {
     root.addEventListener('change', onInput);
     root.addEventListener('keydown', onKey);
     root.addEventListener('submit', onSubmit);
-    logic.onMount?.(ctx, setState, root);
+    // onMount may return a cleanup (timers, listeners) run when the page unmounts.
+    const cleanup = logic.onMount?.(ctx, setState, root);
     return () => {
+      if (typeof cleanup === 'function') cleanup();
       root.removeEventListener('click', onClick);
       root.removeEventListener('input', onInput);
       root.removeEventListener('change', onInput);
