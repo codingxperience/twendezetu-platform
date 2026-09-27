@@ -64,7 +64,7 @@ export async function requestWithdrawal(user, { currency, amountMinor, methodId,
       urgent: true,
       title: 'Withdrawal requested',
       body: `${formatMoney(amountMinor - fee, currency)} to ${method.label} after the ${formatMoney(fee, currency)} fee. Reference ${payoutReference}.`,
-      href: '/provider-wallet',
+      href: (await tx.provider.count({ where: { ownerId: user.id } })) ? '/provider-wallet' : '/organizer-payouts',
     });
   });
   return { reference: payoutReference, net: amountMinor - fee, fee };
@@ -297,15 +297,24 @@ export async function markPayoutFailed(financeUser, payoutId, reason) {
 
 // ── Ticket escrow release ─────────────────────────────────────────────────
 
-// Releases each finished event's ticket money to its organizer, 48 hours
-// after the event ends. An event with an open dispute waits until it closes.
+// An event with no end time is taken to run six hours.
+const ASSUMED_EVENT_HOURS = 6;
+
+// When an event's ticket money leaves escrow: 48 hours after it ends.
+export function eventReleaseTime(event) {
+  const end = event.endsAt || new Date(event.startsAt.getTime() + ASSUMED_EVENT_HOURS * 3600 * 1000);
+  return new Date(end.getTime() + ESCROW.eventReleaseDelayHours * 3600 * 1000);
+}
+
+// Releases each finished event's ticket money to its organizer (see
+// eventReleaseTime). An event with an open dispute waits until it closes.
 export async function releaseEventEscrows() {
   const cutoff = new Date(Date.now() - ESCROW.eventReleaseDelayHours * 3600 * 1000);
   const events = await prisma.event.findMany({
     where: {
       payoutReleasedAt: null,
       status: { in: ['PUBLISHED', 'PAUSED', 'ARCHIVED'] },
-      OR: [{ endsAt: { lt: cutoff } }, { endsAt: null, startsAt: { lt: new Date(cutoff.getTime() - 6 * 3600 * 1000) } }],
+      OR: [{ endsAt: { lt: cutoff } }, { endsAt: null, startsAt: { lt: new Date(cutoff.getTime() - ASSUMED_EVENT_HOURS * 3600 * 1000) } }],
     },
     select: { id: true, title: true, organizer: { select: { ownerId: true } } },
     take: 50,
@@ -348,52 +357,120 @@ export async function releaseEventEscrows() {
 
 // ── Organizer payouts view ────────────────────────────────────────────────
 
-export async function organizerPayouts(user) {
-  const events = await prisma.event.findMany({
-    where: { organizer: { ownerId: user.id }, isFree: false },
-    select: { id: true, title: true, startsAt: true, endsAt: true, payoutReleasedAt: true, status: true, currency: true },
-    orderBy: { startsAt: 'desc' },
-    take: 20,
-  });
-  const escrowAccounts = await prisma.ledgerAccount.findMany({ where: { kind: 'EVENT_ESCROW', ownerKey: { in: events.map((event) => event.id) } } });
-  const balances = await earnings(user.id);
-  const primary = Object.entries(balances).sort((a, b) => b[1] - a[1])[0] || [user.currency || 'USD', 0];
+const PAYOUT_STATUS = { REQUESTED: 'WAITING FOR BATCH', APPROVED: 'SENDING', PAID: 'PAID OUT', FAILED: 'RETURNED' };
 
-  const schedule = events
-    .filter((event) => !event.payoutReleasedAt)
-    .map((event) => {
-      const held = escrowAccounts.filter((account) => account.ownerKey === event.id).map((account) => ({ currency: account.currency, amount: toNumber(account.balance) })).find((row) => row.amount > 0);
-      if (!held) return null;
-      const releaseAt = new Date((event.endsAt || event.startsAt).getTime() + ESCROW.eventReleaseDelayHours * 3600 * 1000);
-      return { title: event.title, when: `AUTO-RELEASE ${shortDate(releaseAt)} (event + ${ESCROW.eventReleaseDelayHours / 24} days)`, amount: formatMoney(held.amount, held.currency) };
+// Ticket money an organizer has: available to withdraw, held per event until
+// release, and what has been released and withdrawn, in one currency at a
+// time. The currency defaults to wherever the money is.
+export async function organizerPayouts(user, { currency: wanted } = {}) {
+  // Only events whose money has not been released can still hold any, so
+  // this stays small however many events an organizer has run.
+  const [waitingEvents, balances, eventCount] = await Promise.all([
+    prisma.event.findMany({
+      where: { organizer: { ownerId: user.id }, isFree: false, payoutReleasedAt: null },
+      select: { id: true, title: true, startsAt: true, endsAt: true },
+    }),
+    earnings(user.id),
+    prisma.event.count({ where: { organizer: { ownerId: user.id }, isFree: false } }),
+  ]);
+  const eventIds = waitingEvents.map((event) => event.id);
+  const [escrowAccounts, liveCases] = await Promise.all([
+    prisma.ledgerAccount.findMany({ where: { kind: 'EVENT_ESCROW', ownerKey: { in: eventIds }, balance: { gt: 0 } } }),
+    prisma.dispute.groupBy({ by: ['orderId'], where: { status: { in: ['OPEN', 'ESCALATED'] }, order: { eventId: { in: eventIds } } }, _count: { _all: true } }),
+  ]);
+  const casesByEvent = {};
+  if (liveCases.length) {
+    const orders = await prisma.order.findMany({ where: { id: { in: liveCases.map((row) => row.orderId) } }, select: { eventId: true } });
+    for (const order of orders) casesByEvent[order.eventId] = (casesByEvent[order.eventId] || 0) + 1;
+  }
+
+  const held = escrowAccounts
+    .map((account) => ({ eventId: account.ownerKey, currency: account.currency, amount: toNumber(account.balance) }))
+    .filter((row) => row.amount > 0);
+  const currencies = [...new Set([
+    ...Object.entries(balances).filter(([, amount]) => amount !== 0).map(([code]) => code),
+    ...held.map((row) => row.currency),
+  ])];
+  const fallback = Object.entries(balances).sort((a, b) => b[1] - a[1])[0]?.[0] || held[0]?.currency || user.currency || 'USD';
+  const currency = currencies.includes(wanted) ? wanted : fallback;
+  if (!currencies.includes(currency)) currencies.unshift(currency);
+
+  const byId = Object.fromEntries(waitingEvents.map((event) => [event.id, event]));
+  const waiting = held.filter((row) => row.currency === currency);
+  const heldTotal = waiting.reduce((sum, row) => sum + row.amount, 0);
+  const schedule = waiting
+    .map((row) => {
+      const event = byId[row.eventId];
+      const releaseAt = eventReleaseTime(event);
+      const cases = casesByEvent[event.id] || 0;
+      return {
+        title: event.title,
+        releaseAt,
+        when: cases
+          ? `HELD WHILE ${cases === 1 ? 'A CASE IS' : `${cases} CASES ARE`} OPEN`
+          : releaseAt.getTime() <= Date.now()
+            ? 'RELEASING IN THE NEXT RUN'
+            : `RELEASES ${shortDate(releaseAt)} · ${ESCROW.eventReleaseDelayHours}H AFTER THE EVENT`,
+        amount: formatMoney(row.amount, currency),
+        frozen: Boolean(cases),
+      };
     })
-    .filter(Boolean);
+    .sort((a, b) => a.releaseAt - b.releaseAt);
 
   const [payouts, releases] = await Promise.all([
-    prisma.payout.findMany({ where: { userId: user.id, currency: { not: 'PTS' } }, orderBy: { requestedAt: 'desc' }, take: 10 }),
-    prisma.journalEntry.findMany({ where: { kind: 'ESCROW_RELEASE', reference: { in: events.map((event) => event.id) } }, include: { lines: true }, orderBy: { createdAt: 'desc' }, take: 10 }),
+    prisma.payout.findMany({ where: { userId: user.id, currency }, orderBy: { requestedAt: 'desc' }, take: 12 }),
+    prisma.journalEntry.findMany({
+      where: { kind: 'ESCROW_RELEASE', lines: { some: { currency, account: { kind: 'EARNINGS', ownerKey: user.id } } } },
+      include: { lines: { where: { amount: { gt: 0 }, account: { kind: 'EARNINGS', ownerKey: user.id } } } },
+      orderBy: { createdAt: 'desc' },
+      take: 12,
+    }),
   ]);
 
+  // The same balance also takes booking releases for someone who is a
+  // provider too; only ticket releases from their own events belong here.
+  const ownEvents = new Set((await prisma.event.findMany({ where: { id: { in: releases.map((entry) => entry.reference).filter(Boolean) }, organizer: { ownerId: user.id } }, select: { id: true } })).map((event) => event.id));
+  const ticketReleases = releases.filter((entry) => ownEvents.has(entry.reference));
+
   const history = [
-    ...releases.map((entry) => {
-      const credit = entry.lines.find((line) => line.amount > 0n);
-      return { event: entry.memo.replace('Ticket sales: ', ''), meta: `RELEASED ${shortDate(entry.createdAt)} · IN YOUR BALANCE`, status: 'RELEASED', amount: formatMoney(toNumber(credit.amount), credit.currency), at: entry.createdAt };
-    }),
+    ...ticketReleases.map((entry) => ({
+      title: entry.memo.replace('Ticket sales: ', ''),
+      meta: `RELEASED ${shortDate(entry.createdAt)} · ADDED TO YOUR BALANCE`,
+      status: 'RELEASED',
+      tone: 'in',
+      amount: `+${formatMoney(toNumber(entry.lines[0]?.amount || 0), currency)}`,
+      at: entry.createdAt,
+    })),
     ...payouts.map((payout) => ({
-      event: `Withdrawal ${payout.reference}`,
-      meta: `${payout.status === 'PAID' ? `PAID OUT ${shortDate(payout.paidAt)}` : `REQUESTED ${shortDate(payout.requestedAt)}`} · ${payout.destinationLabel}`,
-      status: payout.status,
-      amount: formatMoney(payout.amountMinor - payout.feeMinor, payout.currency),
+      title: `Withdrawal to ${payout.destinationLabel}`,
+      meta: `${payout.reference} · ${payout.status === 'PAID' && payout.paidAt ? `SENT ${shortDate(payout.paidAt)}` : `ASKED ${shortDate(payout.requestedAt)}`} · ${formatMoney(payout.feeMinor, currency)} FEE`,
+      status: PAYOUT_STATUS[payout.status] || payout.status,
+      tone: payout.status === 'FAILED' ? 'failed' : payout.status === 'PAID' ? 'out' : 'pending',
+      amount: `−${formatMoney(payout.amountMinor - payout.feeMinor, currency)}`,
       at: payout.requestedAt,
     })),
-  ].sort((a, b) => b.at - a.at);
+  ]
+    .sort((a, b) => b.at - a.at)
+    .slice(0, 15)
+    .map(({ at: _at, ...row }) => row);
 
+  const lastRelease = ticketReleases[0];
+  const fee = FEES.withdrawalFeeMinor[currency] ?? null;
   return {
-    currency: primary[0],
-    available: primary[1],
-    availableLabel: formatMoney(primary[1], primary[0]),
+    currency,
+    currencies,
+    available: balances[currency] || 0,
+    availableLabel: formatMoney(balances[currency] || 0, currency),
+    lastRelease: lastRelease ? `last release: “${lastRelease.memo.replace('Ticket sales: ', '')}”, ${shortDate(lastRelease.createdAt)}` : null,
+    heldLabel: formatMoney(heldTotal, currency),
+    heldCount: schedule.length,
+    fee,
+    feeLabel: fee == null ? null : formatMoney(fee, currency),
+    serviceFeePercent: FEES.ticketServiceBps / 100,
+    releaseHours: ESCROW.eventReleaseDelayHours,
     methods: await payoutMethods(user.id),
-    schedule,
+    schedule: schedule.map(({ releaseAt: _releaseAt, ...row }) => row),
     history,
+    hasEvents: eventCount > 0,
   };
 }

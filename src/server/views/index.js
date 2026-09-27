@@ -18,6 +18,7 @@ import { settingsView } from './settings.js';
 import { checkinView } from './checkin.js';
 import { disputesView } from './disputes.js';
 import { organizerAnalyticsView } from './organizerAnalytics.js';
+import { organizerPayoutsView } from './organizerPayouts.js';
 
 export const VIEWS = {
   home: homeView,
@@ -36,4 +37,5 @@ export const VIEWS = {
   checkin: checkinView,
   disputes: disputesView,
   organizerAnalytics: organizerAnalyticsView,
+  organizerPayouts: organizerPayoutsView,
 };

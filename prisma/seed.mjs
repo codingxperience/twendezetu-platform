@@ -36,7 +36,8 @@ const { findOrCreateThread, sendMessage } = await import('../src/server/services
 const { saveListing, renewMembership } = await import('../src/server/services/providers.js');
 const { createSplit, payShare } = await import('../src/server/services/splits.js');
 const { openDispute, escalateOverdueDisputes } = await import('../src/server/services/disputes.js');
-const { requestWithdrawal } = await import('../src/server/services/payouts.js');
+const { releaseEventEscrows, requestWithdrawal } = await import('../src/server/services/payouts.js');
+const { scanTicket } = await import('../src/server/services/checkin.js');
 const { fileReport } = await import('../src/server/services/moderation.js');
 const { storeFile } = await import('../src/server/storage.js');
 const { EVENT_CATALOG } = await import('./seed/events-content.mjs');
@@ -636,6 +637,73 @@ async function topUp(user, usd) {
   await startTopUp(await viewer(user), usd);
 }
 
+// A ticketed night that already happened, so the organizer has a real money
+// trail: tickets sold into escrow, most guests scanned at the door, the event
+// moved into the past, escrow released by the same job production runs, and
+// part of it withdrawn to the bank.
+async function seedFinishedEvent(people, organizer) {
+  const startsAt = zoned(now.getUTCFullYear(), now.getUTCMonth() + 1, now.getUTCDate() + 20, 18, 0, 'America/New_York');
+  const event = await prisma.event.create({
+    data: {
+      slug: 'afrogroove-harbour-cruise',
+      organizerId: organizer.id,
+      createdById: organizer.ownerId,
+      title: 'Afrogroove Harbour Cruise',
+      category: 'MUSIC',
+      blurb: 'Amapiano and bongo flava on the water, round Manhattan at sunset.',
+      description: 'Three hours round the harbour with the Afrogroove selectors: amapiano, bongo flava and afrobeats from boarding to docking. Boarding at Pier 40 from 5:30 PM; the boat leaves on time. 21+.',
+      coverUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=1100&q=80',
+      venue: 'Pier 40 · Hudson River Park, New York, NY',
+      city: 'New York, NY',
+      country: 'US',
+      timezone: 'America/New_York',
+      startsAt,
+      endsAt: new Date(startsAt.getTime() + 3 * 3600 * 1000),
+      currency: 'USD',
+      isFree: false,
+      priceFromMinor: 3000,
+      status: 'PUBLISHED',
+      publishedAt: new Date(now.getTime() - 40 * DAY),
+      allowGuestRsvp: true,
+      tiers: {
+        create: [
+          { name: 'Deck pass', description: 'Boarding, open deck and the dancefloor', kind: 'ONLINE', priceMinor: 3000, currency: 'USD', capacity: 150, sortOrder: 0 },
+          { name: 'Captain’s lounge', description: 'Lounge seating, the upper bar and a welcome drink', kind: 'ONLINE', priceMinor: 5500, currency: 'USD', capacity: 30, sortOrder: 1 },
+        ],
+      },
+    },
+    include: { tiers: true },
+  });
+  const [deck, lounge] = event.tiers;
+  const buyers = [['faridah', lounge, 2], ['deo', deck, 1], ['neema', deck, 2], ['samuel', lounge, 1]];
+  for (const [key, tier, quantity] of buyers) {
+    await placeOrder({ viewer: await viewer(people[key]), slug: event.slug, items: [{ tierId: tier.id, quantity }], channel: 'POINTS' });
+  }
+  const desk = await viewer(people.desk);
+  const tickets = await prisma.ticket.findMany({ where: { eventId: event.id }, orderBy: { code: 'asc' }, select: { code: true } });
+  for (const { code } of tickets.slice(0, -1)) await scanTicket(desk, event.slug, code);
+
+  // It happened twelve days ago.
+  const shift = startsAt.getTime() - (now.getTime() - 12 * DAY);
+  const back = (date) => new Date(date.getTime() - shift);
+  await prisma.event.update({ where: { id: event.id }, data: { startsAt: back(startsAt), endsAt: back(event.endsAt) } });
+  for (const order of await prisma.order.findMany({ where: { eventId: event.id } })) {
+    await prisma.order.update({ where: { id: order.id }, data: { createdAt: back(order.createdAt), paidAt: back(order.paidAt) } });
+  }
+  // Guests boarded over the half hour before departure.
+  const boarding = back(startsAt).getTime() - 30 * 60 * 1000;
+  const scans = await prisma.checkInScan.findMany({ where: { eventId: event.id }, orderBy: { createdAt: 'asc' }, select: { id: true, ticketId: true } });
+  for (const [index, scan] of scans.entries()) {
+    const at = new Date(boarding + index * 4 * 60 * 1000);
+    await prisma.checkInScan.update({ where: { id: scan.id }, data: { createdAt: at } });
+    await prisma.ticket.update({ where: { id: scan.ticketId }, data: { checkedInAt: at } });
+  }
+  await releaseEventEscrows();
+
+  const bank = await prisma.paymentMethod.create({ data: { userId: people.desk.id, kind: 'BANK', label: 'Chase ••4410', last4: '4410', accountEnc: encrypt('021000021:000044104410'), usableForPayouts: true, isDefault: true } });
+  await requestWithdrawal(desk, { currency: 'USD', amountMinor: 15_000, methodId: bank.id });
+}
+
 async function setBackdated(model, where, date) {
   await prisma[model].updateMany({ where, data: { createdAt: date } });
 }
@@ -686,7 +754,7 @@ async function main() {
   await prisma.user.update({ where: { id: people.kato.id }, data: { phoneVerifiedAt: new Date(now - 60 * DAY) } });
 
   console.log('— Events');
-  const { events } = await createEvents(people);
+  const { events, organizers } = await createEvents(people);
   await seedAttendance(events);
   await seedTraffic(events['nyama-choma-festival-2026'], 4210);
   await seedTraffic(events['afrogroove-night'], 1850);
@@ -830,6 +898,9 @@ async function main() {
   await prisma.dispute.update({ where: { id: dispute.id }, data: { respondBy: new Date(now - DAY) } });
   await escalateOverdueDisputes();
   await fileReport(katoViewer, { targetType: 'PROVIDER', targetId: providers['quickcars-ug'].id, reason: 'IMPERSONATION', detail: 'Their photos are copied from my listing.' });
+
+  console.log('— A finished, paid-out event');
+  await seedFinishedEvent(people, organizers['Afrogroove Collective']);
 
   console.log('— Finishing touches');
   // History reads naturally: move creation times of the seeded activity back.
