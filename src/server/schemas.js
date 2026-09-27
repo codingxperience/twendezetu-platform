@@ -197,7 +197,12 @@ export const schemas = {
   disputeAction: z.object({ action: z.enum(['refund', 'partial', 'contest', 'withdraw', 'note']), amount: optionalText(40), note: optionalText(1000), fileIds: z.array(id).max(10).optional() }),
 
   adminReport: z.object({ action: z.enum(['dismiss', 'warn', 'suspend']) }),
-  adminUser: z.object({ action: z.enum(['suspend', 'reinstate']), reason: optionalText(200) }),
+  adminUser: z.object({
+    action: z.enum(['suspend', 'reinstate', 'role', 'message', 'reset']),
+    reason: optionalText(200),
+    role: z.enum(['MEMBER', 'MODERATOR', 'FINANCE', 'ADMIN']).optional(),
+    text: optionalText(2000),
+  }),
   adminVerification: z.object({ decision: z.enum(['approve', 'info', 'reject']), note: optionalText(500) }),
   adminContent: z.object({ kind: z.enum(['event', 'need']), id, action: z.enum(['feature', 'unfeature', 'hide', 'unhide']), reason: optionalText(200) }),
   adminSetting: z.object({ key: z.enum(['providerSignups', 'autoScamDetection', 'guestRsvp', 'poolReleaseReview']), value: z.boolean() }),

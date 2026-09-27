@@ -12,6 +12,7 @@ import { consumeCode, issueCode } from '../security/otp.js';
 import { randomToken, sha256 } from '../security/crypto.js';
 import { notify, sendText } from '../notify/index.js';
 import { awardReferral } from './referrals.js';
+import { isStaff } from '../security/staff.js';
 import { enforceRateLimit } from '../security/rate-limit.js';
 import { balancesByCurrency, balanceOf, accounts } from '../ledger.js';
 import { COUNTRIES, slugify } from '../../shared/format.js';
@@ -223,6 +224,7 @@ export async function setTwoFactor(user, { enabled, password }) {
   const record = await prisma.user.findUnique({ where: { id: user.id }, select: { passwordHash: true, phone: true, phoneVerifiedAt: true } });
   const { ok } = await verifyPassword(password || '', record.passwordHash);
   if (!ok) throw unauthorized('Your password is not right.');
+  if (!enabled && config().production && isStaff(user)) throw forbidden('Staff accounts keep two-step verification on.');
   if (enabled && !(record.phone && record.phoneVerifiedAt)) {
     throw badRequest('Verify a phone number first. Two-step codes are sent by text message.');
   }

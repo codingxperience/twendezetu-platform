@@ -13,7 +13,7 @@ import { notify } from '../notify/index.js';
 import { reference } from '../security/crypto.js';
 import { refundOrder } from './checkout.js';
 import { releaseBooking } from './marketplace.js';
-import { relativeTime, shortDate } from '../../shared/format.js';
+import { relativeTime, shortDate, shortName } from '../../shared/format.js';
 
 export const REASONS = Object.freeze({
   EVENT_CANCELLED: ['Event cancelled or moved', 'Automatic full refund if the organizer cancelled'],
@@ -374,4 +374,43 @@ export async function disputesForUser(userId) {
       timeline: dispute.timeline.map((event) => ({ kind: event.kind, note: event.note, when: relativeTime(event.createdAt) })),
     };
   });
+}
+
+// Cases waiting on the resolution team, oldest deadline first, with both
+// sides' words and evidence.
+export async function escalatedCases() {
+  const disputes = await prisma.dispute.findMany({
+    where: { status: 'ESCALATED' },
+    orderBy: { respondBy: 'asc' },
+    take: 30,
+    include: {
+      timeline: { orderBy: { createdAt: 'asc' } },
+      evidence: { include: { file: { select: { id: true, name: true } } } },
+      order: { select: { reference: true, event: { select: { title: true, organizer: { select: { name: true } } } } } },
+      booking: { select: { reference: true, title: true, provider: { select: { name: true } } } },
+      openedBy: { select: { name: true } },
+      respondent: { select: { name: true } },
+    },
+  });
+  return disputes.map((dispute) => ({
+    id: dispute.id,
+    reference: dispute.reference,
+    subject: subjectTitle(dispute),
+    reason: REASONS[dispute.reason][0],
+    amount: formatMoney(dispute.amountMinor, dispute.currency),
+    currency: dispute.currency,
+    opener: shortName(dispute.openedBy.name),
+    // Sellers are shown as the business the buyer dealt with.
+    respondent: dispute.order?.event.organizer.name || dispute.booking?.provider.name || (dispute.respondent ? shortName(dispute.respondent.name) : 'Account closed'),
+    detail: dispute.detail,
+    opened: relativeTime(dispute.createdAt),
+    notes: dispute.timeline
+      .filter((event) => event.kind !== 'opened')
+      .map((event) => ({
+        who: event.actorId === dispute.openedById ? 'BUYER' : event.actorId && event.actorId === dispute.respondentId ? 'SELLER' : 'PLATFORM',
+        note: event.note,
+        when: relativeTime(event.createdAt),
+      })),
+    evidence: dispute.evidence.map((item) => ({ name: item.file.name, href: `/api/files/${item.file.id}`, side: item.uploadedBy === dispute.openedById ? 'BUYER' : 'SELLER' })),
+  }));
 }

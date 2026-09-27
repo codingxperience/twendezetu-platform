@@ -6,6 +6,7 @@ import { cache } from 'react';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { resolveSession, sessionCookieName } from './security/sessions.js';
+import { staffTwoFactorMissing } from './security/staff.js';
 
 const resolveCurrent = cache(async () => {
   const jar = await cookies();
@@ -28,5 +29,6 @@ export async function requireViewer(nextPath) {
 export async function requireRole(roles, nextPath) {
   const viewer = await requireViewer(nextPath);
   if (!roles.includes(viewer.role)) redirect('/my-twende');
+  if (staffTwoFactorMissing(viewer)) redirect('/settings?tab=security');
   return viewer;
 }

@@ -19,6 +19,7 @@ import { AppError, badRequest, conflict, forbidden, fromDatabaseError, invalid, 
 import { enforceRateLimit } from './security/rate-limit.js';
 import { resolveSession, sessionCookieName, sessionCookieOptions } from './security/sessions.js';
 import { randomToken, sha256 } from './security/crypto.js';
+import { staffTwoFactorMissing } from './security/staff.js';
 
 const MAX_JSON_BYTES = 64 * 1024;
 const MUTATING = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
@@ -174,6 +175,7 @@ export function route(options, handler) {
       }
       if (auth === 'required' && !viewer) throw unauthorized();
       if (roles && (!viewer || !roles.includes(viewer.role))) throw forbidden();
+      if (roles && staffTwoFactorMissing(viewer)) throw forbidden('Turn on two-step verification in Settings to use staff tools.');
 
       const limits = limit === false ? [] : limit || defaultLimits(method, viewer);
       await applyLimits(limits, { ip, viewer });

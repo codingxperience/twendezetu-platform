@@ -17,6 +17,7 @@ import { reference } from '../security/crypto.js';
 import { maskPhone } from './identity.js';
 import { timezoneFor } from '../notify/preferences.js';
 import { requestClaimPath } from './guest-requests.js';
+import { isStaff } from '../security/staff.js';
 
 export const NOTICES = {
   masked: 'Contact details are masked until an offer is accepted.',
@@ -151,6 +152,8 @@ function counterpartOf(thread, viewerId) {
   const other = thread.participants.find((participant) => participant.userId !== viewerId);
   if (!other && thread.kind === 'PROVIDER') return { name: 'Guest', initials: 'G', sub: 'NO ACCOUNT · REPLIES GO BY EMAIL', role: 'MEMBER', userId: null };
   if (!other) return { name: 'Twendezetu', initials: 'TZ', sub: '', role: 'MEMBER', userId: null };
+  // Members see support threads as coming from the team, not one employee.
+  if (thread.kind === 'SUPPORT' && isStaff(other.user)) return { name: 'Twendezetu team', initials: 'TZ', sub: 'OFFICIAL · SUPPORT', role: 'MEMBER', userId: null };
   if (other.role === 'PROVIDER' && thread.provider) {
     const provider = thread.provider;
     const rating = ratingLabel(provider);
@@ -164,7 +167,7 @@ function counterpartOf(thread, viewerId) {
 }
 
 const THREAD_INCLUDE = {
-  participants: { include: { user: { select: { id: true, name: true } } } },
+  participants: { include: { user: { select: { id: true, name: true, role: true } } } },
   provider: { select: { id: true, name: true, ratingSum: true, ratingCount: true, verifiedAt: true, jobsCompleted: true, ownerId: true } },
   event: { select: { slug: true, organizer: { select: { name: true } } } },
   need: { select: { slug: true, title: true, posterId: true } },

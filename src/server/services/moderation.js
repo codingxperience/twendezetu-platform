@@ -8,6 +8,8 @@ import { reference } from '../security/crypto.js';
 import { revokeAllSessions } from '../security/sessions.js';
 import { notify } from '../notify/index.js';
 import { getSettings, setSetting, SETTING_COPY } from '../settings.js';
+import { findOrCreateThread, sendMessage } from './threads.js';
+import { requestPasswordReset } from './identity.js';
 import { getRates } from '../fx.js';
 import { convert } from '../../shared/money.js';
 import { EVENT_CATEGORIES, maskEmail, relativeTime, shortName } from '../../shared/format.js';
@@ -191,10 +193,63 @@ export async function listUsers({ q, take = 25 } = {}) {
       name: user.name,
       email: maskEmail(user.email),
       role: roles.join(' + '),
+      staffRole: user.role,
       city: user.city || user.country || '—',
       suspended: user.status === 'SUSPENDED',
     };
   });
+}
+
+const ROLE_COPY = { MEMBER: 'member', MODERATOR: 'moderator', FINANCE: 'finance', ADMIN: 'administrator' };
+
+// Staff roles are granted by administrators only, never to themselves.
+export async function setUserRole(admin, userId, role) {
+  if (admin.role !== 'ADMIN') throw forbidden('Only administrators can change roles.');
+  if (!ROLE_COPY[role]) throw badRequest('Unknown role.');
+  if (userId === admin.id) throw forbidden('Ask another administrator to change your own role.');
+  const target = await prisma.user.findUnique({ where: { id: userId }, select: { id: true, role: true, status: true } });
+  if (!target || target.status === 'DELETED') throw notFound();
+  if (target.role === role) return { role };
+  await transaction(async (tx) => {
+    await tx.user.update({ where: { id: userId }, data: { role } });
+    await notify(tx, {
+      userId,
+      topic: 'MONEY',
+      urgent: true,
+      title: 'Your account role changed',
+      body: role === 'MEMBER' ? 'Your staff access was removed.' : `You now have ${ROLE_COPY[role]} access. Staff tools need two-step verification on: turn it on in Settings under Security.`,
+    });
+    await audit(tx, { actorId: admin.id, action: 'user.role_changed', targetType: 'User', targetId: userId, meta: { from: target.role, to: role } });
+  });
+  return { role };
+}
+
+// A message from the team lands in the member's inbox as a support thread.
+export async function messageUser(staff, userId, text) {
+  const body = String(text || '').trim();
+  if (body.length < 2) throw badRequest('Write the message first.');
+  const target = await prisma.user.findUnique({ where: { id: userId }, select: { id: true, status: true } });
+  if (!target || target.status === 'DELETED') throw notFound();
+  if (target.id === staff.id) throw badRequest('You cannot message yourself.');
+  const thread = await transaction((tx) =>
+    findOrCreateThread(tx, {
+      kind: 'SUPPORT',
+      subject: 'Twendezetu support',
+      participants: [{ userId: staff.id, role: 'MEMBER' }, { userId: target.id, role: 'MEMBER' }],
+    }),
+  );
+  await sendMessage(staff, thread.id, { text: body });
+  await audit(prisma, { actorId: staff.id, action: 'user.messaged', targetType: 'User', targetId: userId });
+  return { threadId: thread.id };
+}
+
+// Sends the member the same reset link they could ask for themselves.
+export async function sendPasswordResetFor(staff, userId) {
+  const target = await prisma.user.findUnique({ where: { id: userId }, select: { email: true, status: true } });
+  if (!target || target.status !== 'ACTIVE') throw badRequest('Only active accounts can reset a password.');
+  await requestPasswordReset(target.email, `staff:${staff.id}`);
+  await audit(prisma, { actorId: staff.id, action: 'user.password_reset_sent', targetType: 'User', targetId: userId });
+  return { sent: true };
 }
 
 export async function contentList() {
@@ -312,6 +367,7 @@ export async function adminOverview() {
   const gmvCents = toUsd(ordersPaid30, 'totalMinor') + toUsd(escrowed30, 'amountMinor');
   const payoutCount = payoutsPending.reduce((sum, row) => sum + row._count._all, 0);
   const payoutUsd = toUsd(payoutsPending, 'amountMinor');
+  const escalated = await prisma.dispute.count({ where: { status: 'ESCALATED' } });
   const matched = await prisma.need.count({ where: { createdAt: { gte: d30 }, offerCount: { gt: 0 } } });
   const posted = await prisma.need.count({ where: { createdAt: { gte: d30 } } });
 
@@ -328,11 +384,12 @@ export async function adminOverview() {
 
   const attention = [];
   if (highReports) attention.push({ label: `${highReports} high-severity report${highReports === 1 ? '' : 's'} waiting`, action: 'MODERATE', section: 'moderation' });
+  if (escalated) attention.push({ label: `${escalated} refund case${escalated === 1 ? '' : 's'} waiting for a decision (money is frozen)`, action: 'DECIDE', section: 'cases' });
   if (stalledVerifications) attention.push({ label: `${stalledVerifications} provider verification${stalledVerifications === 1 ? '' : 's'} waiting over 48h`, action: 'REVIEW', section: 'verify' });
   if (payoutCount) attention.push({ label: `Payout batch of ${usdShort(payoutUsd)} awaits finance approval`, action: 'FINANCE', href: '/finance' });
   if (featuredEligible) attention.push({ label: `${featuredEligible} popular event${featuredEligible === 1 ? ' is' : 's are'} not featured yet`, action: 'CURATE', section: 'content' });
 
-  return { kpis, attention, badges: { moderation: openReports || null, verify: pendingVerifications || null } };
+  return { kpis, attention, badges: { moderation: openReports || null, cases: escalated || null, verify: pendingVerifications || null } };
 }
 
 function usdShort(cents) {
