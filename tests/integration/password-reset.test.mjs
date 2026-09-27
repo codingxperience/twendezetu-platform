@@ -154,6 +154,7 @@ test('a reset changes the password, signs out every device and works once', { sk
   const result = await resetPassword({ token, newPassword: NEW_PASSWORD, ipAddress: '203.0.113.9', userAgent: 'test' });
   assert.equal(result.signedIn, true);
   assert.equal(result.email, user.email);
+  assert.equal(result.home, '/my-twende');
   assert.ok(result.session.token);
 
   const fresh = await prisma.user.findUnique({ where: { id: user.id } });
@@ -178,7 +179,7 @@ test('with two-step verification on, the reset does not sign in', { skip }, asyn
   const user = await member({ twoFactorEnabled: true, phone: '+254712000111', phoneVerifiedAt: new Date() });
   const token = await sendAndCapture(user);
   const result = await resetPassword({ token, newPassword: NEW_PASSWORD, ipAddress: '203.0.113.9' });
-  assert.deepEqual(result, { signedIn: false, email: user.email });
+  assert.deepEqual(result, { signedIn: false, email: user.email, home: '/my-twende' });
   const live = await prisma.session.count({ where: { userId: user.id, revokedAt: null } });
   assert.equal(live, 0);
 });

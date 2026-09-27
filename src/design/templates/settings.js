@@ -184,6 +184,12 @@ const template = `
         <div>
           <h1 style="font-family: var(--tz-display); font-size: clamp(30px, 4vw, 44px); text-transform: uppercase; margin: 0 0 6px;">Security<span style="color: #D97A3B;">.</span></h1>
           <p style="font-size: 14px; color: #6E6155; margin: 0 0 28px;">Your money and your masked identity depend on this account staying yours.</p>
+          <sc-if value="{{ staffLocked }}">
+            <div role="status" style="border: 2px solid #1F3A38; background: #EFE7D6; padding: 14px 18px; font-size: 14px; line-height: 1.55; max-width: 640px; margin: 0 0 16px;">
+              <div style="font-family: var(--tz-mono); font-size: 12px; color: #A85A23; letter-spacing: 0.08em; margin-bottom: 4px;">[STAFF TOOLS LOCKED]</div>
+              {{ staffLockedText }}
+            </div>
+          </sc-if>
           <div style="display: grid; gap: 12px; max-width: 640px;">
             <sc-for list="{{ securityRows }}" as="sr" hint-placeholder-count="4">
               <div style="border: 2px solid {{ sr.border }}; background: #FFFDF8; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap;">

@@ -6,5 +6,5 @@ import { signIn } from '@/server/services/identity';
 export const POST = route({ auth: 'none', body: schemas.signIn, limit: false }, async ({ body, ip, req }) => {
   const result = await signIn({ email: body.email, password: body.password, ipAddress: ip, userAgent: req.headers.get('user-agent') });
   await setSessionCookie(result.session.token, result.session.expiresAt);
-  return withStatus(200, { twoFactorRequired: result.mfaRequired, phoneHint: result.phoneHint });
+  return withStatus(200, { twoFactorRequired: result.mfaRequired, phoneHint: result.phoneHint, home: result.home });
 });
