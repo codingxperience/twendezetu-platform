@@ -30,6 +30,10 @@ const schema = z.object({
 
   RESEND_API_KEY: optional,
   EMAIL_FROM: optional,
+  SMTP_HOST: optional,
+  SMTP_PORT: optional,
+  SMTP_USER: optional,
+  SMTP_PASSWORD: optional,
   AFRICASTALKING_API_KEY: optional,
   AFRICASTALKING_USERNAME: optional,
   AFRICASTALKING_SENDER_ID: optional,
@@ -79,7 +83,11 @@ export function config() {
     }),
     email: Object.freeze({
       resendApiKey: env.RESEND_API_KEY,
-      from: env.EMAIL_FROM || 'Twendezetu <hello@twendezetu.test>',
+      smtp: env.SMTP_HOST && env.SMTP_USER && env.SMTP_PASSWORD
+        ? Object.freeze({ host: env.SMTP_HOST, port: Number(env.SMTP_PORT) || 465, user: env.SMTP_USER, password: env.SMTP_PASSWORD })
+        : null,
+      // A mailbox only sends as itself, so without EMAIL_FROM it is the sender.
+      from: env.EMAIL_FROM || (env.SMTP_USER ? `Twendezetu <${env.SMTP_USER}>` : 'Twendezetu <hello@twendezetu.test>'),
     }),
     sms: Object.freeze({
       apiKey: env.AFRICASTALKING_API_KEY,

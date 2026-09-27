@@ -104,24 +104,76 @@ const template = `
 
       <sc-if value="{{ isForgot }}">
       <div style="display: grid; gap: 16px;" onKeyDown="{{ submitOnEnter }}">
-        <div style="font-size: 14.5px; line-height: 1.55;">Enter your account email and we'll send a link to choose a new password. The link works for 30 minutes.</div>
-        <input type="email" autocomplete="email" placeholder="you@example.com" value="{{ email }}" onChange="{{ setEmail }}" style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 14px 16px; font-family: var(--tz-sans); font-size: 15px; outline: none;">
+        <div>
+          <div style="font-family: var(--tz-mono); font-size: 12px; color: #A85A23; letter-spacing: 0.08em;">[Umesahau? — forgot your password]</div>
+          <h1 style="font-family: var(--tz-display); font-size: 28px; text-transform: uppercase; line-height: 1; margin: 6px 0 0;">Reset your password</h1>
+        </div>
+        <div style="font-size: 14.5px; line-height: 1.55;">Enter your account email and we'll send a link to choose a new password. The link works once, for 30 minutes.</div>
+        <label style="display: grid; gap: 6px;">
+          <span style="font-family: var(--tz-mono); font-size: 12px; color: #A85A23;">EMAIL *</span>
+          <input type="email" autocomplete="email" placeholder="you@example.com" value="{{ email }}" onChange="{{ setEmail }}" style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 14px 16px; font-family: var(--tz-sans); font-size: 15px; outline: none;">
+        </label>
         <sc-if value="{{ error }}">
-          <div role="alert" style="font-size: 13px; color: #B8463A;">{{ error }}</div>
+          <div role="alert" style="font-size: 13px; color: #B8463A; line-height: 1.45;">{{ error }}</div>
         </sc-if>
         <button onClick="{{ submit }}" aria-busy="{{ busy }}" style="font-family: var(--tz-display); font-size: 17px; text-transform: uppercase; background: #D97A3B; color: #1F3A38; border: 2px solid #1F3A38; padding: 15px; cursor: pointer; box-shadow: 4px 4px 0 #1F3A38; text-align: center; display: block; width: 100%;">Send reset link →</button>
         <button onClick="{{ backToSignIn }}" style="background: none; border: 0; padding: 0; font-family: var(--tz-mono); font-size: 12px; color: #A85A23; text-decoration: underline; cursor: pointer; justify-self: start;">Back to sign in</button>
       </div>
       </sc-if>
 
+      <sc-if value="{{ isSent }}">
+      <div style="display: grid; gap: 16px;" role="status">
+        <div>
+          <div style="font-family: var(--tz-mono); font-size: 12px; color: #A85A23; letter-spacing: 0.08em;">[Angalia barua pepe — check your inbox]</div>
+          <h1 style="font-family: var(--tz-display); font-size: 28px; text-transform: uppercase; line-height: 1; margin: 6px 0 0;">Check your email</h1>
+        </div>
+        <div style="font-size: 14.5px; line-height: 1.6;">If <strong>{{ sentTo }}</strong> has a Twendezetu account, a link to choose a new password is on its way. It works once, for the next 30 minutes.</div>
+        <div style="border: 2px solid #1F3A38; background: #EFE7D6; padding: 12px 14px; font-size: 13.5px; line-height: 1.55;">Nothing after a few minutes? Look in spam or promotions, and check the address above for typos. Asking again sends a fresh link and cancels the earlier one.</div>
+        <sc-if value="{{ error }}">
+          <div role="alert" style="font-size: 13px; color: #B8463A; line-height: 1.45;">{{ error }}</div>
+        </sc-if>
+        <button onClick="{{ resend }}" aria-busy="{{ busy }}" style="background: none; border: 0; padding: 0; font-family: var(--tz-mono); font-size: 12px; color: {{ resendColor }}; text-decoration: underline; cursor: pointer; justify-self: start;">{{ resendLabel }}</button>
+        <button onClick="{{ useOtherEmail }}" style="background: none; border: 0; padding: 0; font-family: var(--tz-mono); font-size: 12px; color: #A85A23; text-decoration: underline; cursor: pointer; justify-self: start;">Use a different email</button>
+        <button onClick="{{ backToSignIn }}" style="background: none; border: 0; padding: 0; font-family: var(--tz-mono); font-size: 12px; color: #A85A23; text-decoration: underline; cursor: pointer; justify-self: start;">Back to sign in</button>
+      </div>
+      </sc-if>
+
       <sc-if value="{{ isReset }}">
       <div style="display: grid; gap: 16px;" onKeyDown="{{ submitOnEnter }}">
-        <div style="font-size: 14.5px; line-height: 1.55;">Choose a new password. At least 10 characters — a short phrase works well.</div>
-        <input type="password" autocomplete="new-password" placeholder="New password" value="{{ password }}" onChange="{{ setPassword }}" style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 14px 16px; font-family: var(--tz-sans); font-size: 15px; outline: none;">
+        <div>
+          <div style="font-family: var(--tz-mono); font-size: 12px; color: #A85A23; letter-spacing: 0.08em;">[Nenosiri jipya — new password]</div>
+          <h1 style="font-family: var(--tz-display); font-size: 28px; text-transform: uppercase; line-height: 1; margin: 6px 0 0;">Choose a new password</h1>
+        </div>
+        <div style="font-size: 14.5px; line-height: 1.55;">For <strong>{{ resetFor }}</strong>. A short phrase you will remember works well. Every device signed in to this account will be signed out.</div>
+        <label style="display: grid; gap: 6px;">
+          <span style="font-family: var(--tz-mono); font-size: 12px; color: #A85A23;">NEW PASSWORD *</span>
+          <input type="{{ passwordType }}" autocomplete="new-password" placeholder="At least 10 characters" value="{{ password }}" onChange="{{ setPassword }}" style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 14px 16px; font-family: var(--tz-sans); font-size: 15px; outline: none;">
+        </label>
+        <label style="display: grid; gap: 6px;">
+          <span style="font-family: var(--tz-mono); font-size: 12px; color: #A85A23;">TYPE IT AGAIN *</span>
+          <input type="{{ passwordType }}" autocomplete="new-password" placeholder="Same password" value="{{ confirm }}" onChange="{{ setConfirm }}" style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 14px 16px; font-family: var(--tz-sans); font-size: 15px; outline: none;">
+        </label>
+        <div style="display: grid; gap: 4px; font-family: var(--tz-mono); font-size: 12px;">
+          <span style="color: {{ lengthColor }};">{{ lengthMark }} At least 10 characters</span>
+          <span style="color: {{ matchColor }};">{{ matchMark }} Both entries match</span>
+        </div>
+        <button onClick="{{ toggleShow }}" style="background: none; border: 0; padding: 0; font-family: var(--tz-mono); font-size: 12px; color: #A85A23; text-decoration: underline; cursor: pointer; justify-self: start;">{{ toggleShowLabel }}</button>
         <sc-if value="{{ error }}">
-          <div role="alert" style="font-size: 13px; color: #B8463A;">{{ error }}</div>
+          <div role="alert" style="font-size: 13px; color: #B8463A; line-height: 1.45;">{{ error }}</div>
         </sc-if>
         <button onClick="{{ submit }}" aria-busy="{{ busy }}" style="font-family: var(--tz-display); font-size: 17px; text-transform: uppercase; background: #D97A3B; color: #1F3A38; border: 2px solid #1F3A38; padding: 15px; cursor: pointer; box-shadow: 4px 4px 0 #1F3A38; text-align: center; display: block; width: 100%;">Save new password →</button>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isResetDead }}">
+      <div style="display: grid; gap: 16px;">
+        <div>
+          <div style="font-family: var(--tz-mono); font-size: 12px; color: #A85A23; letter-spacing: 0.08em;">[Kiungo kimekwisha — link no longer works]</div>
+          <h1 style="font-family: var(--tz-display); font-size: 28px; text-transform: uppercase; line-height: 1; margin: 6px 0 0;">Ask for a new link</h1>
+        </div>
+        <div role="alert" style="font-size: 14.5px; line-height: 1.55;">{{ linkProblem }}</div>
+        <button onClick="{{ askNewLink }}" style="font-family: var(--tz-display); font-size: 17px; text-transform: uppercase; background: #D97A3B; color: #1F3A38; border: 2px solid #1F3A38; padding: 15px; cursor: pointer; box-shadow: 4px 4px 0 #1F3A38; text-align: center; display: block; width: 100%;">Send me a new link →</button>
+        <button onClick="{{ backToSignIn }}" style="background: none; border: 0; padding: 0; font-family: var(--tz-mono); font-size: 12px; color: #A85A23; text-decoration: underline; cursor: pointer; justify-self: start;">Back to sign in</button>
       </div>
       </sc-if>
 

@@ -3,13 +3,14 @@
 
 import { prisma, transaction } from '../db.js';
 import { audit } from '../audit.js';
-import { badRequest, conflict, forbidden, notFound } from '../errors.js';
+import { badRequest, conflict, forbidden, notFound, unavailable } from '../errors.js';
 import { reference } from '../security/crypto.js';
 import { revokeAllSessions } from '../security/sessions.js';
 import { notify } from '../notify/index.js';
 import { getSettings, setSetting, SETTING_COPY } from '../settings.js';
 import { findOrCreateThread, sendMessage } from './threads.js';
-import { requestPasswordReset } from './identity.js';
+import { deliverPasswordReset } from './identity.js';
+import { enforceRateLimit } from '../security/rate-limit.js';
 import { getRates } from '../fx.js';
 import { convert } from '../../shared/money.js';
 import { EVENT_CATEGORIES, maskEmail, relativeTime, shortName } from '../../shared/format.js';
@@ -244,10 +245,15 @@ export async function messageUser(staff, userId, text) {
 }
 
 // Sends the member the same reset link they could ask for themselves.
+// Staff already know the account exists, so unlike the public form this
+// says plainly whether the email went out.
 export async function sendPasswordResetFor(staff, userId) {
   const target = await prisma.user.findUnique({ where: { id: userId }, select: { email: true, status: true } });
   if (!target || target.status !== 'ACTIVE') throw badRequest('Only active accounts can reset a password.');
-  await requestPasswordReset(target.email, `staff:${staff.id}`);
+  await enforceRateLimit('auth.password', `reset:${target.email}`);
+  const result = await deliverPasswordReset(target.email, { ipAddress: `staff:${staff.id}`, requestedBy: staff.id });
+  if (result.reason === 'cooldown') throw conflict('A reset link went to this member less than a minute ago. Give it a moment to arrive.');
+  if (!result.sent) throw unavailable('The reset email could not be sent. Try again in a few minutes.');
   await audit(prisma, { actorId: staff.id, action: 'user.password_reset_sent', targetType: 'User', targetId: userId });
   return { sent: true };
 }

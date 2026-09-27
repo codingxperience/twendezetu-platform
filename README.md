@@ -8,7 +8,7 @@ points. Providers and organizers get paid through escrow, with disputes,
 payouts and a finance console behind it.
 
 **Stack:** Next.js 15 (App Router, React 19) · Prisma 5 · Postgres
-(Supabase) · Stripe · Resend · Africa's Talking · Supabase Storage ·
+(Supabase) · Stripe · Resend or SMTP · Africa's Talking · Supabase Storage ·
 optional Upstash Redis.
 
 ---

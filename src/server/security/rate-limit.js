@@ -21,6 +21,7 @@ export const POLICIES = Object.freeze({
   'auth.sign-in.account': { limit: 6, periodSeconds: 15 * 60 },
   'auth.sign-up': { limit: 6, periodSeconds: 60 * 60 },
   'auth.password': { limit: 5, periodSeconds: 15 * 60 },
+  'auth.reset': { limit: 15, periodSeconds: 15 * 60 },
   'otp.send': { limit: 3, periodSeconds: 10 * 60 },
   'otp.verify': { limit: 10, periodSeconds: 10 * 60 },
   'guest.write': { limit: 10, periodSeconds: 10 * 60 },

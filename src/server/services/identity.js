@@ -11,11 +11,12 @@ import { createSession, revokeAllSessions } from '../security/sessions.js';
 import { consumeCode, issueCode } from '../security/otp.js';
 import { randomToken, sha256 } from '../security/crypto.js';
 import { notify, sendText } from '../notify/index.js';
+import { emailConfigured, passwordResetEmail, sendEmailNow } from '../notify/dispatch.js';
 import { awardReferral } from './referrals.js';
 import { isStaff } from '../security/staff.js';
 import { enforceRateLimit } from '../security/rate-limit.js';
 import { balancesByCurrency, balanceOf, accounts } from '../ledger.js';
-import { COUNTRIES, slugify } from '../../shared/format.js';
+import { COUNTRIES, maskEmail, slugify } from '../../shared/format.js';
 
 export function normalizeEmail(email) {
   return String(email || '').trim().toLowerCase();
@@ -272,50 +273,156 @@ export async function changePassword(user, { currentPassword, newPassword, sessi
   return { signedOutSessions };
 }
 
-const RESET_TTL_MS = 30 * 60 * 1000;
+export const RESET_TTL_MINUTES = 30;
+const RESET_TTL_MS = RESET_TTL_MINUTES * 60 * 1000;
+// A second request inside this window reuses nothing and sends nothing: a
+// double click or an impatient "send again" should not bury the first email.
+const RESET_COOLDOWN_MS = 60 * 1000;
 
-// Always answers the same way, whether or not the email has an account.
-export async function requestPasswordReset(email, ipAddress) {
+// The part of a reset request that answers the browser. It is identical for
+// every address, so neither its reply nor its timing says whether an
+// account exists; the lookup and the email happen in deliverPasswordReset.
+export async function guardPasswordResetRequest(email, ipAddress) {
   const normalizedEmail = normalizeEmail(email);
   await enforceRateLimit('auth.password', `reset:${normalizedEmail}`);
   await enforceRateLimit('auth.password', `reset-ip:${ipAddress}`);
-  const user = await prisma.user.findUnique({ where: { email: normalizedEmail }, select: { id: true, status: true } });
-  if (!user || user.status !== 'ACTIVE') return;
+  if (config().production && !emailConfigured()) {
+    throw unavailable('Password reset emails are not set up yet. Contact support and we will help you back in.');
+  }
+  return normalizedEmail;
+}
+
+// Issues a single-use link and emails it. The link's token exists only in
+// the email: the database keeps its SHA-256, and nothing is written to the
+// outbox or the in-app inbox where a copy could outlive its purpose.
+// Returns what happened, for staff tools and tests; the public route never
+// shows it.
+export async function deliverPasswordReset(email, { ipAddress, requestedBy = null } = {}) {
+  const normalizedEmail = normalizeEmail(email);
+  const user = await prisma.user.findUnique({ where: { email: normalizedEmail }, select: { id: true, name: true, status: true } });
+  if (!user || user.status !== 'ACTIVE') return { sent: false, reason: 'no_active_account' };
+
+  const recent = await prisma.oneTimeCode.findFirst({
+    where: { purpose: 'PASSWORD_RESET', userId: user.id, consumedAt: null, createdAt: { gt: new Date(Date.now() - RESET_COOLDOWN_MS) } },
+    select: { id: true },
+  });
+  if (recent) return { sent: false, reason: 'cooldown' };
 
   const token = randomToken(32);
   await transaction(async (tx) => {
-    await tx.oneTimeCode.updateMany({ where: { purpose: 'PASSWORD_RESET', target: normalizedEmail, consumedAt: null }, data: { consumedAt: new Date() } });
+    // A new link retires every earlier one.
+    await tx.oneTimeCode.updateMany({ where: { purpose: 'PASSWORD_RESET', userId: user.id, consumedAt: null }, data: { consumedAt: new Date() } });
     await tx.oneTimeCode.create({
       data: { purpose: 'PASSWORD_RESET', target: normalizedEmail, userId: user.id, codeHash: sha256(token), expiresAt: new Date(Date.now() + RESET_TTL_MS) },
     });
+    await audit(tx, {
+      actorId: requestedBy || user.id,
+      action: 'security.password_reset_requested',
+      targetType: 'User',
+      targetId: user.id,
+      ipAddress,
+    });
+  });
+
+  const link = `${config().appUrl}/sign-in?reset=${token}`;
+  if (!emailConfigured()) {
+    if (config().production) throw unavailable('Password reset emails are not set up yet.');
+    // Development: no email provider, so the link goes to the server log.
+    log.info('password reset link (development only, not emailed)', { to: normalizedEmail, link });
+    return { sent: true, logged: true };
+  }
+
+  const message = passwordResetEmail({ name: user.name, link, minutes: RESET_TTL_MINUTES });
+  let lastError;
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      await sendEmailNow({ to: normalizedEmail, ...message, idempotencyKey: `reset:${sha256(token)}` });
+      return { sent: true };
+    } catch (error) {
+      lastError = error;
+      if (attempt < 3) await new Promise((resolve) => setTimeout(resolve, attempt * 1500));
+    }
+  }
+  log.error('password reset email failed', { userId: user.id, error: lastError?.message });
+  // Retire the link nobody received, so a retry starts clean.
+  await prisma.oneTimeCode.updateMany({ where: { purpose: 'PASSWORD_RESET', codeHash: sha256(token), consumedAt: null }, data: { consumedAt: new Date() } });
+  return { sent: false, reason: 'delivery_failed' };
+}
+
+async function findResetCode(token) {
+  const raw = String(token || '');
+  if (raw.length < 20 || raw.length > 200) return null;
+  return prisma.oneTimeCode.findFirst({
+    where: { purpose: 'PASSWORD_RESET', codeHash: sha256(raw) },
+    include: { user: { select: { id: true, email: true, name: true, status: true, passwordHash: true, emailVerifiedAt: true, twoFactorEnabled: true, phone: true, phoneVerifiedAt: true } } },
+  });
+}
+
+function resetCodeStatus(record) {
+  if (!record?.user) return 'invalid';
+  if (record.consumedAt) return 'used';
+  if (record.expiresAt <= new Date()) return 'expired';
+  if (record.user.status !== 'ACTIVE') return 'invalid';
+  return 'valid';
+}
+
+// What the reset page shows before anyone types: whether the link still
+// works, and for which (masked) address. Reading it changes nothing.
+export async function checkPasswordReset(token) {
+  const record = await findResetCode(token);
+  const status = resetCodeStatus(record);
+  if (status !== 'valid') return { status };
+  return { status, emailHint: maskEmail(record.user.email), expiresAt: record.expiresAt.toISOString() };
+}
+
+const RESET_REFUSALS = {
+  used: 'That reset link was already used. Ask for a new one if you still need it.',
+  expired: 'That reset link has expired. Ask for a new one.',
+  invalid: 'That reset link does not work. Ask for a new one.',
+};
+
+// Sets the new password, retires every outstanding link, signs out every
+// device and tells the member. Holding the link proves the inbox, so the
+// email counts as verified. The member is signed straight in unless the
+// account uses two-step verification, which then runs as a normal sign-in.
+export async function resetPassword({ token, newPassword, ipAddress, userAgent }) {
+  const record = await findResetCode(token);
+  const status = resetCodeStatus(record);
+  if (status !== 'valid') throw badRequest(RESET_REFUSALS[status], { linkStatus: status });
+  const { user } = record;
+
+  const problem = passwordProblem(newPassword, { email: user.email, name: user.name });
+  if (problem) throw invalid(problem);
+  if ((await verifyPassword(newPassword, user.passwordHash)).ok) {
+    throw invalid('That is the password you have now. Choose a different one.');
+  }
+  const passwordHash = await hashPassword(newPassword);
+
+  await transaction(async (tx) => {
+    const consumed = await tx.oneTimeCode.updateMany({ where: { id: record.id, consumedAt: null, expiresAt: { gt: new Date() } }, data: { consumedAt: new Date() } });
+    if (!consumed.count) throw badRequest(RESET_REFUSALS.used, { linkStatus: 'used' });
+    await tx.oneTimeCode.updateMany({ where: { purpose: 'PASSWORD_RESET', userId: user.id, consumedAt: null }, data: { consumedAt: new Date() } });
+    await tx.user.update({
+      where: { id: user.id },
+      data: { passwordHash, passwordChangedAt: new Date(), ...(user.emailVerifiedAt ? {} : { emailVerifiedAt: new Date() }) },
+    });
+    await audit(tx, { actorId: user.id, action: 'security.password_reset', targetType: 'User', targetId: user.id, ipAddress });
     await notify(tx, {
       userId: user.id,
       topic: 'MONEY',
       urgent: true,
-      title: 'Reset your Twendezetu password',
-      body: 'Use the link below within 30 minutes to choose a new password. If you did not ask for this, you can ignore this email.',
-      href: `/sign-in?reset=${token}`,
+      title: 'Your password was reset',
+      body: 'Your Twendezetu password was changed with a reset link and every device was signed out. If this was not you, reset it again now and contact support.',
+      href: '/settings?section=security',
     });
   });
-}
+  await revokeAllSessions(user.id);
 
-export async function resetPassword({ token, newPassword, ipAddress }) {
-  const record = await prisma.oneTimeCode.findFirst({
-    where: { purpose: 'PASSWORD_RESET', codeHash: sha256(String(token || '')), consumedAt: null, expiresAt: { gt: new Date() } },
-    include: { user: { select: { id: true, email: true, name: true } } },
-  });
-  if (!record?.user) throw badRequest('That reset link has expired. Ask for a new one.');
-  const problem = passwordProblem(newPassword, { email: record.user.email, name: record.user.name });
-  if (problem) throw invalid(problem);
-  const passwordHash = await hashPassword(newPassword);
-
-  await transaction(async (tx) => {
-    const consumed = await tx.oneTimeCode.updateMany({ where: { id: record.id, consumedAt: null }, data: { consumedAt: new Date() } });
-    if (!consumed.count) throw badRequest('That reset link was already used.');
-    await tx.user.update({ where: { id: record.user.id }, data: { passwordHash, passwordChangedAt: new Date() } });
-    await audit(tx, { actorId: record.user.id, action: 'security.password_reset', targetType: 'User', targetId: record.user.id, ipAddress });
-  });
-  await revokeAllSessions(record.user.id);
+  const twoStep = Boolean(user.twoFactorEnabled && user.phone && user.phoneVerifiedAt);
+  if (twoStep) return { signedIn: false, email: user.email };
+  const session = await createSession(user.id, { ipAddress, userAgent });
+  await audit(prisma, { actorId: user.id, action: 'auth.signed_in', targetType: 'User', targetId: user.id, ipAddress });
+  return { signedIn: true, email: user.email, session };
 }
 
 // ── Profile ───────────────────────────────────────────────────────────────

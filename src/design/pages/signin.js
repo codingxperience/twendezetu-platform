@@ -10,10 +10,21 @@ const HOMES = [
   { value: 'RW|Kigali', label: 'Kigali, Rwanda' },
 ];
 
-export const initialState = { mode: 'signin', step: 'credentials', role: 'user', name: '', email: '', password: '', home: HOMES[0].value, code: '', phoneHint: '', error: null, notice: null };
+export const initialState = { mode: 'signin', step: 'credentials', role: 'user', name: '', email: '', password: '', confirm: '', showPassword: false, home: HOMES[0].value, code: '', phoneHint: '', sentTo: '', canResend: false, linkStatus: null, error: null, notice: null };
+
+// A reset link waits this long before "send it again" is offered, matching
+// the server, which ignores a second request inside the same minute.
+const RESEND_AFTER_MS = 60 * 1000;
+const MIN_PASSWORD = 10;
+
+const LINK_PROBLEMS = {
+  used: 'This reset link was already used. If you still need to change your password, ask for a new link.',
+  expired: 'This reset link has expired. Links work for 30 minutes; ask for a new one below.',
+  invalid: 'This reset link does not work. It may be incomplete, or a newer link replaced it. Ask for a new one below.',
+};
 
 export function stateFrom(data, params = {}) {
-  if (params.reset) return { step: 'reset' };
+  if (params.reset) return { step: 'reset', linkStatus: data?.reset?.status || 'invalid' };
   return { mode: params.mode === 'register' ? 'register' : 'signin', role: ['user', 'advertiser', 'provider'].includes(params.role) ? params.role : 'user' };
 }
 
@@ -27,8 +38,17 @@ export function values(state, set, ctx) {
   const signIn = state.mode === 'signin' && state.step === 'credentials';
   const next = safeNext(ctx.params.next);
   const setField = (key) => (event) => set((current) => ({ ...current, [key]: event.target.value, error: null }));
-  const fail = (error) => set((current) => ({ ...current, error }));
+  const fail = (error) => set((current) => ({ ...current, error, busy: {} }));
   const go = (path) => window.location.assign(path);
+  const linkAlive = state.linkStatus === 'valid';
+
+  // Asks for a reset link and moves to the "check your inbox" panel. The
+  // reply is the same whether or not the address has an account.
+  const sendResetLink = async (email) => {
+    await ctx.api.post('/api/auth/password/forgot', { email });
+    set((current) => ({ ...current, step: 'sent', sentTo: email, canResend: false, error: null, notice: null, busy: {} }));
+    window.setTimeout(() => set((current) => (current.sentTo === email ? { ...current, canResend: true } : current)), RESEND_AFTER_MS);
+  };
 
   const submit = async () => {
     if (state.busy?.auth) return;
@@ -59,15 +79,30 @@ export function values(state, set, ctx) {
       }
       if (state.step === 'forgot') {
         if (!EMAIL_PATTERN.test(email)) return fail('Enter a valid email address.');
-        const result = await ctx.api.post('/api/auth/password/forgot', { email });
-        return set((current) => ({ ...current, step: 'credentials', mode: 'signin', notice: result.message, busy: {} }));
+        return await sendResetLink(email);
       }
       if (state.step === 'reset') {
-        await ctx.api.post('/api/auth/password/reset', { token: ctx.params.reset, password: state.password });
-        return set((current) => ({ ...current, step: 'credentials', mode: 'signin', password: '', notice: 'Password changed. Sign in with your new password.', busy: {} }));
+        if (!linkAlive) return set((current) => ({ ...current, busy: {} }));
+        if (state.password.length < MIN_PASSWORD) return fail(`Use at least ${MIN_PASSWORD} characters.`);
+        if (state.password !== state.confirm) return fail('The two passwords do not match.');
+        const result = await ctx.api.post('/api/auth/password/reset', { token: ctx.params.reset, password: state.password });
+        if (result.signedIn) return go(next || '/my-twende');
+        return set((current) => ({
+          ...current,
+          step: 'credentials',
+          mode: 'signin',
+          email: result.email || current.email,
+          password: '',
+          confirm: '',
+          notice: 'Password changed. Sign in with your new password; we will text a code to your phone as usual.',
+          busy: {},
+        }));
       }
     } catch (error) {
-      set((current) => ({ ...current, error: error.message, busy: {} }));
+      // A link that died while the page was open switches to the panel that
+      // offers a new one, instead of an error beside a form that cannot work.
+      const linkStatus = error.details?.linkStatus;
+      set((current) => ({ ...current, error: linkStatus ? null : error.message, linkStatus: linkStatus || current.linkStatus, busy: {} }));
     }
     return undefined;
   };
@@ -88,7 +123,35 @@ export function values(state, set, ctx) {
     isSignIn: signIn,
     isTwoFactor: state.step === 'twoFactor',
     isForgot: state.step === 'forgot',
-    isReset: state.step === 'reset',
+    isSent: state.step === 'sent',
+    isReset: state.step === 'reset' && linkAlive,
+    isResetDead: state.step === 'reset' && !linkAlive,
+    resetFor: state.data?.reset?.emailHint || '',
+    linkProblem: LINK_PROBLEMS[state.linkStatus] || LINK_PROBLEMS.invalid,
+    sentTo: state.sentTo,
+    resendLabel: state.canResend ? 'Send it again' : 'You can ask again in a minute',
+    resendColor: state.canResend ? '#A85A23' : '#8A7F74',
+    resend: async () => {
+      if (!state.canResend || state.busy?.auth) return;
+      set((current) => ({ ...current, busy: { ...current.busy, auth: true }, error: null }));
+      try {
+        await sendResetLink(state.sentTo);
+        ctx.toast('Sent again. Use the newest email: it replaces the earlier link.');
+      } catch (error) {
+        set((current) => ({ ...current, error: error.message, busy: {} }));
+      }
+    },
+    useOtherEmail: () => set((current) => ({ ...current, step: 'forgot', error: null, notice: null })),
+    askNewLink: () => set((current) => ({ ...current, step: 'forgot', password: '', confirm: '', error: null, notice: null })),
+    confirm: state.confirm,
+    setConfirm: setField('confirm'),
+    passwordType: state.showPassword ? 'text' : 'password',
+    toggleShowLabel: state.showPassword ? 'Hide passwords' : 'Show passwords',
+    toggleShow: () => set((current) => ({ ...current, showPassword: !current.showPassword })),
+    lengthMark: state.password.length >= MIN_PASSWORD ? '✓' : '·',
+    lengthColor: state.password.length >= MIN_PASSWORD ? COLORS.forest : '#9A8F84',
+    matchMark: state.confirm && state.password === state.confirm ? '✓' : '·',
+    matchColor: state.confirm && state.password === state.confirm ? COLORS.forest : '#9A8F84',
     setSignIn: () => set((current) => ({ ...current, mode: 'signin', error: null })),
     setRegister: () => set((current) => ({ ...current, mode: 'register', error: null })),
     signInBg: state.mode === 'signin' ? COLORS.forest : COLORS.cream,
@@ -124,8 +187,8 @@ export function values(state, set, ctx) {
         submit();
       }
     },
-    showForgot: () => set((current) => ({ ...current, step: 'forgot', error: null, notice: null })),
-    backToSignIn: () => set((current) => ({ ...current, step: 'credentials', mode: 'signin', error: null })),
+    showForgot: () => set((current) => ({ ...current, step: 'forgot', password: '', error: null, notice: null })),
+    backToSignIn: () => set((current) => ({ ...current, step: 'credentials', mode: 'signin', password: '', confirm: '', error: null })),
     resendCode: () =>
       ctx.api.put('/api/auth/two-factor').then(
         () => ctx.toast('A new code is on its way.'),
@@ -134,4 +197,12 @@ export function values(state, set, ctx) {
     ctaLabel: register ? 'Create account →' : 'Sign in →',
     guestHref: next || '/',
   };
+}
+
+// The reset token is read into memory as the page loads; take it out of the
+// address bar and history so it is not bookmarked, shared or synced.
+export function onMount(ctx) {
+  if (ctx.params.reset && typeof window !== 'undefined') {
+    window.history.replaceState(window.history.state, '', '/sign-in');
+  }
 }
