@@ -1,83 +1,141 @@
-// The event guide: every upcoming event, the featured one, the needs board
-// and what has recently happened on the platform.
+// The home page: events first, vendors second. Every section is a query over
+// real rows; a section with nothing in it is left out rather than padded.
 
 import { unstable_cache } from 'next/cache';
 import { prisma } from '../db.js';
 import { getRates } from '../fx.js';
-import { categoryCounts, listGuideEvents } from '../services/events.js';
+import { CARD_INCLUDE, listGuideEvents, toEventCard } from '../services/events.js';
+import { listProviders } from '../services/providers.js';
 import { openNeeds } from '../services/marketplace.js';
-import { EVENT_CATEGORIES, PROVIDER_CATEGORIES, relativeTime } from '../../shared/format.js';
+import { initials, whenBadge } from '../../shared/format.js';
+import { byStart, publicShelves } from './home-shelves.js';
 import { me } from './common.js';
 
-// Recent activity, written up as short guide entries. Every line is backed
-// by a real row: a newly published event, a newly verified provider, a pool
-// that people are chipping into.
-async function recentActivity() {
-  const [events, providers, pools] = await Promise.all([
-    prisma.event.findMany({
-      where: { status: 'PUBLISHED', hiddenAt: null, startsAt: { gt: new Date() } },
-      orderBy: { publishedAt: 'desc' },
-      take: 2,
-      include: { organizer: { select: { name: true } } },
-    }),
-    prisma.provider.findMany({ where: { status: 'ACTIVE', verifiedAt: { not: null } }, orderBy: { verifiedAt: 'desc' }, take: 1 }),
-    prisma.pool.findMany({ where: { status: { in: ['OPEN', 'FUNDED'] }, contributorCount: { gt: 1 } }, orderBy: { updatedAt: 'desc' }, take: 1 }),
+const DAY = 24 * 60 * 60 * 1000;
+const TRENDING_WINDOW = 14 * DAY;
+
+// People who RSVPed or bought tickets in the last two weeks, per event.
+async function recentInterest(since) {
+  const [rsvps, tickets] = await Promise.all([
+    prisma.rsvp.groupBy({ by: ['eventId'], where: { createdAt: { gte: since }, status: 'GOING' }, _sum: { partySize: true } }),
+    prisma.ticket.groupBy({ by: ['eventId'], where: { createdAt: { gte: since }, status: { not: 'VOID' } }, _count: { _all: true } }),
   ]);
-  return [
-    ...events.map((event) => ({
-      at: event.publishedAt,
-      href: `/events/${event.slug}`,
-      title: `${event.organizer.name} posts ${event.title}`,
-      desc: event.blurb,
-      img: event.coverUrl,
-    })),
-    ...providers.map((provider) => ({
-      at: provider.verifiedAt,
-      href: `/providers/${provider.slug}`,
-      title: `${provider.name} is now verified`,
-      desc: `${PROVIDER_CATEGORIES[provider.category].label} in ${provider.city}. ${provider.headline}`,
-      img: provider.coverUrl,
-    })),
-    ...pools.map((pool) => ({
-      at: pool.updatedAt,
-      href: `/points-wallet?pool=${pool.slug}`,
-      title: `Harambee: ${pool.contributorCount} people, one goal — ${pool.title}`,
-      desc: `${Math.min(100, Math.round((pool.raisedPoints / pool.goalPoints) * 100))}% of the way there. ${pool.purpose}`,
-      img: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=500&q=80',
-    })),
-  ]
-    .sort((a, b) => b.at - a.at)
-    .map(({ at, ...story }) => ({ ...story, when: relativeTime(at) }));
+  const score = new Map();
+  for (const row of rsvps) score.set(row.eventId, (score.get(row.eventId) || 0) + (row._sum.partySize || 0));
+  for (const row of tickets) score.set(row.eventId, (score.get(row.eventId) || 0) + row._count._all);
+  return Object.fromEntries(score);
 }
 
-// The public part of the guide is the same for everyone, so it is computed at
-// most once a minute per server instance instead of on every visit.
-const publicGuide = unstable_cache(
+// What is the same for every visitor, computed at most once a minute.
+const publicHome = unstable_cache(
   async () => {
-    const [events, counts, needs, stories, rates] = await Promise.all([
-      listGuideEvents({ limit: 160 }),
-      categoryCounts(),
-      openNeeds({ limit: 3 }),
-      recentActivity(),
+    const [events, interest, vendors, needs, rates] = await Promise.all([
+      listGuideEvents({ limit: 200 }),
+      recentInterest(new Date(Date.now() - TRENDING_WINDOW)),
+      listProviders({ limit: 6 }),
+      openNeeds({ limit: 8 }),
       getRates(),
     ]);
-    return { events, counts, needs, stories, rates };
+    return { events, interest, vendors, needs, rates };
   },
-  ['home-guide'],
+  ['home-shelves'],
   { revalidate: 60, tags: ['guide'] },
 );
 
+// The signed-in part: organizers and vendors followed, what is coming up for
+// this person, their saved events and their next event for the bottom bar.
+async function personal(viewer, now) {
+  const since = new Date(now.getTime() - 6 * 60 * 60 * 1000);
+  const [follows, rsvps, tickets, saved] = await Promise.all([
+    prisma.follow.findMany({
+      where: { followerId: viewer.id },
+      include: {
+        organizer: { select: { id: true, name: true, slug: true, verifiedAt: true } },
+        provider: { select: { id: true, name: true, slug: true, coverUrl: true, verifiedAt: true, status: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    }),
+    prisma.rsvp.findMany({
+      where: { userId: viewer.id, status: 'GOING', event: { startsAt: { gte: since }, status: 'PUBLISHED', hiddenAt: null } },
+      include: { event: { include: CARD_INCLUDE } },
+      orderBy: { event: { startsAt: 'asc' } },
+      take: 12,
+    }),
+    prisma.ticket.findMany({
+      where: { OR: [{ ownerId: viewer.id }, { order: { buyerId: viewer.id } }], status: { not: 'VOID' }, event: { startsAt: { gte: since }, status: 'PUBLISHED' } },
+      include: { event: { include: CARD_INCLUDE } },
+      orderBy: { event: { startsAt: 'asc' } },
+      take: 24,
+    }),
+    prisma.savedEvent.findMany({
+      where: { userId: viewer.id, event: { status: 'PUBLISHED', hiddenAt: null, startsAt: { gte: since } } },
+      include: { event: { include: CARD_INCLUDE } },
+      orderBy: { createdAt: 'desc' },
+      take: 18,
+    }),
+  ]);
+
+  const organizers = follows.filter((follow) => follow.organizer).map((follow) => follow.organizer);
+  const followedVendors = follows.filter((follow) => follow.provider?.status === 'ACTIVE').map((follow) => follow.provider);
+
+  const fromFollowedRows = organizers.length
+    ? await prisma.event.findMany({
+        where: { organizerId: { in: organizers.map((organizer) => organizer.id) }, status: 'PUBLISHED', hiddenAt: null, startsAt: { gte: since } },
+        include: CARD_INCLUDE,
+        orderBy: { startsAt: 'asc' },
+        take: 60,
+      })
+    : [];
+  const badge = (event) => ({ ...toEventCard(event), when: whenBadge(event.startsAt, event.timezone, now) });
+  const fromFollowed = fromFollowedRows.map(badge);
+
+  // One entry per event: a ticket wins over an RSVP, since it opens the door.
+  const coming = new Map();
+  for (const ticket of tickets) {
+    if (!coming.has(ticket.eventId)) coming.set(ticket.eventId, { ...badge(ticket.event), ticketCode: ticket.code, kind: 'TICKET' });
+  }
+  for (const rsvp of rsvps) {
+    if (!coming.has(rsvp.eventId)) coming.set(rsvp.eventId, { ...badge(rsvp.event), kind: 'RSVP' });
+  }
+  const comingUp = [...coming.values()].sort(byStart).slice(0, 8);
+
+  // "More from …" for the followed organizers with the most coming up.
+  const perOrganizer = new Map();
+  for (const event of fromFollowed) {
+    const list = perOrganizer.get(event.organizerSlug) || [];
+    list.push(event);
+    perOrganizer.set(event.organizerSlug, list);
+  }
+  const moreFrom = [...perOrganizer.entries()]
+    .filter(([, list]) => list.length >= 2)
+    .sort((a, b) => b[1].length - a[1].length)
+    .slice(0, 3)
+    .map(([slug, list]) => ({ slug, name: list[0].organizer, verified: list[0].organizerVerified, events: list.slice(0, 18) }));
+
+  const favourites = [
+    ...organizers.map((organizer) => ({ kind: 'ORGANIZER', name: organizer.name, initials: initials(organizer.name), img: null, verified: Boolean(organizer.verifiedAt), href: `/events?organizer=${organizer.slug}` })),
+    ...followedVendors.map((vendor) => ({ kind: 'VENDOR', name: vendor.name, initials: initials(vendor.name), img: vendor.coverUrl, verified: Boolean(vendor.verifiedAt), href: `/vendors/${vendor.slug}` })),
+  ].slice(0, 12);
+
+  return {
+    favourites,
+    comingUp,
+    nextUp: comingUp[0] || null,
+    fromFollowed: fromFollowed.slice(0, 18),
+    moreFrom,
+    saved: saved.map((row) => badge(row.event)),
+    followsSomeone: follows.length > 0,
+  };
+}
+
 export async function homeView(viewer) {
-  const [{ events, counts, needs, stories, rates }, person] = await Promise.all([publicGuide(), me(viewer)]);
-  const featured = events.find((event) => event.featured) || events[0] || null;
+  const now = new Date();
+  const [shared, person, mine] = await Promise.all([publicHome(), me(viewer), viewer ? personal(viewer, now) : null]);
   return {
     me: person,
-    events,
-    featured,
-    categories: Object.keys(EVENT_CATEGORIES).map((key) => ({ key, label: EVENT_CATEGORIES[key], count: counts[key] || 0 })),
-    needs,
-    stories,
-    rates,
+    rates: shared.rates,
     city: viewer?.city || null,
+    ...publicShelves(shared, { city: viewer?.city || null, now }),
+    personal: mine,
   };
 }

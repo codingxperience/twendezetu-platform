@@ -107,3 +107,58 @@ export async function withStepUp(ctx, call) {
     return call(code);
   }
 }
+
+// ── The shared frame (src/design/templates/shell.js) ─────────────────────
+
+const EVENT_MENU = [
+  ['MUSIC', 'Music & DJ nights'],
+  ['NYAMA_CHOMA', 'Nyama choma & cookouts'],
+  ['COMMUNITY', 'Community gatherings'],
+  ['WEDDINGS', 'Weddings & ruracio'],
+  ['FAITH', 'Faith & worship'],
+  ['SPORTS', 'Sports & fitness'],
+];
+
+const VENDOR_MENU = [
+  ['MUSIC_DJS', 'Music & DJs'],
+  ['CATERING', 'Catering & chefs'],
+  ['TENTS_EQUIPMENT', 'Tents & equipment'],
+  ['TRANSPORT', 'Transport & drivers'],
+  ['PHOTOGRAPHY', 'Photography'],
+  ['DECOR_MC', 'Décor & MC'],
+];
+
+const SECTIONS = ['home', 'week', 'events', 'vendors', 'saved', 'tickets', 'post', 'me'];
+
+// `active` names the section the page belongs to; `q` refills the search box.
+export function shellValues(me, ctx, { active = null, q = '' } = {}) {
+  const current = Object.fromEntries(SECTIONS.map((key) => [key, key === active ? 'page' : 'false']));
+  const unread = me.unread > 0 ? (me.unread > 9 ? '9+' : String(me.unread)) : '';
+  return {
+    signedIn: me.signedIn,
+    signedOut: !me.signedIn,
+    name: me.name || '',
+    initials: me.initials || '',
+    unread,
+    bellLabel: unread ? `Notifications, ${unread} unread` : 'Notifications',
+    isVendor: me.isProvider,
+    isStaff: me.isStaff,
+    isFinance: me.isFinance,
+    meHref: me.signedIn ? '/my-twende' : '/sign-in',
+    current,
+    q,
+    categories: EVENT_MENU.map(([key, label]) => ({ href: `/events?category=${key}`, label })),
+    vendorCategories: VENDOR_MENU.map(([key, label]) => ({ href: `/vendors?category=${key}`, label })),
+    search: (event) => {
+      const value = event.target.querySelector('input[name="q"]')?.value.trim();
+      window.location.assign(value ? `/events?q=${encodeURIComponent(value)}` : '/events');
+    },
+    signOut: async () => {
+      try {
+        await ctx.api.post('/api/auth/sign-out');
+      } finally {
+        window.location.assign('/');
+      }
+    },
+  };
+}

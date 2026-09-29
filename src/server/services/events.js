@@ -22,8 +22,8 @@ function stillOn(now = new Date()) {
   return { OR: [{ endsAt: { gte: now } }, { endsAt: null, startsAt: { gte: cutoff } }] };
 }
 
-const CARD_INCLUDE = {
-  organizer: { select: { id: true, name: true, slug: true } },
+export const CARD_INCLUDE = {
+  organizer: { select: { id: true, name: true, slug: true, verifiedAt: true } },
   tiers: { where: { active: true, kind: 'ONLINE' }, select: { priceMinor: true } },
 };
 
@@ -47,6 +47,9 @@ export function toEventCard(event) {
     badge: event.badge || false,
     organizer: event.organizer?.name || '',
     organizerSlug: event.organizer?.slug || null,
+    organizerVerified: Boolean(event.organizer?.verifiedAt),
+    timezone: event.timezone,
+    publishedAt: event.publishedAt ? event.publishedAt.toISOString() : null,
     blurb: event.blurb,
     description: event.description,
     isFree: event.isFree,

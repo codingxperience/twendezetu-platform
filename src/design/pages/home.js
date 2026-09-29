@@ -1,125 +1,212 @@
-// The event guide.
+// The home page: sections of events first, vendors second. Signed-in members
+// get their own sections on top and three views: For You, Following, New.
 
-import { COLORS, eventPrice, nextCurrency, readPreference, scrollShelf, writePreference } from './shared';
+import { eventPrice, scrollShelf, shellValues } from './shared';
 
-export const initialState = { cat: 'All', lang: 'en', currency: null };
+export const initialState = { tab: 'forYou' };
 
-const CATEGORY_KEYS = new Set(['NYAMA_CHOMA', 'MUSIC', 'COMMUNITY', 'WEDDINGS', 'FAITH', 'SPORTS']);
-
-export function stateFrom(data, params = {}) {
-  return { currency: data.me.currency || 'USD', cat: CATEGORY_KEYS.has(params.cat) ? params.cat : 'All' };
-}
-
-export function onMount(ctx, set) {
-  const currency = readPreference('currency', null);
-  const lang = readPreference('lang', null);
-  if (currency || lang) set((state) => ({ ...state, ...(currency ? { currency } : {}), ...(lang ? { lang } : {}) }));
-}
-
-const SERVICES = [
-  { href: '/providers?category=PHOTOGRAPHY', img: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=1400&q=80', kicker: 'WITH SPECIAL CARE', title: 'Weddings & harusi', desc: 'Venues, convoys, caterers and photographers who shoot like family.' },
-  { href: '/?cat=NYAMA_CHOMA', img: 'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=1400&q=80', kicker: 'THAT WON’T BE FORGOTTEN', title: 'Community & cookouts', desc: 'Nyama choma festivals, harambees, faith gatherings — every rika.' },
-  { href: '/providers?category=MUSIC_DJS', img: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=1400&q=80', kicker: 'FIND YOUR VIBE', title: 'Music & DJs', desc: 'Bongo flava, amapiano, gospel — book the set or sell the tickets.' },
-  { href: '/create-event?kind=need', img: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=1400&q=80', kicker: 'MASKED & MATCHED', title: 'The needs board', desc: 'Drivers, tents, chefs, escorts — post the need, compare the offers.' },
+const TABS = [
+  ['forYou', 'For You'],
+  ['following', 'Following'],
+  ['fresh', 'New'],
 ];
 
-const PROCESS = {
-  en: [
-    { num: '01', title: 'Post', desc: 'An event or a need — free, in minutes. Your contacts are masked from day one.' },
-    { num: '02', title: 'Share', desc: 'Every post gets a link built for WhatsApp and Facebook. Your circle spreads it for you.' },
-    { num: '03', title: 'Match', desc: 'Providers in that city get notified and respond with offers, in-platform.' },
-    { num: '04', title: 'Gather', desc: 'RSVP and tickets sync to calendars with reminders — 7 days, 1 day, 2 hours before.' },
-    { num: '05', title: 'Settle', desc: 'Pay online, at the door, or pool points across borders. Fees only when money moves.' },
-  ],
-  sw: [
-    { num: '01', title: 'Tangaza', desc: 'Tukio au hitaji — bure, kwa dakika chache. Mawasiliano yako yamefichwa tangu mwanzo.' },
-    { num: '02', title: 'Sambaza', desc: 'Kila tangazo lina link ya WhatsApp na Facebook. Mtandao wako unakusambazia.' },
-    { num: '03', title: 'Unganishwa', desc: 'Watoa huduma wa mji huo wanapata taarifa na kujibu na ofa, ndani ya jukwaa.' },
-    { num: '04', title: 'Kusanyika', desc: 'RSVP na tiketi zinaingia kalenda zenye vikumbusho — siku 7, siku 1, saa 2 kabla.' },
-    { num: '05', title: 'Lipana', desc: 'Lipa mtandaoni, mlangoni, au changishana pointi kuvuka mipaka. Ada ni pale pesa inapohamia tu.' },
-  ],
-};
+function titleCase(value) {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/(^|[\s&/-])(\p{L})/gu, (match, space, letter) => space + letter.toUpperCase());
+}
 
-function card(event, currency, rates) {
-  return { ...event, price: eventPrice(event, currency, rates) };
+function eventCards(events, currency, rates) {
+  return events.map((event) => ({
+    href: event.href,
+    img: event.img,
+    when: event.when || '',
+    price: eventPrice(event, currency, rates),
+    rank: event.rank || '',
+    organizer: event.organizer,
+    organizerVerified: event.organizerVerified,
+    title: event.title,
+    meta: `${event.date} · ${event.city}`,
+    cat: event.cat,
+    goingLabel: event.going > 0 ? `${event.going} going` : '',
+  }));
+}
+
+// One section. `kind` picks the layout; everything else is shared.
+function section(kind, { key, title, note = '', href = '', ...rest }) {
+  const scrollId = `tz-shelf-${key}`;
+  const scrolls = kind === 'events' || kind === 'needs';
+  return {
+    key,
+    title,
+    note,
+    href,
+    plainTitle: !href,
+    scrollId,
+    scrolls,
+    prev: () => scrollShelf(scrollId, -1),
+    next: () => scrollShelf(scrollId, 1),
+    isEvents: kind === 'events',
+    isVendors: kind === 'vendors',
+    isFaces: kind === 'faces',
+    isList: kind === 'list',
+    isNeeds: kind === 'needs',
+    isEmpty: kind === 'empty',
+    ...rest,
+  };
+}
+
+function publicSections(data, cards) {
+  const list = [];
+  if (data.thisWeek.length) {
+    list.push(section('events', { key: 'week', title: data.thisWeekTitle, note: 'Tonight, this weekend and the days ahead', href: '/events?when=week', events: cards(data.thisWeek) }));
+  }
+  if (data.trending.length) {
+    list.push(section('events', { key: 'trending', title: data.trendingTitle, note: 'Most RSVPs and tickets in the last two weeks', href: '/events?sort=trending', events: cards(data.trending) }));
+  }
+  if (data.vendors.length) {
+    list.push(
+      section('vendors', {
+        key: 'vendors',
+        title: 'Vendors to book',
+        note: 'DJs, caterers, tents, drivers and photographers, verified by us',
+        href: '/vendors',
+        vendors: data.vendors.map((vendor) => ({
+          href: `/vendors/${vendor.slug}`,
+          img: vendor.img,
+          name: vendor.name,
+          verified: vendor.verified,
+          sub: [titleCase(vendor.cat), titleCase(vendor.city), vendor.rating === 'NEW' ? 'New' : `★ ${vendor.rating}`].join(' · '),
+        })),
+      }),
+    );
+  }
+  for (const shelf of data.categories) {
+    list.push(section('events', { key: `cat-${shelf.key.toLowerCase()}`, title: shelf.title, note: shelf.note, href: `/events?category=${shelf.key}`, events: cards(shelf.events) }));
+  }
+  for (const chart of data.cityCharts) {
+    list.push(section('events', { key: `city-${chart.city.replace(/\W+/g, '-').toLowerCase()}`, title: `Top in ${chart.city}`, note: `The most popular events in ${chart.city} right now`, href: `/events?city=${encodeURIComponent(chart.city)}`, events: cards(chart.events) }));
+  }
+  if (data.staffPicks.length) {
+    list.push(section('events', { key: 'picks', title: 'Staff picks', note: 'Chosen by the Twendezetu team', events: cards(data.staffPicks) }));
+  }
+  if (data.needs.length) {
+    list.push(
+      section('needs', {
+        key: 'needs',
+        title: 'Vendors wanted',
+        note: 'Organizers looking for help. Vendors reply with offers from their dashboard',
+        needs: data.needs.map((need) => ({
+          href: '/provider-dashboard',
+          category: need.category,
+          title: need.title,
+          meta: need.meta,
+          offers: need.offers === 1 ? '1 offer so far' : `${need.offers} offers so far`,
+        })),
+      }),
+    );
+  }
+  if (!list.length) {
+    list.push(section('empty', { key: 'none', title: 'Nothing on yet', emptyText: 'No upcoming events have been posted yet.', emptyHref: '/create-event', emptyLink: 'Post the first one →' }));
+  }
+  return list;
+}
+
+function faceSection(mine) {
+  if (!mine.favourites.length) {
+    return section('empty', {
+      key: 'faces',
+      title: 'Your organizers & vendors',
+      emptyText: 'Follow organizers and vendors you like and their news shows up here first.',
+      emptyHref: '/vendors',
+      emptyLink: 'Find vendors to follow →',
+    });
+  }
+  return section('faces', {
+    key: 'faces',
+    title: 'Your organizers & vendors',
+    faces: mine.favourites.map((face) => ({ ...face, noImg: !face.img })),
+  });
+}
+
+function personalSections(mine, tab, cards) {
+  const list = [];
+  const moreFrom = mine.moreFrom.map((group) =>
+    section('events', { key: `more-${group.slug}`, title: `More from ${group.name}`, href: `/events?organizer=${group.slug}`, events: cards(group.events) }),
+  );
+
+  if (tab === 'following') {
+    list.push(faceSection(mine));
+    if (mine.fromFollowed.length) list.push(section('events', { key: 'followed', title: 'From organizers you follow', events: cards(mine.fromFollowed) }));
+    list.push(...moreFrom);
+    return list;
+  }
+
+  list.push(faceSection(mine));
+  if (mine.comingUp.length) {
+    list.push(
+      section('list', {
+        key: 'coming',
+        title: 'Coming up for you',
+        note: 'Your tickets and RSVPs',
+        href: '/my-twende?tab=upcoming',
+        items: mine.comingUp.map((event) => ({
+          href: event.href,
+          img: event.img,
+          organizer: event.organizer,
+          title: event.title,
+          meta: `${event.when || event.date} · ${event.kind === 'TICKET' ? 'Ticket' : 'RSVP'}`,
+        })),
+      }),
+    );
+  }
+  if (mine.fromFollowed.length) list.push(section('events', { key: 'followed', title: 'From organizers you follow', events: cards(mine.fromFollowed) }));
+  list.push(...moreFrom);
+  if (mine.saved.length) list.push(section('events', { key: 'saved', title: 'Saved for later', href: '/my-twende?tab=saved', events: cards(mine.saved) }));
+  return list;
 }
 
 export function values(state, set, ctx) {
   const { data } = state;
-  const currency = state.currency || 'USD';
-  const sw = state.lang === 'sw';
-  const events = data.events.map((event) => card(event, currency, data.rates));
-  const pickCategory = (key) => set((current) => ({ ...current, cat: key }));
-  const shown = state.cat === 'All' ? events : events.filter((event) => event.category === state.cat);
-  const featured = data.featured ? card(data.featured, currency, data.rates) : null;
+  const currency = data.me.signedIn ? data.me.currency : null;
+  const cards = (events) => eventCards(events, currency, data.rates);
 
-  const shelves = data.categories
-    .filter((category) => category.count > 0)
-    .map((category) => {
-      const scrollId = `tw-shelf-${category.key.toLowerCase()}`;
-      const list = events.filter((event) => event.category === category.key);
-      return {
-        label: category.label,
-        count: `${list.length} event${list.length === 1 ? '' : 's'}`,
-        scrollId,
-        prev: () => scrollShelf(scrollId, -1),
-        next: () => scrollShelf(scrollId, 1),
-        jump: () => pickCategory(category.key),
-        events: list,
-      };
-    });
+  const mine = data.personal;
+  let sections;
+  if (!mine) {
+    sections = publicSections(data, cards);
+  } else if (state.tab === 'fresh') {
+    sections = [
+      section('events', { key: 'fresh', title: 'Just posted', note: 'The newest events on Twendezetu', href: '/events?sort=new', events: cards(data.fresh) }),
+      ...publicSections(data, cards).filter((item) => item.key === 'week'),
+    ];
+  } else if (state.tab === 'following') {
+    sections = personalSections(mine, 'following', cards);
+  } else {
+    sections = [...personalSections(mine, 'forYou', cards), ...publicSections(data, cards)];
+  }
 
-  const explore = events.filter((event) => event.slug !== featured?.slug).slice(0, 6);
-
+  const next = mine?.nextUp;
   return {
-    me: data.me,
-    isEn: !sw,
-    isSw: sw,
-    langLabel: sw ? 'SW → EN' : 'EN → SW',
-    toggleLang: () => {
-      const lang = sw ? 'en' : 'sw';
-      writePreference('lang', lang);
-      set((current) => ({ ...current, lang }));
-    },
-    currency,
-    cycleCurrency: () => {
-      const next = nextCurrency(currency);
-      writePreference('currency', next);
-      set((current) => ({ ...current, currency: next }));
-      if (data.me.signedIn) ctx.api.patch('/api/account/profile', { currency: next }).catch(() => {});
-    },
-    cityLabel: (data.city || 'Nairobi · Kampala · Dar · Kigali · NY/NJ').toUpperCase(),
-    eventCount: shown.length,
-    isAll: state.cat === 'All',
-    isFiltered: state.cat !== 'All',
-    featured: featured
-      ? { ...featured, going: `${featured.going} going`, kicker: '[Tukio kuu — featured this month]', badge: featured.badge || 'FEATURED' }
-      : { href: '/create-event', img: '', title: 'Post the first event', city: '', date: '', price: '', going: '', badge: 'NEW', blurb: 'The guide is empty right now. Be the first to post.', kicker: '[Karibu]' },
-    explore,
-    shelves,
-    services: SERVICES,
-    process: PROCESS[sw ? 'sw' : 'en'],
-    categories: [{ key: 'All', label: 'All', count: events.length }, ...data.categories]
-      .map((category) => {
-        const active = state.cat === category.key;
-        return {
-          label: `${category.label} (${category.count})`,
-          pick: () => pickCategory(category.key),
-          bg: active ? COLORS.forest : COLORS.cream,
-          fg: active ? COLORS.cream : COLORS.ink,
-        };
-      })
-      .concat({
-        label: 'Needs board ↓',
-        pick: () => {
-          const board = document.querySelector('[data-needs-board]');
-          if (board) window.scrollTo({ top: board.offsetTop - 80, behavior: 'smooth' });
-        },
-        bg: COLORS.clay,
-        fg: COLORS.ink,
-      }),
-    events: shown.slice(0, 48),
-    moreStories: data.stories,
-    needs: data.needs,
+    shell: shellValues(data.me, ctx, { active: 'home' }),
+    signedIn: data.me.signedIn,
+    signedOut: !data.me.signedIn,
+    tabs: TABS.map(([key, label]) => ({
+      label,
+      pressed: state.tab === key ? 'true' : 'false',
+      pick: () => set((current) => ({ ...current, tab: key })),
+    })),
+    sections,
+    nextUp: next
+      ? {
+          img: next.img,
+          title: next.title,
+          meta: `${next.when ? `${next.when.charAt(0)}${next.when.slice(1).toLowerCase()}` : next.date} · ${next.time}`,
+          label: next.kind === 'TICKET' ? 'YOUR NEXT EVENT · TICKET' : 'YOUR NEXT EVENT · RSVP',
+          href: next.kind === 'TICKET' ? '/my-twende?tab=upcoming' : next.href,
+          cta: next.kind === 'TICKET' ? 'Show ticket' : 'View event',
+        }
+      : null,
   };
 }
