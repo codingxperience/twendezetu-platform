@@ -1,21 +1,12 @@
 // Markup for the provider page. Bindings are resolved by src/design/render.js.
 
+import { SITE_HEADER, SITE_TABBAR } from './shell';
+
 const template = `
-<div style="font-family: var(--tz-sans); background: #F7F1E6; color: #14201F; min-height: 100vh;">
+<div class="tz-page" style="font-family: var(--tz-sans); background: #F7F1E6; color: #14201F; min-height: 100vh;">
 
   <!-- Header -->
-  <header style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 18px 24px; border-bottom: 2px solid #1F3A38; background: #F7F1E6; position: sticky; top: 0; z-index: 40;">
-    <div style="display: flex; align-items: center; gap: 36px;">
-      <a href="/" class="tz-logo-link" aria-label="Twendezetu home"><img src="/brand/logo.png" alt="Twendezetu" width="1211" height="229" class="tz-logo tz-logo--md"></a>
-      <nav class="tw-nav" style="display: flex; gap: 24px; font-size: 14px; font-weight: 500;">
-        <a href="/events" style="color: #6E6155; text-decoration: none;">Events</a>
-        <a href="/vendors" style="color: #6E6155; text-decoration: none;">Directory</a>
-        <a href="/create-event" style="color: #6E6155; text-decoration: none;">Post an event or need</a>
-        <a href="/provider-dashboard" style="color: #6E6155; text-decoration: none;">For vendors</a>
-      </nav>
-    </div>
-    <a href="{{ accountHref }}" style="font-family: var(--tz-mono); font-size: 13px; background: #1F3A38; color: #F7F1E6; text-decoration: none; padding: 12px 20px; box-shadow: 4px 4px 0 #E9B4AC;">{{ accountLabel }}</a>
-  </header>
+  ${SITE_HEADER}
 
   <!-- Public-listing orientation -->
   <div style="background: #EFE7D6; border-bottom: 2px solid #1F3A38; padding: 9px 24px;">
@@ -267,6 +258,7 @@ const template = `
     </div>
     <div aria-hidden="true" style="font-family: var(--tz-display); font-size: clamp(56px, 11vw, 180px); text-transform: uppercase; line-height: 0.78; text-align: center; transform: translateY(12%); white-space: nowrap;">{{ footerName }}</div>
   </footer>
+  ${SITE_TABBAR}
 </div>
 `;
 

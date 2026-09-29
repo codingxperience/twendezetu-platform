@@ -3,7 +3,7 @@
 // was booked and completed here.
 
 import { stars } from '@/shared/format';
-import { COLORS, EMAIL_PATTERN, copyText, sentence, shareLinks } from './shared';
+import { COLORS, EMAIL_PATTERN, copyText, sentence, shareLinks, shellValues } from './shared';
 
 const CARD_WIDTH = 318; // card + gap in the "more vendors" row
 
@@ -87,6 +87,7 @@ export function values(state, set, ctx) {
   const following = Boolean(state.following);
 
   return {
+    shell: shellValues(state.data.me, ctx, { active: 'vendors' }),
     me: data.me,
     accountHref: data.me.accountHref,
     accountLabel: signedIn ? 'MY TWENDE →' : 'SIGN IN →',

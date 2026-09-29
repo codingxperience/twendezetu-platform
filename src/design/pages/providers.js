@@ -1,6 +1,6 @@
 // The provider directory: category chips, search by name or city.
 
-import { COLORS } from './shared';
+import { COLORS, shellValues } from './shared';
 
 export const initialState = { q: '', city: '' };
 
@@ -13,13 +13,14 @@ function href({ category, city, q }) {
   return `/vendors${query ? `?${query}` : ''}`;
 }
 
-export function values(state, set) {
+export function values(state, set, ctx) {
   const { data } = state;
   const { filters } = data;
   const active = data.categories.find((item) => item.code === filters.category);
   const count = data.providers.length;
   const where = [filters.city ? `in ${filters.city}` : null, filters.q ? `matching “${filters.q}”` : null].filter(Boolean).join(' ');
   return {
+    shell: shellValues(state.data.me, ctx, { active: 'vendors' }),
     me: data.me,
     accountLabel: data.me.signedIn ? 'My Twende' : 'Sign in',
     title: active?.code ? active.label : 'The directory',

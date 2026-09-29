@@ -1,26 +1,12 @@
 // Markup for the event page. Bindings are resolved by src/design/render.js.
 
+import { SITE_HEADER, SITE_TABBAR } from './shell';
+
 const template = `
-<div style="font-family: var(--tz-sans); background: #F7F1E6; color: #14201F; min-height: 100vh;">
+<div class="tz-page" style="font-family: var(--tz-sans); background: #F7F1E6; color: #14201F; min-height: 100vh;">
 
   <!-- Header -->
-  <header style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 18px 24px; border-bottom: 2px solid #1F3A38; background: #F7F1E6; position: sticky; top: 0; z-index: 40;">
-    <div style="display: flex; align-items: center; gap: 36px;">
-      <a href="/" class="tz-logo-link" aria-label="Twendezetu home"><img src="/brand/logo.png" alt="Twendezetu" width="1211" height="229" class="tz-logo tz-logo--md"></a>
-      <nav class="tw-nav" style="display: flex; gap: 24px; font-size: 14px; font-weight: 500;">
-        <a href="/events" style="color: #6E6155; text-decoration: none;">Events</a>
-        <a href="/events/nyama-choma-festival-2026" style="color: #14201F; text-decoration: none; border-bottom: 2px solid #820101; padding-bottom: 2px;">Featured</a>
-        <a href="/create-event" style="color: #6E6155; text-decoration: none;">Post an event or need</a>
-        <a href="/provider-dashboard" style="color: #6E6155; text-decoration: none;">For vendors</a>
-      </nav>
-    </div>
-    <div style="display: flex; gap: 10px; align-items: center;">
-      <sc-if value="{{ me.signedOut }}">
-        <a href="{{ signInHref }}" style="font-size: 14px; font-weight: 600; color: #14201F; text-decoration: none; padding: 10px 16px;">Sign in</a>
-      </sc-if>
-      <a href="/my-twende" style="font-family: var(--tz-mono); font-size: 13px; background: #1F3A38; color: #F7F1E6; text-decoration: none; padding: 12px 20px; box-shadow: 4px 4px 0 #E9B4AC;">MY TWENDE →</a>
-    </div>
-  </header>
+  ${SITE_HEADER}
 
   <!-- Breadcrumb -->
   <div style="max-width: 1200px; margin: 0 auto; padding: 20px 24px 0; font-family: var(--tz-mono); font-size: 12px; color: #6E6155;">
@@ -276,6 +262,7 @@ const template = `
     </div>
     <div style="font-family: var(--tz-display); font-size: clamp(64px, 12vw, 200px); text-transform: uppercase; line-height: 0.78; text-align: center; transform: translateY(12%);">HII SI YA KUKOSA</div>
   </footer>
+  ${SITE_TABBAR}
 </div>
 `;
 

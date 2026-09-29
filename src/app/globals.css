@@ -1257,6 +1257,7 @@ a.tz-shelf__title:hover { color: var(--tz-maroon); }
    and hide overflow on page wrappers; the browsing frame opts out of both. */
 .claude-design .tz-top > .tz-top__actions { width: auto !important; margin-left: auto; justify-content: flex-end !important; }
 .claude-design > .tz-page { overflow-x: clip !important; overflow-y: visible !important; }
+.claude-design .tz-top { overflow: visible !important; max-width: none !important; }
 
 @media (max-width: 640px) {
   .tz-top { flex-wrap: wrap; height: auto; gap: 10px; padding: 10px 16px; }

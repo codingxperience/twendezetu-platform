@@ -1,25 +1,12 @@
 // Markup for the eventDetail page. Bindings are resolved by src/design/render.js.
 
+import { SITE_HEADER, SITE_TABBAR } from './shell';
+
 const template = `
-<div style="font-family: var(--tz-sans); background: #F7F1E6; color: #14201F; min-height: 100vh;">
+<div class="tz-page" style="font-family: var(--tz-sans); background: #F7F1E6; color: #14201F; min-height: 100vh;">
 
   <!-- Header -->
-  <header style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 18px 24px; border-bottom: 2px solid #1F3A38; background: #F7F1E6; position: sticky; top: 0; z-index: 40;">
-    <div style="display: flex; align-items: center; gap: 36px;">
-      <a href="/" class="tz-logo-link" aria-label="Twendezetu home"><img src="/brand/logo.png" alt="Twendezetu" width="1211" height="229" class="tz-logo tz-logo--md"></a>
-      <nav class="tw-nav" style="display: flex; gap: 24px; font-size: 14px; font-weight: 500;">
-        <a href="/events" style="color: #6E6155; text-decoration: none;">Events</a>
-        <a href="/create-event" style="color: #6E6155; text-decoration: none;">Post an event or need</a>
-        <a href="/provider-dashboard" style="color: #6E6155; text-decoration: none;">For vendors</a>
-      </nav>
-    </div>
-    <div style="display: flex; gap: 10px; align-items: center;">
-      <sc-if value="{{ me.signedOut }}">
-        <a href="{{ signInHref }}" style="font-size: 14px; font-weight: 600; color: #14201F; text-decoration: none; padding: 10px 16px;">Sign in</a>
-      </sc-if>
-      <a href="/my-twende" style="font-family: var(--tz-mono); font-size: 13px; background: #1F3A38; color: #F7F1E6; text-decoration: none; padding: 12px 20px; box-shadow: 4px 4px 0 #E9B4AC;">MY TWENDE →</a>
-    </div>
-  </header>
+  ${SITE_HEADER}
 
   <!-- Guest banner -->
   <div style="background: #1F3A38; color: #F7F1E6; font-family: var(--tz-mono); font-size: 12px; padding: 10px 24px; text-align: center; line-height: 1.5;">
@@ -187,6 +174,7 @@ const template = `
       <div style="font-family: var(--tz-mono); font-size: 11px; color: rgba(247,241,230,0.7);">Gather anywhere · Fees only when money moves</div>
     </div>
   </footer>
+  ${SITE_TABBAR}
 </div>
 `;
 
