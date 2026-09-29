@@ -5,7 +5,7 @@ const template = `
 
   <!-- Left: brand panel -->
   <div style="padding: 40px; display: flex; flex-direction: column; justify-content: space-between; border-right: 2px solid #F7F1E6;">
-    <a href="/" style="text-decoration: none; color: #F7F1E6; font-family: var(--tz-display); font-size: 30px; text-transform: uppercase; line-height: 0.9;">TWENDE<br><span style="color: #D97A3B;">ZETU</span></a>
+    <a href="/" class="tz-logo-link" aria-label="Twendezetu home"><img src="/brand/logo-light.png" alt="Twendezetu" width="1211" height="229" class="tz-logo tz-logo--lg"></a>
     <div>
       <div style="font-family: var(--tz-mono); font-size: 12px; color: #E8A472; letter-spacing: 0.08em;">[Karibu tena]</div>
       <div style="font-family: var(--tz-display); font-size: clamp(44px, 5vw, 76px); text-transform: uppercase; line-height: 0.94; margin-top: 12px;">

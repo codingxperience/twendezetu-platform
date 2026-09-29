@@ -6,7 +6,7 @@ const template = `
   <!-- Header -->
   <header style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 18px 24px; border-bottom: 2px solid #1F3A38; background: #F7F1E6; position: sticky; top: 0; z-index: 40;">
     <div style="display: flex; align-items: center; gap: 36px;">
-      <a href="/" style="text-decoration: none; color: #14201F; font-family: var(--tz-display); font-size: 26px; text-transform: uppercase; line-height: 0.9;">TWENDE<br><span style="color: #D97A3B;">ZETU</span></a>
+      <a href="/" class="tz-logo-link" aria-label="Twendezetu home"><img src="/brand/logo.png" alt="Twendezetu" width="1211" height="229" class="tz-logo tz-logo--md"></a>
       <nav class="tw-nav" style="display: flex; gap: 24px; font-size: 14px; font-weight: 500;">
         <a href="/" style="color: #6E6155; text-decoration: none;">Event guide</a>
         <a href="/providers" style="color: #6E6155; text-decoration: none;">Directory</a>
@@ -179,7 +179,7 @@ const template = `
   <!-- Footer -->
   <footer style="border-top: 2px solid #1F3A38; background: #1F3A38; color: #F7F1E6; padding: 32px 24px;">
     <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; align-items: center;">
-      <a href="/" style="text-decoration: none; color: #F7F1E6; font-family: var(--tz-display); font-size: 22px; text-transform: uppercase; line-height: 0.9;">TWENDE<span style="color: #D97A3B;">ZETU</span></a>
+      <a href="/" class="tz-logo-link" aria-label="Twendezetu home"><img src="/brand/logo-light.png" alt="Twendezetu" width="1211" height="229" class="tz-logo tz-logo--sm"></a>
       <div style="font-family: var(--tz-mono); font-size: 11px; color: rgba(247,241,230,0.7);">Masked contacts · Fees only when money moves</div>
     </div>
   </footer>

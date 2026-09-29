@@ -19,7 +19,7 @@ const template = `
   <!-- ===== Header ===== -->
   <header style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 18px 24px; border-bottom: 2px solid #1F3A38; background: #F7F1E6; position: sticky; top: 0; z-index: 40;">
     <div style="display: flex; align-items: center; gap: 36px;">
-      <div style="font-family: var(--tz-display); font-size: 26px; text-transform: uppercase; line-height: 0.9; letter-spacing: 0.01em;">TWENDE<br><span style="color: #D97A3B;">ZETU</span></div>
+      <a href="/" class="tz-logo-link" aria-label="Twendezetu home"><img src="/brand/logo.png" alt="Twendezetu" width="1211" height="229" class="tz-logo tz-logo--md"></a>
       <nav class="tw-nav" style="display: flex; gap: 24px; font-size: 14px; font-weight: 500;">
         <a href="/" style="color: #14201F; text-decoration: none; border-bottom: 2px solid #D97A3B; padding-bottom: 2px;">Event guide</a>
         <a href="{{ featured.href }}" style="color: #6E6155; text-decoration: none;">Featured</a>
@@ -337,7 +337,7 @@ const template = `
         <span style="color: rgba(247,241,230,0.75);">English · Kiswahili greetings</span>
       </div>
     </div>
-    <div style="font-family: var(--tz-display); font-size: clamp(72px, 13vw, 220px); text-transform: uppercase; line-height: 0.78; text-align: center; color: #F7F1E6; margin: 0 -20px; transform: translateY(12%);">TWENDEZETU</div>
+    <div style="text-align: center; padding: 8px 0 4px;"><img src="/brand/logo-light.png" alt="Twendezetu" width="1211" height="229" loading="lazy" class="tz-logo tz-logo--hero"></div>
   </footer>
 </div>
 `;

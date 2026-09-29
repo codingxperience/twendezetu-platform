@@ -231,20 +231,9 @@
 }
 
 .wordmark {
-  color: #14201f;
-  font-family: var(--tz-display);
-  font-size: 19px;
-  letter-spacing: 0.01em;
-  line-height: 0.88;
-  text-transform: uppercase;
-}
-
-.wordmarkDark {
-  color: #f7f1e6;
-}
-
-.wordmark span {
-  color: #d97a3b;
+  display: block;
+  height: 22px;
+  width: auto;
 }
 
 .phoneTopActions {

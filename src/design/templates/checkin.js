@@ -5,7 +5,7 @@ const template = `
 
   <header style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 16px 24px; border-bottom: 2px solid #F7F1E6;">
     <div style="display: flex; align-items: center; gap: 20px;">
-      <a href="/my-twende?tab=posts" style="text-decoration: none; color: #F7F1E6; font-family: var(--tz-display); font-size: 22px; text-transform: uppercase; line-height: 0.9;">TWENDE<span style="color: #D97A3B;">ZETU</span></a>
+      <a href="/my-twende?tab=posts" class="tz-logo-link" aria-label="Twendezetu home"><img src="/brand/logo-light.png" alt="Twendezetu" width="1211" height="229" class="tz-logo tz-logo--sm"></a>
       <span style="font-family: var(--tz-mono); font-size: 12px; background: #D97A3B; color: #14201F; padding: 5px 10px;">DOOR CHECK-IN</span>
     </div>
     <div style="display: flex; gap: 12px; align-items: center; font-family: var(--tz-mono); font-size: 11px; color: rgba(247,241,230,0.7);">

@@ -40,11 +40,8 @@ const screens = [
 
 function Wordmark({ dark = false }) {
   return (
-    <div className={`${styles.wordmark} ${dark ? styles.wordmarkDark : ''}`}>
-      TWENDE
-      <br />
-      <span>ZETU</span>
-    </div>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img className={styles.wordmark} src={dark ? '/brand/logo-light.png' : '/brand/logo.png'} alt="Twendezetu" width={1211} height={229} />
   );
 }
 

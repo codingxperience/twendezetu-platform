@@ -614,3 +614,30 @@ a { color: inherit; }
 @media (prefers-reduced-motion: reduce) {
   .claude-design [data-scan-line] { animation: none !important; top: 50% !important; }
 }
+
+/* The Twendezetu logo. The files carry their own proportions; these set the
+   height it sits at in headers, the sign-in panel, footers and the home
+   page sign-off, a little smaller on phones. */
+.tz-logo-link {
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+  text-decoration: none;
+}
+
+.tz-logo {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: 36px;
+}
+
+.tz-logo--sm { height: 26px; }
+.tz-logo--md { height: 34px; }
+.tz-logo--lg { height: 46px; }
+.tz-logo--hero { height: auto; width: min(1100px, 92%); margin: 0 auto; }
+
+@media (max-width: 560px) {
+  .tz-logo--md { height: 28px; }
+  .tz-logo--lg { height: 38px; }
+}

@@ -85,7 +85,7 @@ function frame({ title, inner, button, footer }) {
   return `<!doctype html><html><body style="margin:0;background:#F7F1E6;font-family:Helvetica,Arial,sans-serif;color:#14201F">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:32px 16px">
 <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;background:#FFFDF8;border:2px solid #1F3A38">
-<tr><td style="background:#1F3A38;color:#F7F1E6;padding:18px 24px;font-size:18px;font-weight:bold;letter-spacing:1px">TWENDE<span style="color:#D97A3B">ZETU</span></td></tr>
+<tr><td style="background:#1F3A38;color:#F7F1E6;padding:18px 24px;font-size:18px;font-weight:bold;letter-spacing:1px"><img src="${escapeHtml(config().appUrl)}/brand/logo-light.png" alt="Twendezetu" width="170" height="32" style="display:block;height:32px;width:170px;border:0"></td></tr>
 <tr><td style="padding:28px 24px"><h1 style="margin:0 0 12px;font-size:22px">${escapeHtml(title)}</h1>
 ${inner}
 ${button ? `<a href="${escapeHtml(button.href)}" style="display:inline-block;background:#D97A3B;color:#1F3A38;text-decoration:none;font-weight:bold;padding:12px 20px">${escapeHtml(button.label)}</a>` : ''}
