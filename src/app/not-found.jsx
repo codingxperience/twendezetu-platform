@@ -10,8 +10,9 @@ export default function NotFound() {
   return (
     <main style={{ minHeight: '100vh', background: '#F7F1E6', color: '#14201F', fontFamily: 'var(--tz-sans)', display: 'flex', flexDirection: 'column' }}>
       <header style={{ padding: '18px 24px', borderBottom: '2px solid #1F3A38' }}>
-        <Link href="/" style={{ textDecoration: 'none', color: '#14201F', fontFamily: 'var(--tz-display)', fontSize: 26, textTransform: 'uppercase', lineHeight: 0.9 }}>
-          TWENDE<br /><span style={{ color: '#D97A3B' }}>ZETU</span>
+        <Link href="/" className="tz-logo-link" aria-label="Twendezetu home">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/logo.png" alt="Twendezetu" width={1211} height={229} className="tz-logo tz-logo--md" />
         </Link>
       </header>
       <section style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px 24px' }}>

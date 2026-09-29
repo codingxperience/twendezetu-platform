@@ -33,15 +33,21 @@ export const metadata = {
     description: 'Post events and needs, discover providers, RSVP, pay, and coordinate without exposing contacts.',
     type: 'website',
     siteName: 'Twendezetu',
-    images: [{ url: '/assets/events/nytc-nanenane-2026-flyer.jpeg', alt: 'Twendezetu' }],
+    images: [{ url: '/brand/share-card.png', width: 1200, height: 630, alt: 'Twendezetu' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Twendezetu — Gather anywhere.',
     description: 'Post events and needs, discover providers, RSVP, pay, and coordinate without exposing contacts.',
-    images: ['/assets/events/nytc-nanenane-2026-flyer.jpeg'],
+    images: ['/brand/share-card.png'],
   },
-  icons: { icon: '/favicon.svg' },
+  icons: {
+    icon: [
+      { url: '/brand/favicon-32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/brand/icon-192.png', sizes: '192x192', type: 'image/png' },
+    ],
+    apple: '/brand/apple-touch-icon.png',
+  },
 };
 
 export const viewport = {
