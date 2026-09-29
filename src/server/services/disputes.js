@@ -17,7 +17,7 @@ import { relativeTime, shortDate, shortName } from '../../shared/format.js';
 
 export const REASONS = Object.freeze({
   EVENT_CANCELLED: ['Event cancelled or moved', 'Automatic full refund if the organizer cancelled'],
-  NO_SHOW: ['Provider no-show', 'The provider never arrived or stopped responding'],
+  NO_SHOW: ['Vendor no-show', 'The vendor never arrived or stopped responding'],
   NOT_AS_DESCRIBED: ['Not as described', 'What arrived differs materially from the offer'],
   CHARGED_INCORRECTLY: ['Charged incorrectly', 'Double charge, wrong amount, or unknown charge'],
 });

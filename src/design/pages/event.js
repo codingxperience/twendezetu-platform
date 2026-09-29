@@ -1,7 +1,7 @@
 // An event page: RSVP (members and guests), tickets, calendar, sharing.
 // Serves both the standard event template and the bespoke flagship one.
 
-import { COLORS, EMAIL_PATTERN, copyText, readPreference, shareLinks, writePreference } from './shared';
+import { COLORS, EMAIL_PATTERN, copyText, readPreference, shareLinks, shellValues, writePreference } from './shared';
 
 export const initialState = { rsvpStep: 'idle', gName: '', gEmail: '', gParty: 1, gError: null, copied: false, justRsvped: null };
 
@@ -67,6 +67,7 @@ export function values(state, set, ctx) {
   const canCancel = Boolean(data.rsvp?.manageToken || data.rsvp?.mine);
 
   return {
+    shell: shellValues(state.data.me, ctx, { active: 'events' }),
     me: data.me,
     signInHref: `/sign-in?next=${encodeURIComponent(`/events/${event.slug}`)}`,
     bannerText: signedIn
@@ -102,7 +103,7 @@ export function values(state, set, ctx) {
     rsvpForm: state.rsvpStep === 'form' && !rsvped,
     rsvpLabel: state.rsvpStep === 'form' ? 'Finish below ↓' : 'RSVP — I am going',
     rsvpBg: state.rsvpStep === 'form' ? COLORS.forest : COLORS.clay,
-    rsvpFg: state.rsvpStep === 'form' ? COLORS.cream : COLORS.forest,
+    rsvpFg: COLORS.cream,
     toggleRsvp: () => {
       if (state.rsvpStep === 'idle') track(ctx, event.slug, 'cta');
       if (signedIn && state.rsvpStep === 'idle') {

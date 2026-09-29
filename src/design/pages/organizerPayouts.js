@@ -14,7 +14,7 @@ export function stateFrom(data) {
 const TONES = {
   in: { bg: '#E4EBDD', fg: '#3E5234' },
   out: { bg: COLORS.sand, fg: COLORS.ink },
-  pending: { bg: '#FBEED8', fg: '#7A3E0F' },
+  pending: { bg: '#FBEED8', fg: '#5C0000' },
   failed: { bg: '#F4D9D5', fg: COLORS.red },
 };
 
@@ -57,7 +57,7 @@ export function values(state, set, ctx) {
       { step: '1 · BUYERS PAY', label: 'Ticket + fee', desc: `Buyers pay the ${data.serviceFeePercent}% service fee on top of your price.`, bg: COLORS.paper, fg: COLORS.ink },
       { step: '2 · HELD', label: 'In escrow', desc: 'Refunds and open cases are paid from here first.', bg: COLORS.sand, fg: COLORS.ink },
       { step: '3 · RELEASED', label: `${data.releaseHours}h after`, desc: 'The event ends, and the full ticket price moves to your balance.', bg: COLORS.forest, fg: COLORS.cream },
-      { step: '4 · WITHDRAW', label: 'To you', desc: data.feeLabel ? `Mobile money or bank, ${data.feeLabel} flat per withdrawal.` : 'Mobile money or bank.', bg: COLORS.clay, fg: COLORS.ink },
+      { step: '4 · WITHDRAW', label: 'To you', desc: data.feeLabel ? `Mobile money or bank, ${data.feeLabel} flat per withdrawal.` : 'Mobile money or bank.', bg: COLORS.clay, fg: COLORS.cream },
     ],
 
     availableLabel: data.availableLabel,
@@ -76,7 +76,7 @@ export function values(state, set, ctx) {
       label: item.label,
       tag: item.isDefault ? 'DEFAULT' : '',
       pick: () => set((current) => ({ ...current, methodId: item.id })),
-      border: item.id === state.methodId ? COLORS.clay : 'rgba(247,241,230,0.35)',
+      border: item.id === state.methodId ? COLORS.clayLight : 'rgba(247,241,230,0.35)',
       bg: item.id === state.methodId ? 'rgba(217,122,59,0.2)' : 'transparent',
       on: item.id === state.methodId,
     })),

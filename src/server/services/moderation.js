@@ -186,7 +186,7 @@ export async function listUsers({ q, take = 25 } = {}) {
   return users.map((user) => {
     const roles = [];
     if (user.role !== 'MEMBER') roles.push(user.role);
-    if (user.provider) roles.push('PROVIDER');
+    if (user.provider) roles.push('VENDOR');
     if (user._count.eventsCreated) roles.push('ORGANIZER');
     if (!roles.length) roles.push(user._count.needs ? 'USER + ADVERTISER' : 'USER');
     return {
@@ -379,7 +379,7 @@ export async function adminOverview() {
 
   const kpis = [
     { label: 'TOTAL USERS', big: users.toLocaleString('en-US'), delta: delta(users30, usersPrior), good: users30 >= usersPrior },
-    { label: 'ACTIVE PROVIDERS', big: providers.toLocaleString('en-US'), delta: `+${providers7} this week`, good: true },
+    { label: 'ACTIVE VENDORS', big: providers.toLocaleString('en-US'), delta: `+${providers7} this week`, good: true },
     { label: 'LIVE EVENTS', big: liveEvents.toLocaleString('en-US'), delta: `${featuredEligible} featured-eligible`, good: null },
     { label: 'OPEN NEEDS', big: openNeeds.toLocaleString('en-US'), delta: posted ? `${Math.round((matched / posted) * 100)}% got an offer (30d)` : 'no needs posted (30d)', good: true },
     { label: 'TICKETS SOLD (30D)', big: tickets30.toLocaleString('en-US'), delta: delta(tickets30, ticketsPrior), good: tickets30 >= ticketsPrior },
@@ -391,7 +391,7 @@ export async function adminOverview() {
   const attention = [];
   if (highReports) attention.push({ label: `${highReports} high-severity report${highReports === 1 ? '' : 's'} waiting`, action: 'MODERATE', section: 'moderation' });
   if (escalated) attention.push({ label: `${escalated} refund case${escalated === 1 ? '' : 's'} waiting for a decision (money is frozen)`, action: 'DECIDE', section: 'cases' });
-  if (stalledVerifications) attention.push({ label: `${stalledVerifications} provider verification${stalledVerifications === 1 ? '' : 's'} waiting over 48h`, action: 'REVIEW', section: 'verify' });
+  if (stalledVerifications) attention.push({ label: `${stalledVerifications} vendor verification${stalledVerifications === 1 ? '' : 's'} waiting over 48h`, action: 'REVIEW', section: 'verify' });
   if (payoutCount) attention.push({ label: `Payout batch of ${usdShort(payoutUsd)} awaits finance approval`, action: 'FINANCE', href: '/finance' });
   if (featuredEligible) attention.push({ label: `${featuredEligible} popular event${featuredEligible === 1 ? ' is' : 's are'} not featured yet`, action: 'CURATE', section: 'content' });
 

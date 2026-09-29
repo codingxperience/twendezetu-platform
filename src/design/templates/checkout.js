@@ -11,13 +11,13 @@ const template = `
   </header>
 
   <div style="max-width: 1200px; margin: 0 auto; padding: 40px 24px 80px;">
-    <div style="font-family: var(--tz-mono); font-size: 12px; color: #A85A23; letter-spacing: 0.08em;">[Tiketi — get tickets]</div>
-    <h1 style="font-family: var(--tz-display); font-size: clamp(38px, 5.5vw, 68px); text-transform: uppercase; line-height: 0.95; margin: 10px 0 6px;">{{ eventTitle }}<span style="color: #D97A3B;">.</span></h1>
+    <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Tiketi — get tickets]</div>
+    <h1 style="font-family: var(--tz-display); font-size: clamp(38px, 5.5vw, 68px); text-transform: uppercase; line-height: 0.95; margin: 10px 0 6px;">{{ eventTitle }}<span style="color: #820101;">.</span></h1>
     <div style="display: flex; gap: 10px; flex-wrap: wrap; font-family: var(--tz-mono); font-size: 12.5px; margin-bottom: 36px;">
       <span style="background: #1F3A38; color: #F7F1E6; padding: 6px 12px;">{{ dateLine }}</span>
       <span style="border: 2px solid #1F3A38; padding: 4px 12px;">{{ venue }}</span>
       <sc-if value="{{ testMode }}">
-        <span style="border: 2px solid #A85A23; color: #A85A23; padding: 4px 12px;">TEST MODE — NO CARD IS CHARGED</span>
+        <span style="border: 2px solid #820101; color: #820101; padding: 4px 12px;">TEST MODE — NO CARD IS CHARGED</span>
       </sc-if>
     </div>
 
@@ -32,7 +32,7 @@ const template = `
                 <div style="display: flex; gap: 10px; align-items: center;">
                   <span style="font-family: var(--tz-display); font-size: 22px; text-transform: uppercase;">{{ t.name }}</span>
                   <sc-if value="{{ t.tag }}" hint-placeholder-val="{{ false }}">
-                    <span style="background: #D97A3B; border: 1px solid #1F3A38; font-family: var(--tz-mono); font-size: 10px; padding: 3px 8px; color: #1F3A38;">{{ t.tag }}</span>
+                    <span style="background: #820101; border: 1px solid #1F3A38; font-family: var(--tz-mono); font-size: 10px; padding: 3px 8px; color: #F7F1E6;">{{ t.tag }}</span>
                   </sc-if>
                 </div>
                 <div style="font-size: 13px; color: #6E6155; margin-top: 4px;">{{ t.desc }}</div>
@@ -41,7 +41,7 @@ const template = `
                 <sc-if value="{{ t.was }}" hint-placeholder-val="{{ false }}">
                   <div style="font-family: var(--tz-mono); font-size: 12px; color: #8C7F6F; text-decoration: line-through;">{{ t.was }}</div>
                 </sc-if>
-                <div style="font-family: var(--tz-display); font-size: 22px; color: #A85A23;">{{ t.price }}</div>
+                <div style="font-family: var(--tz-display); font-size: 22px; color: #820101;">{{ t.price }}</div>
                 <div style="font-family: var(--tz-mono); font-size: 10.5px; color: #6E6155;">incl. tax + fee</div>
               </div>
               <sc-if value="{{ t.soldOut }}" hint-placeholder-val="{{ false }}">
@@ -57,7 +57,7 @@ const template = `
             </div>
           </sc-for>
         </div>
-        <div style="margin-top: 16px; border: 1px dashed #A85A23; background: #FBEED8; padding: 14px 16px; font-size: 13px; line-height: 1.55; color: #7A3E0F;">
+        <div style="margin-top: 16px; border: 1px dashed #820101; background: #FBEED8; padding: 14px 16px; font-size: 13px; line-height: 1.55; color: #5C0000;">
           {{ incentive }}
         </div>
 
@@ -74,7 +74,7 @@ const template = `
             <div style="margin-top: 14px; display: grid; gap: 8px;">
               <sc-for list="{{ guestRows }}" as="g" hint-placeholder-count="2">
                 <div style="display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: center;">
-                  <span style="font-family: var(--tz-mono); font-size: 12px; color: #A85A23;">{{ g.n }}</span>
+                  <span style="font-family: var(--tz-mono); font-size: 12px; color: #820101;">{{ g.n }}</span>
                   <input value="{{ g.name }}" onChange="{{ g.set }}" placeholder="{{ g.ph }}" style="border: 2px solid #1F3A38; background: #F7F1E6; padding: 10px 12px; font-family: var(--tz-sans); font-size: 13.5px; outline: none;">
                 </div>
               </sc-for>
@@ -88,7 +88,7 @@ const template = `
         </div>
 
         <!-- Pay method -->
-        <div style="font-family: var(--tz-mono); font-size: 12px; color: #A85A23; letter-spacing: 0.08em; margin: 32px 0 12px;">[Njia ya malipo — how will you pay?]</div>
+        <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em; margin: 32px 0 12px;">[Njia ya malipo — how will you pay?]</div>
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;" class="tw-3col">
           <sc-for list="{{ methods }}" as="m" hint-placeholder-count="3">
             <button onClick="{{ m.pick }}" style="text-align: left; border: 2px solid #1F3A38; background: {{ m.bg }}; color: {{ m.fg }}; padding: 16px 18px; cursor: pointer; box-shadow: {{ m.shadow }};">
@@ -134,17 +134,17 @@ const template = `
           <div style="padding: 0 22px 18px;">
             <div style="display: flex; border: 2px solid #1F3A38; margin-bottom: 12px;">
               <input placeholder="Promo code" value="{{ promoValue }}" onChange="{{ promoInput }}" style="flex: 1; min-width: 0; border: 0; background: #EFE7D6; font-family: var(--tz-mono); font-size: 12px; padding: 11px 12px; outline: none;">
-              <button onClick="{{ applyPromo }}" style="border: 0; border-left: 2px solid #1F3A38; background: #D97A3B; font-family: var(--tz-mono); font-size: 11px; padding: 0 14px; cursor: pointer;">APPLY</button>
+              <button onClick="{{ applyPromo }}" style="border: 0; border-left: 2px solid #1F3A38; background: #820101; font-family: var(--tz-mono); font-size: 11px; padding: 0 14px; cursor: pointer; color: #F7F1E6;">APPLY</button>
             </div>
             <sc-if value="{{ notPaid }}" hint-placeholder-val="{{ true }}">
-              <div style="border: 1px dashed #A85A23; background: #FBEED8; padding: 10px 12px; font-size: 12px; line-height: 1.5; color: #7A3E0F; margin-bottom: 12px;">{{ guestNote }}</div>
+              <div style="border: 1px dashed #820101; background: #FBEED8; padding: 10px 12px; font-size: 12px; line-height: 1.5; color: #5C0000; margin-bottom: 12px;">{{ guestNote }}</div>
               <div style="display: grid; gap: 8px; margin-bottom: 12px;">
-                <div style="font-family: var(--tz-mono); font-size: 11px; color: #A85A23; letter-spacing: 0.08em;">[Tickets go to this email]</div>
+                <div style="font-family: var(--tz-mono); font-size: 11px; color: #820101; letter-spacing: 0.08em;">[Tickets go to this email]</div>
                 <input placeholder="Your name" value="{{ buyerName }}" onChange="{{ setBuyerName }}" style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 12px 14px; font-family: var(--tz-sans); font-size: 14px; outline: none;">
                 <input placeholder="Email for tickets + receipt" value="{{ buyerEmail }}" onChange="{{ setBuyerEmail }}" style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 12px 14px; font-family: var(--tz-sans); font-size: 14px; outline: none;">
               </div>
-              <button onClick="{{ pay }}" aria-busy="{{ paying }}" style="width: 100%; font-family: var(--tz-display); font-size: 17px; text-transform: uppercase; background: #1F3A38; color: #F7F1E6; border: 2px solid #1F3A38; padding: 15px; cursor: pointer; box-shadow: 4px 4px 0 #D97A3B;">{{ payLabel }}</button>
-              <div style="font-size: 11.5px; color: #6E6155; margin-top: 8px; line-height: 1.45;">{{ buyerHint }} <sc-if value="{{ me.signedOut }}"><a href="{{ signInHref }}" style="color: #A85A23;">Sign in</a> to pay with points.</sc-if></div>
+              <button onClick="{{ pay }}" aria-busy="{{ paying }}" style="width: 100%; font-family: var(--tz-display); font-size: 17px; text-transform: uppercase; background: #1F3A38; color: #F7F1E6; border: 2px solid #1F3A38; padding: 15px; cursor: pointer; box-shadow: 4px 4px 0 #E9B4AC;">{{ payLabel }}</button>
+              <div style="font-size: 11.5px; color: #6E6155; margin-top: 8px; line-height: 1.45;">{{ buyerHint }} <sc-if value="{{ me.signedOut }}"><a href="{{ signInHref }}" style="color: #820101;">Sign in</a> to pay with points.</sc-if></div>
               <sc-if value="{{ payError }}" hint-placeholder-val="{{ false }}">
                 <div style="font-size: 12px; color: #B8463A; margin-top: 8px;">{{ payError }}</div>
               </sc-if>
@@ -152,7 +152,7 @@ const template = `
             <sc-if value="{{ paid }}" hint-placeholder-val="{{ false }}">
               <div style="border: 2px solid #1F3A38; background: #1F3A38; color: #F7F1E6; padding: 18px 20px;">
                 <div style="font-family: var(--tz-display); font-size: 20px; text-transform: uppercase;">{{ paidTitle }}</div>
-                <div style="font-family: var(--tz-mono); font-size: 11.5px; color: #E8A472; margin-top: 6px;">{{ ticketLine }}</div>
+                <div style="font-family: var(--tz-mono); font-size: 11.5px; color: #E9B4AC; margin-top: 6px;">{{ ticketLine }}</div>
                 <div style="font-size: 12px; color: rgba(247,241,230,0.8); line-height: 1.55;">{{ paidNote }}</div>
                 <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px;">
                   <sc-for list="{{ paidTickets }}" as="tk">
@@ -163,10 +163,10 @@ const template = `
                   </sc-for>
                 </div>
                 <sc-if value="{{ me.signedIn }}">
-                  <a href="/my-twende?tab=upcoming" style="display: inline-block; margin-top: 12px; font-family: var(--tz-mono); font-size: 11.5px; background: #D97A3B; color: #14201F; padding: 8px 14px; text-decoration: none;">VIEW IN MY TWENDE →</a>
+                  <a href="/my-twende?tab=upcoming" style="display: inline-block; margin-top: 12px; font-family: var(--tz-mono); font-size: 11.5px; background: #820101; color: #F7F1E6; padding: 8px 14px; text-decoration: none;">VIEW IN MY TWENDE →</a>
                 </sc-if>
                 <sc-if value="{{ me.signedOut }}">
-                  <div style="font-size: 12px; color: #E8A472; line-height: 1.5; margin-top: 12px;">Bookmark this page: its link opens your tickets. The same link is in your email — keep it private.</div>
+                  <div style="font-size: 12px; color: #E9B4AC; line-height: 1.5; margin-top: 12px;">Bookmark this page: its link opens your tickets. The same link is in your email — keep it private.</div>
                 </sc-if>
               </div>
             </sc-if>

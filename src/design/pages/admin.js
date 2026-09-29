@@ -43,7 +43,7 @@ export function values(state, set, ctx) {
     suspend: async () => {
       const sure = await ctx.ask({
         title: 'Suspend this account?',
-        body: 'They are signed out everywhere, their posts are hidden and a provider listing is taken down until you reinstate them.',
+        body: 'They are signed out everywhere, their posts are hidden and a vendor listing is taken down until you reinstate them.',
         input: false,
         confirmLabel: 'Suspend',
         danger: true,
@@ -126,10 +126,10 @@ export function values(state, set, ctx) {
   const review = async (item, decision) => {
     let note;
     if (decision !== 'approve') {
-      note = await ctx.ask({ title: decision === 'info' ? 'What is missing?' : 'Why is it not approved?', body: 'The provider reads this, so say exactly what to fix.', maxLength: 500, confirmLabel: decision === 'info' ? 'Ask for it' : 'Reject' , danger: decision === 'reject' });
+      note = await ctx.ask({ title: decision === 'info' ? 'What is missing?' : 'Why is it not approved?', body: 'The vendor reads this, so say exactly what to fix.', maxLength: 500, confirmLabel: decision === 'info' ? 'Ask for it' : 'Reject' , danger: decision === 'reject' });
       if (!note) return;
     }
-    post(`v:${item.id}`, `/api/admin/verifications/${item.id}`, { decision, note }, decision === 'approve' ? `${item.name} is verified.` : 'The provider has been told.');
+    post(`v:${item.id}`, `/api/admin/verifications/${item.id}`, { decision, note }, decision === 'approve' ? `${item.name} is verified.` : 'The vendor has been told.');
   };
   const verifications = (data.verifications || []).map((item) => ({
     ...item,
@@ -145,8 +145,8 @@ export function values(state, set, ctx) {
   const posts = (data.posts || []).map((item) => ({
     ...item,
     canFeature: item.kind === 'event',
-    featBg: item.featured ? COLORS.clay : 'transparent',
-    featFg: item.featured ? COLORS.ink : COLORS.clay,
+    featBg: item.featured ? COLORS.clayLight : 'transparent',
+    featFg: item.featured ? COLORS.ink : COLORS.clayLight,
     featLabel: item.featured ? 'FEATURED ✓' : 'FEATURE',
     feature: () => post(`p:${item.id}`, '/api/admin/content', { kind: item.kind, id: item.id, action: item.featured ? 'unfeature' : 'feature' }, item.featured ? 'No longer featured.' : 'Featured on the home page.'),
     hideLabel: item.hidden ? 'RESTORE' : 'HIDE',
@@ -160,7 +160,7 @@ export function values(state, set, ctx) {
 
   // ── Settings ──────────────────────────────────────────────────────────
   const settings = (data.settings || []).map((item) => {
-    const style = toggleStyle(item.on, { onBg: COLORS.clay, offBg: 'rgba(247,241,230,0.2)' });
+    const style = toggleStyle(item.on, { onBg: COLORS.clayLight, offBg: 'rgba(247,241,230,0.2)' });
     return {
       ...item,
       bg: style.bg,
@@ -190,7 +190,7 @@ export function values(state, set, ctx) {
       iconPath,
       badge: badges[key] || null,
       go: () => go(key),
-      bg: section === key ? COLORS.clay : 'transparent',
+      bg: section === key ? COLORS.clayLight : 'transparent',
       fg: section === key ? COLORS.ink : COLORS.cream,
       current: section === key ? 'page' : 'false',
     })),

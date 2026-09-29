@@ -1,6 +1,6 @@
 // The provider directory: category chips, search by name or city.
 
-import { COLORS } from './shared';
+import { COLORS, shellValues } from './shared';
 
 export const initialState = { q: '', city: '' };
 
@@ -10,16 +10,17 @@ export function stateFrom(data) {
 
 function href({ category, city, q }) {
   const query = new URLSearchParams(Object.entries({ category, city, q }).filter(([, value]) => value)).toString();
-  return `/providers${query ? `?${query}` : ''}`;
+  return `/vendors${query ? `?${query}` : ''}`;
 }
 
-export function values(state, set) {
+export function values(state, set, ctx) {
   const { data } = state;
   const { filters } = data;
   const active = data.categories.find((item) => item.code === filters.category);
   const count = data.providers.length;
   const where = [filters.city ? `in ${filters.city}` : null, filters.q ? `matching “${filters.q}”` : null].filter(Boolean).join(' ');
   return {
+    shell: shellValues(state.data.me, ctx, { active: 'vendors' }),
     me: data.me,
     accountLabel: data.me.signedIn ? 'My Twende' : 'Sign in',
     title: active?.code ? active.label : 'The directory',
@@ -34,7 +35,7 @@ export function values(state, set) {
       return { ...item, current: current ? 'page' : 'false', href: href({ category: item.code, city: filters.city, q: filters.q }), bg: current ? COLORS.forest : COLORS.paper, fg: current ? COLORS.cream : COLORS.ink };
     }),
     filtered: Boolean(filters.category || filters.city || filters.q),
-    resultLine: `${count} ${count === 1 ? 'PROVIDER' : 'PROVIDERS'}${where ? ` ${where.toUpperCase()}` : ''}`,
+    resultLine: `${count} ${count === 1 ? 'VENDOR' : 'VENDORS'}${where ? ` ${where.toUpperCase()}` : ''}`,
     empty: count === 0,
     providers: data.providers.map((provider) => ({
       ...provider,

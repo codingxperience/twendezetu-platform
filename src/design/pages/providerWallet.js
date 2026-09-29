@@ -89,7 +89,7 @@ export function values(state, set, ctx) {
     destinations: data.methods.map((item) => ({
       label: item.label,
       selected: item.id === state.methodId,
-      border: item.id === state.methodId ? COLORS.clay : 'rgba(247,241,230,0.4)',
+      border: item.id === state.methodId ? COLORS.clayLight : 'rgba(247,241,230,0.4)',
       bg: item.id === state.methodId ? 'rgba(217,122,59,0.2)' : 'rgba(247,241,230,0.08)',
       pick: () => set((current) => ({ ...current, methodId: item.id })),
     })),

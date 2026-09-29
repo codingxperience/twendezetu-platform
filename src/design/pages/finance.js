@@ -5,8 +5,8 @@
 import { COLORS } from './shared';
 
 const RANGE_LABELS = { '7d': 'LAST 7 DAYS', '30d': 'LAST 30 DAYS', '90d': 'LAST 90 DAYS' };
-const STREAM_COLORS = [COLORS.clay, COLORS.sage, COLORS.clayLight, COLORS.sand, COLORS.cream];
-const TYPE_ICONS = { TICKETS: ['T', COLORS.clay], BOOKINGS: ['B', COLORS.sage], MEMBERSHIPS: ['M', COLORS.clayLight], POINTS: ['P', COLORS.sand], PAYOUTS: ['↗', COLORS.cream], REFUNDS: ['R', COLORS.red], OTHER: ['·', COLORS.sand] };
+const STREAM_COLORS = [COLORS.clayLight, COLORS.sage, '#E8C872', COLORS.sand, COLORS.cream];
+const TYPE_ICONS = { TICKETS: ['T', COLORS.clayLight], BOOKINGS: ['B', COLORS.sage], MEMBERSHIPS: ['M', '#E8C872'], POINTS: ['P', COLORS.sand], PAYOUTS: ['↗', COLORS.cream], REFUNDS: ['R', COLORS.red], OTHER: ['·', COLORS.sand] };
 const STATUS_COLORS = { REFUNDED: COLORS.clayLight, 'IN ESCROW': '#E8C872', SETTLED: COLORS.sage };
 
 export const initialState = { menuOpen: false };
@@ -51,7 +51,7 @@ export function values(state, set, ctx) {
     })),
     rangeLabel: RANGE_LABELS[data.range],
 
-    kpis: data.kpis.map((kpi, index) => ({ ...kpi, bg: index === 1 ? COLORS.clay : COLORS.forest, fg: index === 1 ? COLORS.ink : COLORS.cream })),
+    kpis: data.kpis.map((kpi, index) => ({ ...kpi, bg: index === 1 ? COLORS.clay : COLORS.forest, fg: COLORS.cream })),
     streams: data.streams.map((stream, index) => ({ ...stream, color: STREAM_COLORS[index % STREAM_COLORS.length] })),
     noStreams: data.streams.length === 0,
 
@@ -75,11 +75,11 @@ export function values(state, set, ctx) {
       release: async () => {
         const sure = await ctx.ask({
           title: `Release ${row.local} now?`,
-          body: 'The provider is paid straight away, less the booking commission. Only release early when the customer has confirmed the job some other way.',
+          body: 'The vendor is paid straight away, less the booking commission. Only release early when the customer has confirmed the job some other way.',
           input: false,
           confirmLabel: 'Release',
         });
-        if (sure) act(`e:${row.id}`, `/api/finance/escrow/${row.id}/release`, undefined, 'Released to the provider.');
+        if (sure) act(`e:${row.id}`, `/api/finance/escrow/${row.id}/release`, undefined, 'Released to the vendor.');
       },
     })),
     noEscrow: data.escrow.length === 0,

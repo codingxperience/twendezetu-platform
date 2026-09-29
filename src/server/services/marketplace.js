@@ -236,7 +236,7 @@ export async function leadsForProvider(provider, { limit = 12 } = {}) {
 
 async function activeProviderFor(user) {
   const provider = await prisma.provider.findUnique({ where: { ownerId: user.id } });
-  if (!provider) throw forbidden('Set up your provider listing first.');
+  if (!provider) throw forbidden('Set up your vendor listing first.');
   if (provider.status !== 'ACTIVE') throw forbidden('Your listing needs an active membership before you can send offers.');
   return provider;
 }
@@ -463,7 +463,7 @@ async function markEscrowed(tx, booking, sourceLines, meta) {
   });
   await tx.booking.update({ where: { id: booking.id }, data: { status: 'ESCROWED', escrowedAt: new Date(), releaseAfter: releaseTime(booking) } });
   if (booking.threadId) {
-    await appendMessage(tx, { threadId: booking.threadId, kind: 'NOTICE', body: `${formatMoney(booking.amountMinor, booking.currency)} is held in escrow for booking ${booking.reference}. It is released to the provider after the job.` });
+    await appendMessage(tx, { threadId: booking.threadId, kind: 'NOTICE', body: `${formatMoney(booking.amountMinor, booking.currency)} is held in escrow for booking ${booking.reference}. It is released to the vendor after the job.` });
   }
   await notify(tx, {
     userId: booking.provider.ownerId,

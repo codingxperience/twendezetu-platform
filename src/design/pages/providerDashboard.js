@@ -49,7 +49,7 @@ function monthCells(month, bookings, today, selected, pick) {
       num: day,
       label: booking ? booking.title.split(/\s+/).slice(0, 2).join(' ').toUpperCase() : '',
       bg: booking ? (paid ? COLORS.clay : COLORS.sand) : key === selected ? COLORS.cream : COLORS.paper,
-      fg: COLORS.ink,
+      fg: booking && paid ? COLORS.cream : COLORS.ink,
       aria: `${day} ${MONTHS[monthIndex - 1]}${booking ? `: ${booking.title}` : ''}`,
       pick: () => pick(booking ? key : null),
     });
@@ -211,7 +211,7 @@ export function values(state, set, ctx) {
       statusLine: '○ NOT LISTED',
       statusColor: COLORS.muted,
       verificationLabel: 'after you list',
-      listingHref: '/providers',
+      listingHref: '/vendors',
       headlineTail: 'List your service',
       isDraft: false,
     };
@@ -220,7 +220,7 @@ export function values(state, set, ctx) {
   const { provider, membership, tiles } = data;
   const currency = provider.currency;
   const pricePlaceholder = `e.g. ${CURRENCIES[currency]?.exponent ? '450' : '450,000'} (${currency})`;
-  const listingHref = `/providers/${provider.slug}`;
+  const listingHref = `/vendors/${provider.slug}`;
 
   // ── Leads ─────────────────────────────────────────────────────────────
   const leads = data.leads.map((lead) => {
@@ -240,7 +240,7 @@ export function values(state, set, ctx) {
       askOpen: Boolean(state.open[askKey]),
       offerBtnLabel: state.open[offerKey] ? 'Close' : 'Send an offer',
       offerBtnBg: state.open[offerKey] ? COLORS.forest : COLORS.clay,
-      offerBtnFg: state.open[offerKey] ? COLORS.cream : COLORS.forest,
+      offerBtnFg: COLORS.cream,
       askBtnBg: state.open[askKey] ? COLORS.sand : COLORS.paper,
       toggleOffer: () => toggle(offerKey),
       toggleAsk: () => toggle(askKey),
@@ -304,7 +304,7 @@ export function values(state, set, ctx) {
     payPoints: () => payMembership('POINTS'),
 
     tiles: [
-      { label: 'NEW LEADS', big: tiles.newLeads, sub: 'matched needs without your offer', bg: COLORS.clay, fg: COLORS.forest },
+      { label: 'NEW LEADS', big: tiles.newLeads, sub: 'matched needs without your offer', bg: COLORS.clay, fg: COLORS.cream },
       { label: 'ACTIVE OFFERS', big: tiles.activeOffers, sub: tiles.awaitingReply ? `${tiles.awaitingReply} waiting for the poster` : 'none waiting', bg: COLORS.paper, fg: COLORS.ink },
       { label: 'JOBS DONE', big: tiles.jobs, sub: tiles.rating === 'NEW' ? 'no reviews yet' : `★ ${tiles.rating} average`, bg: COLORS.paper, fg: COLORS.ink },
       { label: 'PROFILE VIEWS · 30D', big: tiles.views.toLocaleString('en-US'), sub: tiles.viewsDelta == null ? 'first month on record' : `${tiles.viewsDelta >= 0 ? '+' : ''}${tiles.viewsDelta}% on the month before`, bg: COLORS.forest, fg: COLORS.cream },
@@ -333,6 +333,7 @@ export function values(state, set, ctx) {
     billingNote: `PAID UPFRONT FOR 12 MONTHS BY CARD OR POINTS. NOTHING RENEWS BY ITSELF: WE REMIND YOU 14 AND 3 DAYS BEFORE IT ENDS. RENEW MORE THAN ${membership.earlyWindowDays} DAYS EARLY AND SAVE ${membership.discountPercent}%.`,
     renewLabel,
     renewBg: membership.early ? COLORS.clayLight : COLORS.clay,
+    renewFg: membership.early ? COLORS.ink : COLORS.cream,
     renew: () => payMembership('CARD'),
     renewPoints: () => payMembership('POINTS'),
 

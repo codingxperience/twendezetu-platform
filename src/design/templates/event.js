@@ -1,43 +1,29 @@
 // Markup for the event page. Bindings are resolved by src/design/render.js.
 
+import { SITE_HEADER, SITE_TABBAR } from './shell';
+
 const template = `
-<div style="font-family: var(--tz-sans); background: #F7F1E6; color: #14201F; min-height: 100vh;">
+<div class="tz-page" style="font-family: var(--tz-sans); background: #F7F1E6; color: #14201F; min-height: 100vh;">
 
   <!-- Header -->
-  <header style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 18px 24px; border-bottom: 2px solid #1F3A38; background: #F7F1E6; position: sticky; top: 0; z-index: 40;">
-    <div style="display: flex; align-items: center; gap: 36px;">
-      <a href="/" class="tz-logo-link" aria-label="Twendezetu home"><img src="/brand/logo.png" alt="Twendezetu" width="1211" height="229" class="tz-logo tz-logo--md"></a>
-      <nav class="tw-nav" style="display: flex; gap: 24px; font-size: 14px; font-weight: 500;">
-        <a href="/" style="color: #6E6155; text-decoration: none;">Event guide</a>
-        <a href="/events/nyama-choma-festival-2026" style="color: #14201F; text-decoration: none; border-bottom: 2px solid #D97A3B; padding-bottom: 2px;">Featured</a>
-        <a href="/create-event" style="color: #6E6155; text-decoration: none;">Post an event or need</a>
-        <a href="/provider-dashboard" style="color: #6E6155; text-decoration: none;">For providers</a>
-      </nav>
-    </div>
-    <div style="display: flex; gap: 10px; align-items: center;">
-      <sc-if value="{{ me.signedOut }}">
-        <a href="{{ signInHref }}" style="font-size: 14px; font-weight: 600; color: #14201F; text-decoration: none; padding: 10px 16px;">Sign in</a>
-      </sc-if>
-      <a href="/my-twende" style="font-family: var(--tz-mono); font-size: 13px; background: #1F3A38; color: #F7F1E6; text-decoration: none; padding: 12px 20px; box-shadow: 4px 4px 0 #D97A3B;">MY TWENDE →</a>
-    </div>
-  </header>
+  ${SITE_HEADER}
 
   <!-- Breadcrumb -->
   <div style="max-width: 1200px; margin: 0 auto; padding: 20px 24px 0; font-family: var(--tz-mono); font-size: 12px; color: #6E6155;">
-    <a href="/" style="color: #A85A23;">← Back to guide</a> · Community · Free · All ages
+    <a href="/events" style="color: #820101;">← Back to events</a> · Community · Free · All ages
   </div>
 
   <!-- Title block -->
   <section style="max-width: 1200px; margin: 0 auto; padding: 20px 24px 32px;">
     <h1 style="font-family: var(--tz-display); font-size: clamp(48px, 8vw, 110px); text-transform: uppercase; line-height: 0.92; margin: 0;">
-      NYTC Nyama Choma<br>Festival <span style="color: #D97A3B;">Nanenane 2026</span>
+      NYTC Nyama Choma<br>Festival <span style="color: #820101;">Nanenane 2026</span>
     </h1>
     <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; font-family: var(--tz-mono); font-size: 13px;">
       <span style="background: #1F3A38; color: #F7F1E6; padding: 8px 14px;">SAT · 8 AUG 2026 · 2:00 PM EDT (SAA NANE)</span>
-      <span style="border: 2px solid #1F3A38; color: #A85A23; padding: 6px 14px;">= 9:00 PM EAT · NAIROBI/DAR · YOUR TIME AUTO-DETECTED</span>
+      <span style="border: 2px solid #1F3A38; color: #820101; padding: 6px 14px;">= 9:00 PM EAT · NAIROBI/DAR · YOUR TIME AUTO-DETECTED</span>
       <span style="border: 2px solid #1F3A38; padding: 6px 14px;">LINCOLN PARK · COMMUNIPAW AVE SIDE</span>
       <span style="border: 2px solid #1F3A38; padding: 6px 14px;">JERSEY CITY, NJ 07304</span>
-      <span style="background: #D97A3B; border: 2px solid #1F3A38; color: #1F3A38; padding: 6px 14px;">FREE ENTRY</span>
+      <span style="background: #820101; border: 2px solid #1F3A38; color: #F7F1E6; padding: 6px 14px;">FREE ENTRY</span>
     </div>
   </section>
 
@@ -52,7 +38,7 @@ const template = `
 
     <!-- Left column -->
     <div>
-      <div style="font-family: var(--tz-mono); font-size: 12px; color: #A85A23; letter-spacing: 0.08em;">[Kuhusu tukio — about]</div>
+      <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Kuhusu tukio — about]</div>
       <p style="font-size: 18px; line-height: 1.6; margin: 14px 0 0;">
         <em style="font-family: var(--tz-serif);">Ayawi ayawi, sasa yamekua!</em> The leadership of the Tanzanian Community of NY, NJ, CT &amp; PA (NYTC) welcomes all wanajumuiya to the Nyama Choma Festival. A gathering of ndugu, marafiki, familia, washikaji na majirani — coming together as one NYTC family.
       </p>
@@ -61,11 +47,11 @@ const template = `
       </p>
 
       <!-- What's happening grid -->
-      <div style="font-family: var(--tz-mono); font-size: 12px; color: #A85A23; letter-spacing: 0.08em; margin-top: 40px;">[Ratiba — program]</div>
+      <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em; margin-top: 40px;">[Ratiba — program]</div>
       <div style="border: 2px solid #1F3A38; margin-top: 14px;">
         <sc-for list="{{ schedule }}" as="row" hint-placeholder-count="5">
           <div style="display: grid; grid-template-columns: 130px 1fr auto; gap: 18px; padding: 16px 18px; border-bottom: 1px solid #E3D9C6; align-items: baseline; background: #FFFDF8;">
-            <span style="font-family: var(--tz-display); font-size: 17px; color: #A85A23;">{{ row.time }}</span>
+            <span style="font-family: var(--tz-display); font-size: 17px; color: #820101;">{{ row.time }}</span>
             <div>
               <div style="font-family: var(--tz-display); font-size: 17px; text-transform: uppercase;">{{ row.title }}</div>
               <div style="font-size: 13.5px; color: #6E6155; margin-top: 2px;">{{ row.desc }}</div>
@@ -76,27 +62,27 @@ const template = `
       </div>
 
       <!-- Sponsor: NALA -->
-      <div style="font-family: var(--tz-mono); font-size: 12px; color: #A85A23; letter-spacing: 0.08em; margin-top: 40px;">[Mdhamini — event sponsor]</div>
+      <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em; margin-top: 40px;">[Mdhamini — event sponsor]</div>
       <div style="border: 2px solid #1F3A38; background: #1F3A38; color: #F7F1E6; padding: 28px; margin-top: 14px; display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: center;">
         <div>
-          <div style="font-family: var(--tz-display); font-size: 32px; text-transform: uppercase;">NALA <span style="color: #D97A3B;">— tuma pesa nyumbani</span></div>
-          <p style="font-size: 14.5px; line-height: 1.55; color: rgba(247,241,230,0.8); margin: 10px 0 14px; max-width: 480px;">Download NALA, send money home with amazing rates and 24/7 support. New users: send $50+ with promo code <strong style="color:#E8A472;">NANE20</strong> and get <strong style="color:#E8A472;">$20</strong>.</p>
+          <div style="font-family: var(--tz-display); font-size: 32px; text-transform: uppercase;">NALA <span style="color: #E9B4AC;">— tuma pesa nyumbani</span></div>
+          <p style="font-size: 14.5px; line-height: 1.55; color: rgba(247,241,230,0.8); margin: 10px 0 14px; max-width: 480px;">Download NALA, send money home with amazing rates and 24/7 support. New users: send $50+ with promo code <strong style="color:#E9B4AC;">NANE20</strong> and get <strong style="color:#E9B4AC;">$20</strong>.</p>
           <div style="display: flex; gap: 10px; font-family: var(--tz-mono); font-size: 12px;">
             <span style="border: 1px solid rgba(247,241,230,0.35); padding: 6px 12px;">① AMAZING RATES</span>
             <span style="border: 1px solid rgba(247,241,230,0.35); padding: 6px 12px;">② 24/7 SUPPORT</span>
-            <span style="background: #D97A3B; color: #1F3A38; padding: 7px 12px; border: 1px solid #D97A3B;">PROMO: NANE20</span>
+            <span style="background: #820101; color: #F7F1E6; padding: 7px 12px; border: 1px solid #E9B4AC;">PROMO: NANE20</span>
           </div>
         </div>
-        <div style="font-family: var(--tz-display); font-size: 64px; color: #D97A3B; transform: rotate(-4deg);">$20</div>
+        <div style="font-family: var(--tz-display); font-size: 64px; color: #E9B4AC; transform: rotate(-4deg);">$20</div>
       </div>
 
       <!-- Donations -->
-      <div style="font-family: var(--tz-mono); font-size: 12px; color: #A85A23; letter-spacing: 0.08em; margin-top: 40px;">[Michango — support the festival]</div>
+      <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em; margin-top: 40px;">[Michango — support the festival]</div>
       <div class="tw-2col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px;">
         <div style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 22px;">
           <div style="font-family: var(--tz-display); font-size: 20px; text-transform: uppercase;">Zelle a donation</div>
           <p style="font-size: 13.5px; color: #3A2F25; line-height: 1.5; margin: 8px 0 12px;">Donations from wanajumuiya and wadau make the festival shine.</p>
-          <div style="font-family: var(--tz-mono); font-size: 12.5px; background: #EFE7D6; border: 1px dashed #A85A23; padding: 10px 12px;">$Zelle → info@nytanzaniancommunity.org</div>
+          <div style="font-family: var(--tz-mono); font-size: 12.5px; background: #EFE7D6; border: 1px dashed #820101; padding: 10px 12px;">$Zelle → info@nytanzaniancommunity.org</div>
         </div>
         <div style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 22px;">
           <div style="font-family: var(--tz-display); font-size: 20px; text-transform: uppercase;">Pool points from anywhere</div>
@@ -106,7 +92,7 @@ const template = `
       </div>
 
       <!-- Real photos drop-zone -->
-      <div style="font-family: var(--tz-mono); font-size: 12px; color: #A85A23; letter-spacing: 0.08em; margin-top: 40px;">[Picha — drop real NYTC photos here]</div>
+      <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em; margin-top: 40px;">[Picha — drop real NYTC photos here]</div>
       <div class="tw-3col" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 14px;">
         <figure style="margin: 0;">
           <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=700&q=80" alt="Nyama choma skewers on the grill" style="width: 100%; height: 180px; object-fit: cover; display: block; border: 2px solid #1F3A38;">
@@ -123,7 +109,7 @@ const template = `
       </div>
 
       <!-- Vendors call -->
-      <div style="border: 2px solid #1F3A38; background: #D97A3B; padding: 24px 26px; margin-top: 40px; display: flex; justify-content: space-between; align-items: center; gap: 20px;">
+      <div style="border: 2px solid #1F3A38; background: #820101; padding: 24px 26px; margin-top: 40px; display: flex; justify-content: space-between; align-items: center; gap: 20px; color: #F7F1E6;">
         <div>
           <div style="font-family: var(--tz-display); font-size: 24px; text-transform: uppercase; color: #1F3A38;">Vendors, sponsors &amp; donors — karibuni!</div>
           <div style="font-size: 14px; color: #1F3A38; margin-top: 6px;">Companies and organizations are welcome to help make the Nyama Choma shine. Apply through the platform — organizer contacts stay masked.</div>
@@ -136,7 +122,7 @@ const template = `
     <aside class="tw-sticky" style="position: sticky; top: 100px; display: grid; gap: 16px;">
       <div style="border: 2px solid #1F3A38; background: #FFFDF8; box-shadow: 6px 6px 0 #1F3A38;">
         <div style="padding: 20px 22px; border-bottom: 2px solid #1F3A38;">
-          <div style="font-family: var(--tz-mono); font-size: 11px; color: #A85A23; letter-spacing: 0.08em;">[RSVP — free entry]</div>
+          <div style="font-family: var(--tz-mono); font-size: 11px; color: #820101; letter-spacing: 0.08em;">[RSVP — free entry]</div>
           <div style="display: flex; align-items: baseline; gap: 10px; margin-top: 8px;">
             <span style="font-family: var(--tz-display); font-size: 40px;">FREE</span>
             <span style="font-size: 13px; color: #6E6155;">· {{ going }} attending</span>
@@ -146,12 +132,12 @@ const template = `
           </sc-if>
           <sc-if value="{{ canRsvp }}">
           <sc-if value="{{ notRsvped }}">
-          <button onClick="{{ toggleRsvp }}" style="width: 100%; margin-top: 14px; font-family: var(--tz-display); font-size: 17px; text-transform: uppercase; background: {{ rsvpBg }}; color: {{ rsvpFg }}; border: 2px solid #1F3A38; padding: 14px; cursor: pointer; box-shadow: 4px 4px 0 #D97A3B;">{{ rsvpLabel }}</button>
+          <button onClick="{{ toggleRsvp }}" style="width: 100%; margin-top: 14px; font-family: var(--tz-display); font-size: 17px; text-transform: uppercase; background: {{ rsvpBg }}; color: {{ rsvpFg }}; border: 2px solid #1F3A38; padding: 14px; cursor: pointer; box-shadow: 4px 4px 0 #820101;">{{ rsvpLabel }}</button>
 
           <!-- Guest RSVP form: no account needed -->
           <sc-if value="{{ rsvpForm }}" hint-placeholder-val="{{ false }}">
             <div style="margin-top: 12px; border: 2px solid #1F3A38; background: #EFE7D6; padding: 16px;">
-              <div style="font-family: var(--tz-mono); font-size: 11px; color: #A85A23; letter-spacing: 0.08em;">[RSVP as guest — no account needed]</div>
+              <div style="font-family: var(--tz-mono); font-size: 11px; color: #820101; letter-spacing: 0.08em;">[RSVP as guest — no account needed]</div>
               <div style="display: grid; gap: 8px; margin-top: 10px;">
                 <input placeholder="Your name" value="{{ gName }}" onChange="{{ setGName }}" style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 12px 14px; font-family: var(--tz-sans); font-size: 14px; outline: none;">
                 <input placeholder="Email (for your calendar invite + reminders)" value="{{ gEmail }}" onChange="{{ setGEmail }}" style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 12px 14px; font-family: var(--tz-sans); font-size: 14px; outline: none;">
@@ -164,7 +150,7 @@ const template = `
                 <sc-if value="{{ gError }}" hint-placeholder-val="{{ false }}">
                   <div style="font-size: 12px; color: #B8463A;">{{ gError }}</div>
                 </sc-if>
-                <div style="font-size: 11.5px; color: #6E6155; line-height: 1.5;">Your email is only used for the invite and reminders — never shown to anyone, never spam. <a href="{{ signInHref }}" style="color: #A85A23;">Have an account? Sign in</a></div>
+                <div style="font-size: 11.5px; color: #6E6155; line-height: 1.5;">Your email is only used for the invite and reminders — never shown to anyone, never spam. <a href="{{ signInHref }}" style="color: #820101;">Have an account? Sign in</a></div>
               </div>
             </div>
           </sc-if>
@@ -173,19 +159,19 @@ const template = `
 
           <!-- Guest RSVP confirmed -->
           <sc-if value="{{ rsvped }}" hint-placeholder-val="{{ false }}">
-            <div style="margin-top: 12px; border: 1px dashed #A85A23; background: #FBEED8; padding: 12px 14px; font-size: 13px; line-height: 1.55;">
+            <div style="margin-top: 12px; border: 1px dashed #820101; background: #FBEED8; padding: 12px 14px; font-size: 13px; line-height: 1.55;">
               ✓ <strong>Karibu, {{ gNameShown }}!</strong> You're on the list ({{ gPartyShown }}). {{ rsvpNote }}
               <div style="display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap;">
-                <a href="{{ afterRsvpHref }}" style="font-family: var(--tz-mono); font-size: 11px; background: #D97A3B; border: 1px solid #1F3A38; color: #14201F; padding: 6px 10px; text-decoration: none;">{{ afterRsvpLabel }}</a>
+                <a href="{{ afterRsvpHref }}" style="font-family: var(--tz-mono); font-size: 11px; background: #820101; border: 1px solid #1F3A38; color: #F7F1E6; padding: 6px 10px; text-decoration: none;">{{ afterRsvpLabel }}</a>
                 <sc-if value="{{ canCancelRsvp }}">
-                  <button onClick="{{ withdrawRsvp }}" style="font-family: var(--tz-mono); font-size: 11px; background: none; border: 1px solid #A85A23; color: #7A3E0F; padding: 6px 10px; cursor: pointer;">CAN'T MAKE IT ANYMORE</button>
+                  <button onClick="{{ withdrawRsvp }}" style="font-family: var(--tz-mono); font-size: 11px; background: none; border: 1px solid #820101; color: #5C0000; padding: 6px 10px; cursor: pointer;">CAN'T MAKE IT ANYMORE</button>
                 </sc-if>
               </div>
             </div>
           </sc-if>
         </div>
         <div style="padding: 18px 22px; display: grid; gap: 10px;">
-          <div style="font-family: var(--tz-mono); font-size: 11px; color: #A85A23; letter-spacing: 0.08em;">[Add to calendar]</div>
+          <div style="font-family: var(--tz-mono); font-size: 11px; color: #820101; letter-spacing: 0.08em;">[Add to calendar]</div>
           <div style="display: flex; gap: 8px;">
             <a href="{{ googleCalHref }}" target="_blank" rel="noopener" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px; font-family: var(--tz-mono); font-size: 12px; border: 2px solid #1F3A38; background: #F7F1E6; padding: 10px; cursor: pointer; color: #14201F; text-decoration: none;">
               <svg width="14" height="14" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.75 3.27-8.1z"></path><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23z"></path><path fill="#FBBC05" d="M5.84 14.1a6.6 6.6 0 0 1 0-4.2V7.07H2.18a11 11 0 0 0 0 9.86l3.66-2.84z"></path><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15A11 11 0 0 0 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"></path></svg>
@@ -200,10 +186,10 @@ const template = `
               .ICS
             </a>
           </div>
-          <div style="font-family: var(--tz-mono); font-size: 11px; color: #A85A23; letter-spacing: 0.08em; margin-top: 8px;">[Refer a friend — share the link]</div>
+          <div style="font-family: var(--tz-mono); font-size: 11px; color: #820101; letter-spacing: 0.08em; margin-top: 8px;">[Refer a friend — share the link]</div>
           <div style="display: flex; border: 2px solid #1F3A38;">
             <input value="{{ shareUrl }}" readOnly style="flex: 1; border: 0; background: #EFE7D6; font-family: var(--tz-mono); font-size: 12px; padding: 10px 12px; outline: none; color: #3A2F25;">
-            <button onClick="{{ copyLink }}" style="border: 0; border-left: 2px solid #1F3A38; background: #D97A3B; font-family: var(--tz-mono); font-size: 12px; padding: 0 14px; cursor: pointer;">{{ copyLabel }}</button>
+            <button onClick="{{ copyLink }}" style="border: 0; border-left: 2px solid #1F3A38; background: #820101; font-family: var(--tz-mono); font-size: 12px; padding: 0 14px; cursor: pointer; color: #F7F1E6;">{{ copyLabel }}</button>
           </div>
           <div style="display: flex; gap: 8px;">
             <a href="{{ waHref }}" onClick="{{ shareWa }}" target="_blank" rel="noopener" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px; font-family: var(--tz-mono); font-size: 12px; border: 2px solid #1F3A38; background: #F7F1E6; padding: 10px; cursor: pointer; color: #14201F; text-decoration: none;">
@@ -219,13 +205,13 @@ const template = `
               EMAIL
             </a>
           </div>
-          <div style="font-size: 12px; color: #6E6155; line-height: 1.5;">Anyone with the link can view and RSVP — no account needed. You’ll see your referral count in <a href="/my-twende" style="color: #A85A23;">My Twende</a>.</div>
+          <div style="font-size: 12px; color: #6E6155; line-height: 1.5;">Anyone with the link can view and RSVP — no account needed. You’ll see your referral count in <a href="/my-twende" style="color: #820101;">My Twende</a>.</div>
         </div>
       </div>
 
       <!-- Organizer (masked) -->
       <div style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 20px 22px;">
-        <div style="font-family: var(--tz-mono); font-size: 11px; color: #A85A23; letter-spacing: 0.08em;">[Mratibu — organizer]</div>
+        <div style="font-family: var(--tz-mono); font-size: 11px; color: #820101; letter-spacing: 0.08em;">[Mratibu — organizer]</div>
         <div style="display: flex; gap: 14px; align-items: center; margin-top: 12px;">
           <div style="width: 48px; height: 48px; background: #1F3A38; color: #F7F1E6; font-family: var(--tz-display); font-size: 20px; display: flex; align-items: center; justify-content: center;">{{ organizerInitials }}</div>
           <div>
@@ -239,7 +225,7 @@ const template = `
 
       <!-- Location -->
       <div style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 20px 22px;">
-        <div style="font-family: var(--tz-mono); font-size: 11px; color: #A85A23; letter-spacing: 0.08em;">[Mahali — location]</div>
+        <div style="font-family: var(--tz-mono); font-size: 11px; color: #820101; letter-spacing: 0.08em;">[Mahali — location]</div>
         <div style="font-family: var(--tz-display); font-size: 18px; text-transform: uppercase; margin-top: 10px;">Lincoln Park</div>
         <div style="font-size: 13.5px; color: #3A2F25; line-height: 1.5;">1 Country Road 605, Jersey City, NJ 07304<br>NYTC side: <strong>Communipaw Ave</strong></div>
         <a href="https://www.google.com/maps/search/?api=1&query=Lincoln+Park+1+Country+Road+605+Jersey+City+NJ+07304" target="_blank" style="margin-top: 12px; height: 120px; text-decoration: none; background: repeating-linear-gradient(45deg, #1F3A38, #1F3A38 12px, #26454238 12px, #264542 24px); background-color: #1F3A38; border: 2px solid #1F3A38; display: flex; align-items: center; justify-content: center;">
@@ -252,13 +238,13 @@ const template = `
   <!-- Similar events -->
   <section style="border-top: 2px solid #1F3A38; background: #EFE7D6; padding: 48px 24px;">
     <div style="max-width: 1200px; margin: 0 auto;">
-      <h2 style="font-family: var(--tz-display); font-size: 36px; text-transform: uppercase; margin: 0 0 24px;">More from the community<span style="color: #D97A3B;">.</span></h2>
+      <h2 style="font-family: var(--tz-display); font-size: 36px; text-transform: uppercase; margin: 0 0 24px;">More from the community<span style="color: #820101;">.</span></h2>
       <div class="tw-3col" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
         <sc-for list="{{ similar }}" as="ev" hint-placeholder-count="3">
           <a href="{{ ev.href }}" style="text-decoration: none; color: #14201F; background: #FFFDF8; border: 2px solid #1F3A38; display: block;">
             <img src="{{ ev.img }}" alt="{{ ev.title }}" style="width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; border-bottom: 2px solid #1F3A38;">
             <div style="padding: 14px 16px;">
-              <div style="font-family: var(--tz-mono); font-size: 11px; color: #A85A23;">{{ ev.date }}</div>
+              <div style="font-family: var(--tz-mono); font-size: 11px; color: #820101;">{{ ev.date }}</div>
               <div style="font-family: var(--tz-display); font-size: 18px; text-transform: uppercase; margin-top: 4px;">{{ ev.title }}</div>
               <div style="font-size: 13px; color: #6E6155; margin-top: 2px;">{{ ev.city }}</div>
             </div>
@@ -272,10 +258,11 @@ const template = `
   <footer style="background: #1F3A38; color: #F7F1E6; padding: 40px 24px 0; overflow: hidden; border-top: 2px solid #1F3A38;">
     <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; padding-bottom: 32px; font-size: 14px;">
       <span style="color: rgba(247,241,230,0.75);">IMETOLEWA NA UONGOZI-NYTC · JULY 3, 2026</span>
-      <a href="/" style="color: #F7F1E6;">← Back to the guide</a>
+      <a href="/events" style="color: #F7F1E6;">← Back to events</a>
     </div>
     <div style="font-family: var(--tz-display); font-size: clamp(64px, 12vw, 200px); text-transform: uppercase; line-height: 0.78; text-align: center; transform: translateY(12%);">HII SI YA KUKOSA</div>
   </footer>
+  ${SITE_TABBAR}
 </div>
 `;
 

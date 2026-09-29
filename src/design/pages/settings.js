@@ -152,7 +152,7 @@ export function values(state, set, ctx) {
   return {
     me: data.me,
     backHref: data.isProvider ? '/provider-dashboard' : '/my-twende',
-    backLabel: data.isProvider ? 'PROVIDER PORTAL' : 'MY TWENDE',
+    backLabel: data.isProvider ? 'VENDOR PORTAL' : 'MY TWENDE',
     signOut: () => ctx.run('signout', async () => {
       await ctx.api.post('/api/auth/sign-out');
       window.location.assign('/');
@@ -222,7 +222,7 @@ export function values(state, set, ctx) {
       ...method,
       icon: KIND_ICON[method.kind] || '·',
       iconBg: method.isDefault ? COLORS.clay : COLORS.sand,
-      iconFg: COLORS.ink,
+      iconFg: method.isDefault ? COLORS.cream : COLORS.ink,
       meta: `${method.payouts ? 'RECEIVES PAYOUTS' : 'SAVED'} · ADDED ${method.added}`,
       notDefault: !method.isDefault,
       makeDefault: () => ctx.run(`default:${method.id}`, () => ctx.api.patch(`/api/account/payment-methods/${method.id}`), { success: `${method.label} is now your default.` }),

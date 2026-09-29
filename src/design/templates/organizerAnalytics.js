@@ -13,25 +13,25 @@ const template = `
         <select value="{{ eventSlug }}" onChange="{{ pickEvent }}" aria-label="Event" style="max-width: 280px; border: 2px solid #1F3A38; background: #FFFDF8; padding: 8px 12px; font-family: var(--tz-mono); font-size: 12px; outline: none;"><sc-for list="{{ events }}" as="ev"><option value="{{ ev.slug }}">{{ ev.label }}</option></sc-for></select>
       </sc-if>
       <a href="/organizer-payouts" style="font-family: var(--tz-mono); font-size: 12px; border: 2px solid #1F3A38; color: #14201F; text-decoration: none; padding: 9px 14px;">◍ PAYOUTS</a>
-      <sc-if value="{{ hasDoor }}" hint-placeholder-val="{{ true }}"><a href="{{ checkinHref }}" style="font-family: var(--tz-mono); font-size: 12px; border: 2px solid #1F3A38; background: #D97A3B; color: #14201F; text-decoration: none; padding: 9px 14px;">▣ DOOR CHECK-IN</a></sc-if>
+      <sc-if value="{{ hasDoor }}" hint-placeholder-val="{{ true }}"><a href="{{ checkinHref }}" style="font-family: var(--tz-mono); font-size: 12px; border: 2px solid #1F3A38; background: #820101; color: #F7F1E6; text-decoration: none; padding: 9px 14px;">▣ DOOR CHECK-IN</a></sc-if>
     </div>
   </header>
 
   <!-- No events yet -->
   <sc-if value="{{ noEvents }}" hint-placeholder-val="{{ false }}">
     <section style="max-width: 640px; margin: 0 auto; padding: 80px 24px; text-align: center;">
-      <div style="font-family: var(--tz-mono); font-size: 12px; color: #A85A23; letter-spacing: 0.08em;">[Takwimu]</div>
-      <h1 style="font-family: var(--tz-display); font-size: clamp(30px, 5vw, 48px); text-transform: uppercase; line-height: 0.95; margin: 10px 0 12px;">Nothing to measure yet<span style="color: #D97A3B;">.</span></h1>
+      <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Takwimu]</div>
+      <h1 style="font-family: var(--tz-display); font-size: clamp(30px, 5vw, 48px); text-transform: uppercase; line-height: 0.95; margin: 10px 0 12px;">Nothing to measure yet<span style="color: #820101;">.</span></h1>
       <p style="font-size: 14.5px; color: #6E6155; line-height: 1.6; margin: 0 0 24px;">Post an event and this page fills in as people view it, share it, RSVP and buy tickets.</p>
-      <a href="/create-event" style="display: inline-block; font-family: var(--tz-display); font-size: 16px; text-transform: uppercase; background: #D97A3B; color: #14201F; border: 2px solid #1F3A38; padding: 14px 26px; text-decoration: none; box-shadow: 4px 4px 0 #1F3A38;">Post an event →</a>
+      <a href="/create-event" style="display: inline-block; font-family: var(--tz-display); font-size: 16px; text-transform: uppercase; background: #820101; color: #F7F1E6; border: 2px solid #1F3A38; padding: 14px 26px; text-decoration: none; box-shadow: 4px 4px 0 #1F3A38;">Post an event →</a>
     </section>
   </sc-if>
 
   <sc-if value="{{ hasEvent }}" hint-placeholder-val="{{ true }}">
   <section style="max-width: 1200px; margin: 0 auto; padding: 32px 24px 80px;">
-    <div style="font-family: var(--tz-mono); font-size: 12px; color: #A85A23; letter-spacing: 0.08em;">[Takwimu — {{ eventMeta }} · refreshes every 30 seconds]</div>
+    <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Takwimu — {{ eventMeta }} · refreshes every 30 seconds]</div>
     <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin: 8px 0 24px;">
-      <h1 style="font-family: var(--tz-display); font-size: clamp(30px, 4.5vw, 52px); text-transform: uppercase; line-height: 0.95; margin: 0;">{{ title }}<span style="color: #D97A3B;">.</span></h1>
+      <h1 style="font-family: var(--tz-display); font-size: clamp(30px, 4.5vw, 52px); text-transform: uppercase; line-height: 0.95; margin: 0;">{{ title }}<span style="color: #820101;">.</span></h1>
       <div style="display: flex; gap: 14px; font-family: var(--tz-mono); font-size: 12px;">
         <a href="{{ eventHref }}" style="color: #14201F;">View page ↗</a>
         <a href="{{ editHref }}" style="color: #14201F;">Edit event</a>
@@ -59,13 +59,13 @@ const template = `
             <div>
               <div style="display: flex; justify-content: space-between; gap: 10px; font-family: var(--tz-mono); font-size: 12px; margin-bottom: 5px;">
                 <span>{{ f.label }}</span>
-                <span style="color: #A85A23;">{{ f.value }} · {{ f.pct }}</span>
+                <span style="color: #820101;">{{ f.value }} · {{ f.pct }}</span>
               </div>
               <div style="height: 26px; border: 2px solid #1F3A38; background: #EFE7D6;"><div style="height: 100%; width: {{ f.pct }}; background: {{ f.color }};"></div></div>
             </div>
           </sc-for>
         </div>
-        <div style="font-size: 12.5px; color: #3A2F25; margin-top: 16px; line-height: 1.55; border-left: 3px solid #D97A3B; padding-left: 12px;">{{ funnelNote }}</div>
+        <div style="font-size: 12.5px; color: #3A2F25; margin-top: 16px; line-height: 1.55; border-left: 3px solid #820101; padding-left: 12px;">{{ funnelNote }}</div>
       </div>
 
       <!-- Sources and referrers -->
@@ -79,13 +79,13 @@ const template = `
           <sc-for list="{{ sources }}" as="s" hint-placeholder-count="4">
             <div style="display: grid; grid-template-columns: 96px 1fr 44px; gap: 10px; align-items: center;" title="{{ s.views }} views">
               <span style="font-family: var(--tz-mono); font-size: 11.5px;">{{ s.label }}</span>
-              <div style="height: 12px; border: 1px solid #1F3A38; background: #EFE7D6;"><div style="height: 100%; width: {{ s.pct }}; background: #D97A3B;"></div></div>
+              <div style="height: 12px; border: 1px solid #1F3A38; background: #EFE7D6;"><div style="height: 100%; width: {{ s.pct }}; background: #820101; color: #F7F1E6;"></div></div>
               <span style="font-family: var(--tz-mono); font-size: 11px; color: #6E6155; text-align: right;">{{ s.pct }}</span>
             </div>
           </sc-for>
         </div>
         <div style="border-top: 1px dashed #C9BFB1; margin-top: 16px; padding-top: 14px;">
-          <div style="font-family: var(--tz-mono); font-size: 11px; color: #A85A23;">MEMBERS WHO BROUGHT GUESTS</div>
+          <div style="font-family: var(--tz-mono); font-size: 11px; color: #820101;">MEMBERS WHO BROUGHT GUESTS</div>
           <sc-if value="{{ hasReferrers }}" hint-placeholder-val="{{ true }}">
             <div style="display: grid; gap: 6px; margin-top: 8px; font-size: 13px;">
               <sc-for list="{{ referrers }}" as="r" hint-placeholder-count="3">
@@ -104,7 +104,7 @@ const template = `
     <sc-if value="{{ isPaid }}" hint-placeholder-val="{{ true }}">
     <div class="tw-3col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 24px; align-items: start;">
       <div style="border: 2px solid #1F3A38; background: #1F3A38; color: #F7F1E6; padding: 22px 24px;">
-        <div style="font-family: var(--tz-mono); font-size: 11px; color: #E8A472; letter-spacing: 0.08em;">[Mapato — ticket sales, last 8 days]</div>
+        <div style="font-family: var(--tz-mono); font-size: 11px; color: #E9B4AC; letter-spacing: 0.08em;">[Mapato — ticket sales, last 8 days]</div>
         <div style="font-family: var(--tz-display); font-size: 44px; line-height: 1; margin: 10px 0 2px;">{{ weekSales }}</div>
         <div style="font-size: 12.5px; color: rgba(247,241,230,0.75); line-height: 1.5;">{{ salesTerms }}</div>
         <div style="display: flex; align-items: flex-end; gap: 6px; height: 70px; margin-top: 18px;">
@@ -125,14 +125,14 @@ const template = `
             <div>
               <div style="display: flex; justify-content: space-between; gap: 10px; font-size: 13.5px; margin-bottom: 5px;">
                 <span style="font-weight: 600;">{{ t.name }}</span>
-                <span style="font-family: var(--tz-mono); font-size: 12px; color: #A85A23;">{{ t.sold }}/{{ t.cap }} · {{ t.rev }}</span>
+                <span style="font-family: var(--tz-mono); font-size: 12px; color: #820101;">{{ t.sold }}/{{ t.cap }} · {{ t.rev }}</span>
               </div>
               <div style="height: 14px; border: 1px solid #1F3A38; background: #EFE7D6;"><div style="height: 100%; width: {{ t.pct }}; background: {{ t.color }};"></div></div>
             </div>
           </sc-for>
         </div>
         <sc-if value="{{ tierNote }}" hint-placeholder-val="{{ true }}">
-          <div style="border: 1px dashed #A85A23; background: #FBEED8; padding: 12px 14px; margin-top: 16px; font-size: 12.5px; color: #7A3E0F; line-height: 1.5;">⚡ {{ tierNote }}</div>
+          <div style="border: 1px dashed #820101; background: #FBEED8; padding: 12px 14px; margin-top: 16px; font-size: 12.5px; color: #5C0000; line-height: 1.5;">⚡ {{ tierNote }}</div>
         </sc-if>
       </div>
     </div>

@@ -3,9 +3,9 @@
 // was booked and completed here.
 
 import { stars } from '@/shared/format';
-import { COLORS, EMAIL_PATTERN, copyText, sentence, shareLinks } from './shared';
+import { COLORS, EMAIL_PATTERN, copyText, sentence, shareLinks, shellValues } from './shared';
 
-const CARD_WIDTH = 318; // card + gap in the "more providers" row
+const CARD_WIDTH = 318; // card + gap in the "more vendors" row
 
 export const initialState = {
   galleryIndex: 0,
@@ -87,6 +87,7 @@ export function values(state, set, ctx) {
   const following = Boolean(state.following);
 
   return {
+    shell: shellValues(state.data.me, ctx, { active: 'vendors' }),
     me: data.me,
     accountHref: data.me.accountHref,
     accountLabel: signedIn ? 'MY TWENDE →' : 'SIGN IN →',
@@ -94,7 +95,7 @@ export function values(state, set, ctx) {
     orientation: data.isOwner
       ? '▣ YOUR LISTING — this is exactly what customers see.'
       : '▣ PUBLIC LISTING — anyone can view it or request a quote without an account.',
-    orientationLink: data.isOwner ? 'Edit it in your dashboard →' : 'Provider? Manage yours in the dashboard →',
+    orientationLink: data.isOwner ? 'Edit it in your dashboard →' : 'Vendor? Manage yours in the dashboard →',
 
     name: data.name,
     nameUpper: data.name.toUpperCase(),
@@ -102,7 +103,7 @@ export function values(state, set, ctx) {
     headline: data.headline,
     description: data.description,
     category: data.category,
-    categoryHref: `/providers?category=${data.categoryCode}`,
+    categoryHref: `/vendors?category=${data.categoryCode}`,
     place: data.place,
     city: data.place,
     areasLabel: data.areasLabel,
@@ -123,7 +124,7 @@ export function values(state, set, ctx) {
     followFg: following ? COLORS.cream : COLORS.ink,
     toggleFollow: () => {
       if (!signedIn) {
-        window.location.assign(`/sign-in?next=${encodeURIComponent(`/providers/${data.slug}`)}`);
+        window.location.assign(`/sign-in?next=${encodeURIComponent(`/vendors/${data.slug}`)}`);
         return;
       }
       ctx.run('follow', async () => {
@@ -147,7 +148,7 @@ export function values(state, set, ctx) {
 
     services: data.services,
     hasServices: data.services.length > 0,
-    feeNote: `Guide rates. Final quotes come as offers or in your conversation. You pay the quoted price; the ${data.commissionPercent} platform fee comes out of the provider's side, and only when a booking is paid through Twendezetu.`,
+    feeNote: `Guide rates. Final quotes come as offers or in your conversation. You pay the quoted price; the ${data.commissionPercent} platform fee comes out of the vendor's side, and only when a booking is paid through Twendezetu.`,
 
     avgRating: data.ratingCount ? data.card.rating : '—',
     avgStars: stars(ratingValue),
@@ -163,7 +164,7 @@ export function values(state, set, ctx) {
     toggleWrite: () => set((current) => ({ ...current, writeOpen: !current.writeOpen, reviewError: null })),
     reviewBecause: reviewing ? `your booking "${reviewing.label}" is complete` : '',
     starPicker: [1, 2, 3, 4, 5].map((value) => ({
-      color: value <= state.rating ? COLORS.clay : 'rgba(247,241,230,0.3)',
+      color: value <= state.rating ? COLORS.clayLight : 'rgba(247,241,230,0.3)',
       label: `${value} star${value === 1 ? '' : 's'}`,
       pick: () => set((current) => ({ ...current, rating: value })),
     })),
@@ -182,7 +183,7 @@ export function values(state, set, ctx) {
     toggleReq: () => set((current) => ({ ...current, reqOpen: !current.reqOpen })),
     reqBtnLabel: state.reqOpen && !state.reqDone ? 'Close' : 'Request a quote',
     reqBg: state.reqOpen ? COLORS.forest : COLORS.clay,
-    reqFg: state.reqOpen ? COLORS.cream : COLORS.forest,
+    reqFg: COLORS.cream,
     reqDone: state.reqDone,
     reqNotDone: !state.reqDone,
     reqDoneNote: signedIn

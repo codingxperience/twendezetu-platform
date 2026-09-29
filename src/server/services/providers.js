@@ -28,7 +28,7 @@ export function providerCard(provider) {
   return {
     id: provider.id,
     slug: provider.slug,
-    href: `/providers/${provider.slug}`,
+    href: `/vendors/${provider.slug}`,
     name: provider.name,
     cat: PROVIDER_CATEGORIES[provider.category].upper,
     category: provider.category,
@@ -148,7 +148,7 @@ export async function recordProfileView(providerId, ip) {
 
 async function listedProvider(slug) {
   const provider = await prisma.provider.findUnique({ where: { slug } });
-  if (!provider || provider.status !== 'ACTIVE') throw notFound('That provider is not taking requests.');
+  if (!provider || provider.status !== 'ACTIVE') throw notFound('That vendor is not taking requests.');
   return provider;
 }
 
@@ -289,7 +289,7 @@ export async function toggleFollow(viewer, { providerSlug, organizerSlug }) {
 export async function saveListing(user, input) {
   const settings = await getSettings();
   const existing = await prisma.provider.findUnique({ where: { ownerId: user.id } });
-  if (!existing && !settings.providerSignups) throw forbidden('New provider sign-ups are paused for a short while. Please try again later.');
+  if (!existing && !settings.providerSignups) throw forbidden('New vendor sign-ups are paused for a short while. Please try again later.');
   const country = COUNTRIES[input.country || existing?.country];
   if (!country) throw invalid('Choose a supported country.');
 
@@ -350,7 +350,7 @@ export function membershipQuote(provider, now = new Date()) {
 
 export async function renewMembership(user, { channel, code }) {
   const provider = await prisma.provider.findUnique({ where: { ownerId: user.id } });
-  if (!provider) throw forbidden('Set up your provider listing first.');
+  if (!provider) throw forbidden('Set up your vendor listing first.');
   if (provider.status === 'SUSPENDED') throw forbidden('This listing is suspended.');
   const quote = membershipQuote(provider);
 
@@ -385,7 +385,7 @@ export async function renewMembership(user, { channel, code }) {
       email: user.email,
       amountMinor: quote.amount,
       currency: quote.currency,
-      description: `Twendezetu provider membership — 12 months${quote.early ? ' (early renewal)' : ''}`,
+      description: `Twendezetu vendor membership — 12 months${quote.early ? ' (early renewal)' : ''}`,
       returnPath: '/provider-dashboard',
     }),
   );
@@ -510,7 +510,7 @@ export async function submitReview(user, slug, { rating, body, bookingId }) {
   });
   if (!booking) throw forbidden('Reviews come from completed bookings. Once a job you booked here is done, you can review it.');
   if (await prisma.review.findUnique({ where: { providerId_authorId: { providerId: provider.id, authorId: user.id } } })) {
-    throw conflict('You have already reviewed this provider.', 'already_reviewed');
+    throw conflict('You have already reviewed this vendor.', 'already_reviewed');
   }
 
   return transaction(async (tx) => {
@@ -524,7 +524,7 @@ export async function submitReview(user, slug, { rating, body, bookingId }) {
       topic: 'SOCIAL',
       title: `You received a ${rating}-star review`,
       body: `${shortName(user.name)}: “${review.body.slice(0, 140)}”`,
-      href: `/providers/${provider.slug}`,
+      href: `/vendors/${provider.slug}`,
     });
     return reviewView(review);
   });

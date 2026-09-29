@@ -65,6 +65,17 @@ export function dayKey(date, zone = 'UTC') {
   return new Intl.DateTimeFormat('en-CA', { timeZone: zone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(date);
 }
 
+// "TODAY" or "TOMORROW" in the event's own time zone, for badges on cards;
+// null for anything further off.
+export function whenBadge(startsAt, timeZone = 'UTC', now = new Date()) {
+  const start = new Date(startsAt);
+  if (start <= now) return 'ON NOW';
+  const days = Math.round((Date.parse(dayKey(start, timeZone)) - Date.parse(dayKey(now, timeZone))) / 86_400_000);
+  if (days === 0) return 'TODAY';
+  if (days === 1) return 'TOMORROW';
+  return null;
+}
+
 // "SAT · 8 AUG"
 export function dayLabel(date, timeZone = 'UTC') {
   const p = parts(date, timeZone, { weekday: 'short', day: 'numeric', month: 'short' });

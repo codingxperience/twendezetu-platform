@@ -45,7 +45,7 @@ export async function eventView(viewer, { slug, rsvp: token } = {}) {
 
   let closedNote = null;
   if (cancelled) closedNote = 'This event was cancelled by the organizer. Anyone who paid has been refunded in full.';
-  else if (past) closedNote = `This event took place on ${dayLabel(event.startsAt, event.timezone)}. Browse the guide for what's on next.`;
+  else if (past) closedNote = `This event took place on ${dayLabel(event.startsAt, event.timezone)}. Browse events for what's on next.`;
   else if (event.status === 'PAUSED') closedNote = 'The organizer has paused RSVPs and ticket sales for now.';
 
   return {

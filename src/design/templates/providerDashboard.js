@@ -2,7 +2,7 @@
 
 // Styles shared by the listing editor's fields.
 const F = 'border: 2px solid #1F3A38; background: #FFFDF8; padding: 12px 14px; font-family: var(--tz-sans); font-size: 14px; outline: none; width: 100%; box-sizing: border-box;';
-const L = 'font-family: var(--tz-mono); font-size: 11.5px; color: #A85A23;';
+const L = 'font-family: var(--tz-mono); font-size: 11.5px; color: #820101;';
 const H = 'font-size: 12px; color: #6E6155; line-height: 1.5;';
 
 const template = `
@@ -12,19 +12,19 @@ const template = `
   <header style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 18px 24px; border-bottom: 2px solid #1F3A38; background: #F7F1E6; position: sticky; top: 0; z-index: 40;">
     <div style="display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
       <a href="/" class="tz-logo-link" aria-label="Twendezetu home"><img src="/brand/logo.png" alt="Twendezetu" width="1211" height="229" class="tz-logo tz-logo--md"></a>
-      <span style="font-family: var(--tz-mono); font-size: 12px; background: #1F3A38; color: #F7F1E6; padding: 5px 10px;">PROVIDER PORTAL</span>
+      <span style="font-family: var(--tz-mono); font-size: 12px; background: #1F3A38; color: #F7F1E6; padding: 5px 10px;">VENDOR PORTAL</span>
     </div>
     <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; position: relative;">
-      <button onClick="{{ toggleBell }}" aria-label="Notifications" aria-expanded="{{ bellOpen }}" style="position: relative; background: none; border: 2px solid #1F3A38; padding: 9px 12px; cursor: pointer; font-family: var(--tz-mono); font-size: 13px;">▲<sc-if value="{{ hasUnread }}"><span style="position: absolute; top: -7px; right: -7px; background: #D97A3B; border: 2px solid #1F3A38; font-family: var(--tz-mono); font-size: 10px; padding: 1px 5px;">{{ unread }}</span></sc-if></button>
+      <button onClick="{{ toggleBell }}" aria-label="Notifications" aria-expanded="{{ bellOpen }}" style="position: relative; background: none; border: 2px solid #1F3A38; padding: 9px 12px; cursor: pointer; font-family: var(--tz-mono); font-size: 13px;">▲<sc-if value="{{ hasUnread }}"><span style="position: absolute; top: -7px; right: -7px; background: #820101; border: 2px solid #1F3A38; font-family: var(--tz-mono); font-size: 10px; padding: 1px 5px; color: #F7F1E6;">{{ unread }}</span></sc-if></button>
       <button onClick="{{ toggleProfile }}" aria-label="Your account" aria-expanded="{{ profileOpen }}" style="display: flex; align-items: center; gap: 10px; background: none; border: 0; cursor: pointer; padding: 0;">
-        <span style="width: 40px; height: 40px; background: #D97A3B; border: 2px solid #1F3A38; font-family: var(--tz-display); font-size: 17px; display: flex; align-items: center; justify-content: center; white-space: nowrap;">{{ me.initials }}</span>
+        <span style="width: 40px; height: 40px; background: #820101; border: 2px solid #1F3A38; font-family: var(--tz-display); font-size: 17px; display: flex; align-items: center; justify-content: center; white-space: nowrap; color: #F7F1E6;">{{ me.initials }}</span>
       </button>
 
       <!-- Profile dropdown -->
       <sc-if value="{{ profileOpen }}" hint-placeholder-val="{{ false }}">
         <div style="position: absolute; top: 52px; right: 0; width: 300px; background: #FFFDF8; border: 2px solid #1F3A38; box-shadow: 6px 6px 0 #1F3A38; z-index: 60;">
           <div style="padding: 16px 18px; border-bottom: 2px solid #1F3A38; display: flex; gap: 12px; align-items: center;">
-            <div style="width: 44px; height: 44px; background: #D97A3B; border: 2px solid #1F3A38; font-family: var(--tz-display); font-size: 18px; display: flex; align-items: center; justify-content: center; white-space: nowrap;">{{ me.initials }}</div>
+            <div style="width: 44px; height: 44px; background: #820101; border: 2px solid #1F3A38; font-family: var(--tz-display); font-size: 18px; display: flex; align-items: center; justify-content: center; white-space: nowrap; color: #F7F1E6;">{{ me.initials }}</div>
             <div>
               <div style="font-weight: 700; font-size: 14.5px;">{{ me.name }}</div>
               <div style="font-family: var(--tz-mono); font-size: 11px; color: #6E6155;">{{ businessLine }}</div>
@@ -46,15 +46,15 @@ const template = `
         <div style="position: absolute; top: 52px; right: 0; width: 360px; background: #FFFDF8; border: 2px solid #1F3A38; box-shadow: 6px 6px 0 #1F3A38; z-index: 60;">
           <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-bottom: 2px solid #1F3A38;">
             <span style="font-family: var(--tz-display); font-size: 17px; text-transform: uppercase;">Notifications</span>
-            <button onClick="{{ toggleBell }}" style="background: none; border: 0; font-family: var(--tz-mono); font-size: 12px; color: #A85A23; cursor: pointer; text-decoration: underline;">CLOSE</button>
+            <button onClick="{{ toggleBell }}" style="background: none; border: 0; font-family: var(--tz-mono); font-size: 12px; color: #820101; cursor: pointer; text-decoration: underline;">CLOSE</button>
           </div>
           <sc-if value="{{ noNotifications }}"><div style="padding: 16px 18px; font-size: 13px; color: #6E6155;">Nothing yet. Leads, offers and money notices land here.</div></sc-if>
           <sc-for list="{{ notifications }}" as="n" hint-placeholder-count="3">
             <a href="{{ n.href }}" style="padding: 14px 18px; border-bottom: 1px solid #E3D9C6; display: grid; grid-template-columns: auto 1fr; gap: 12px; text-decoration: none; color: #14201F;">
-              <span style="width: 28px; height: 28px; border: 2px solid #1F3A38; background: #F6DCC0; font-family: var(--tz-mono); font-size: 12px; display: flex; align-items: center; justify-content: center;">{{ n.icon }}</span>
+              <span style="width: 28px; height: 28px; border: 2px solid #1F3A38; background: #F6E6E2; font-family: var(--tz-mono); font-size: 12px; display: flex; align-items: center; justify-content: center;">{{ n.icon }}</span>
               <div>
                 <div style="font-size: 13.5px; line-height: 1.45;">{{ n.body }}</div>
-                <div style="font-family: var(--tz-mono); font-size: 11px; color: #A85A23; margin-top: 3px;">{{ n.time }}</div>
+                <div style="font-family: var(--tz-mono); font-size: 11px; color: #820101; margin-top: 3px;">{{ n.time }}</div>
               </div>
             </a>
           </sc-for>
@@ -96,14 +96,14 @@ const template = `
   </nav>
 
   <div style="max-width: 1320px; margin: 0 auto; padding: 40px 24px 80px;">
-    <div style="font-family: var(--tz-mono); font-size: 12px; color: #A85A23; letter-spacing: 0.08em;">[Dashibodi ya mtoa huduma]</div>
-    <h1 style="font-family: var(--tz-display); font-size: clamp(40px, 5.5vw, 72px); text-transform: uppercase; line-height: 0.95; margin: 10px 0 32px;">Karibu, {{ me.firstName }}<span style="color: #D97A3B;">.</span> {{ headlineTail }}<span style="color: #D97A3B;">.</span></h1>
+    <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Dashibodi ya mtoa huduma]</div>
+    <h1 style="font-family: var(--tz-display); font-size: clamp(40px, 5.5vw, 72px); text-transform: uppercase; line-height: 0.95; margin: 10px 0 32px;">Karibu, {{ me.firstName }}<span style="color: #820101;">.</span> {{ headlineTail }}<span style="color: #820101;">.</span></h1>
 
     <!-- Draft listing: waiting for its membership -->
     <sc-if value="{{ isDraft }}">
       <div style="border: 2px solid #1F3A38; background: #FBEED8; padding: 20px 22px; margin-bottom: 28px; display: flex; justify-content: space-between; align-items: center; gap: 18px; flex-wrap: wrap;">
         <div style="max-width: 620px;">
-          <div style="font-family: var(--tz-display); font-size: 20px; text-transform: uppercase; color: #7A3E0F;">Your listing is saved but not live yet</div>
+          <div style="font-family: var(--tz-display); font-size: 20px; text-transform: uppercase; color: #5C0000;">Your listing is saved but not live yet</div>
           <div style="font-size: 13.5px; color: #3A2F25; line-height: 1.55; margin-top: 6px;">It goes live, gets matched to needs and appears in the directory once the 12-month membership ({{ membership.price }}) is paid. You can keep editing it in the meantime.</div>
         </div>
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
@@ -115,10 +115,10 @@ const template = `
 
     <!-- Listing editor (also how a new provider starts) -->
     <sc-if value="{{ editorOpen }}">
-      <section id="listing-editor" aria-label="Your listing" style="border: 2px solid #1F3A38; background: #FFFDF8; box-shadow: 6px 6px 0 #D97A3B; padding: 26px 28px; margin-bottom: 40px;">
+      <section id="listing-editor" aria-label="Your listing" style="border: 2px solid #1F3A38; background: #FFFDF8; box-shadow: 6px 6px 0 #820101; padding: 26px 28px; margin-bottom: 40px;">
         <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap;">
-          <h2 style="font-family: var(--tz-display); font-size: 28px; text-transform: uppercase; margin: 0;">{{ editorTitle }}<span style="color: #D97A3B;">.</span></h2>
-          <sc-if value="{{ hasListing }}"><button onClick="{{ closeEditor }}" style="background: none; border: 0; font-family: var(--tz-mono); font-size: 12px; color: #A85A23; cursor: pointer; text-decoration: underline;">CLOSE</button></sc-if>
+          <h2 style="font-family: var(--tz-display); font-size: 28px; text-transform: uppercase; margin: 0;">{{ editorTitle }}<span style="color: #820101;">.</span></h2>
+          <sc-if value="{{ hasListing }}"><button onClick="{{ closeEditor }}" style="background: none; border: 0; font-family: var(--tz-mono); font-size: 12px; color: #820101; cursor: pointer; text-decoration: underline;">CLOSE</button></sc-if>
         </div>
         <p style="${H} margin: 6px 0 20px; max-width: 700px;">{{ editorIntro }}</p>
         <div class="tw-2col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
@@ -140,7 +140,7 @@ const template = `
           <span style="${L}">COVER PHOTO *</span>
           <div style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-top: 6px;">
             <sc-if value="{{ lf.coverUrl }}"><img src="{{ lf.coverUrl }}" alt="Cover preview" style="width: 160px; height: 100px; object-fit: cover; border: 2px solid #1F3A38;"></sc-if>
-            <label style="border: 2px dashed #A85A23; background: #FBEED8; color: #7A3E0F; font-family: var(--tz-mono); font-size: 12px; padding: 12px 16px; cursor: pointer;">{{ coverLabel }}<input type="file" accept="image/jpeg,image/png,image/webp" onChange="{{ uploadCover }}" aria-label="Upload a cover photo" style="position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none;"></label>
+            <label style="border: 2px dashed #820101; background: #FBEED8; color: #5C0000; font-family: var(--tz-mono); font-size: 12px; padding: 12px 16px; cursor: pointer;">{{ coverLabel }}<input type="file" accept="image/jpeg,image/png,image/webp" onChange="{{ uploadCover }}" aria-label="Upload a cover photo" style="position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none;"></label>
           </div>
         </div>
 
@@ -150,7 +150,7 @@ const template = `
             <sc-for list="{{ gallery }}" as="g">
               <div style="position: relative;"><img src="{{ g.url }}" alt="{{ g.alt }}" style="width: 110px; height: 80px; object-fit: cover; border: 2px solid #1F3A38; display: block;"><button onClick="{{ g.remove }}" aria-label="Remove photo" style="position: absolute; top: 4px; right: 4px; background: #FFFDF8; border: 2px solid #1F3A38; font-size: 11px; padding: 1px 6px; cursor: pointer;">✕</button></div>
             </sc-for>
-            <sc-if value="{{ canAddPhoto }}"><label style="width: 110px; height: 80px; border: 2px dashed #A85A23; background: #FBEED8; color: #7A3E0F; font-family: var(--tz-mono); font-size: 11px; display: flex; align-items: center; justify-content: center; cursor: pointer; text-align: center;">＋ PHOTO<input type="file" accept="image/jpeg,image/png,image/webp" onChange="{{ addPhoto }}" aria-label="Add a gallery photo" style="position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none;"></label></sc-if>
+            <sc-if value="{{ canAddPhoto }}"><label style="width: 110px; height: 80px; border: 2px dashed #820101; background: #FBEED8; color: #5C0000; font-family: var(--tz-mono); font-size: 11px; display: flex; align-items: center; justify-content: center; cursor: pointer; text-align: center;">＋ PHOTO<input type="file" accept="image/jpeg,image/png,image/webp" onChange="{{ addPhoto }}" aria-label="Add a gallery photo" style="position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none;"></label></sc-if>
           </div>
         </div>
 
@@ -166,13 +166,13 @@ const template = `
                 <button onClick="{{ sv.remove }}" aria-label="Remove service" style="border: 2px solid #B8463A; color: #B8463A; background: none; font-family: var(--tz-mono); font-size: 11px; padding: 10px 12px; cursor: pointer;">✕</button>
               </div>
             </sc-for>
-            <sc-if value="{{ canAddService }}"><button onClick="{{ addService }}" style="border: 2px dashed #A85A23; background: #FBEED8; color: #7A3E0F; font-family: var(--tz-mono); font-size: 12px; padding: 10px; cursor: pointer;">+ ADD A SERVICE</button></sc-if>
+            <sc-if value="{{ canAddService }}"><button onClick="{{ addService }}" style="border: 2px dashed #820101; background: #FBEED8; color: #5C0000; font-family: var(--tz-mono); font-size: 12px; padding: 10px; cursor: pointer;">+ ADD A SERVICE</button></sc-if>
           </div>
         </div>
 
-        <sc-if value="{{ listingError }}"><div role="alert" style="margin-top: 18px; border: 2px solid #B8463A; background: #FBEED8; color: #7A3E0F; padding: 12px 16px; font-size: 13.5px;">{{ listingError }}</div></sc-if>
+        <sc-if value="{{ listingError }}"><div role="alert" style="margin-top: 18px; border: 2px solid #B8463A; background: #FBEED8; color: #5C0000; padding: 12px 16px; font-size: 13.5px;">{{ listingError }}</div></sc-if>
         <div style="display: flex; gap: 10px; margin-top: 22px; flex-wrap: wrap; align-items: center;">
-          <button onClick="{{ saveListing }}" aria-busy="{{ savingListing }}" style="font-family: var(--tz-display); font-size: 16px; text-transform: uppercase; background: #D97A3B; color: #1F3A38; border: 2px solid #1F3A38; padding: 14px 30px; cursor: pointer; box-shadow: 4px 4px 0 #1F3A38;">{{ saveLabel }}</button>
+          <button onClick="{{ saveListing }}" aria-busy="{{ savingListing }}" style="font-family: var(--tz-display); font-size: 16px; text-transform: uppercase; background: #820101; color: #F7F1E6; border: 2px solid #1F3A38; padding: 14px 30px; cursor: pointer; box-shadow: 4px 4px 0 #1F3A38;">{{ saveLabel }}</button>
           <span style="${H}">{{ saveNote }}</span>
         </div>
       </section>
@@ -195,7 +195,7 @@ const template = `
       <!-- Leads -->
       <div>
         <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
-          <h2 style="font-family: var(--tz-display); font-size: 28px; text-transform: uppercase; margin: 0;">Matched needs — respond to win<span style="color: #D97A3B;">.</span></h2>
+          <h2 style="font-family: var(--tz-display); font-size: 28px; text-transform: uppercase; margin: 0;">Matched needs — respond to win<span style="color: #820101;">.</span></h2>
           <span style="font-family: var(--tz-mono); font-size: 12px; color: #6E6155;">matched to: {{ matchedTo }}</span>
         </div>
         <div style="display: grid; gap: 14px;">
@@ -208,18 +208,18 @@ const template = `
                 <div>
                   <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
                     <span style="font-family: var(--tz-display); font-size: 19px; text-transform: uppercase;">{{ ld.title }}</span>
-                    <sc-if value="{{ ld.hot }}" hint-placeholder-val="{{ false }}"><span style="background: #D97A3B; border: 1px solid #1F3A38; font-family: var(--tz-mono); font-size: 10px; padding: 3px 7px;">HOT</span></sc-if>
+                    <sc-if value="{{ ld.hot }}" hint-placeholder-val="{{ false }}"><span style="background: #820101; border: 1px solid #1F3A38; font-family: var(--tz-mono); font-size: 10px; padding: 3px 7px; color: #F7F1E6;">HOT</span></sc-if>
                   </div>
                   <div style="font-family: var(--tz-mono); font-size: 12px; color: #6E6155; margin-top: 5px;">{{ ld.meta }}</div>
                   <div style="font-size: 13.5px; color: #3A2F25; line-height: 1.5; margin-top: 8px; max-width: 520px;">{{ ld.body }}</div>
                 </div>
                 <div style="text-align: right; flex-shrink: 0;">
-                  <div style="font-family: var(--tz-display); font-size: 20px; color: #A85A23;">{{ ld.budget }}</div>
+                  <div style="font-family: var(--tz-display); font-size: 20px; color: #820101;">{{ ld.budget }}</div>
                   <div style="font-family: var(--tz-mono); font-size: 11px; color: #6E6155;">{{ ld.offersLabel }}</div>
                 </div>
               </div>
               <sc-if value="{{ ld.hasMine }}">
-                <div style="margin-top: 12px; border: 1px dashed #4a7c4a; background: #DCE8D9; padding: 10px 14px; font-size: 12.5px; color: #2c4a2c;">{{ ld.mineText }} <a href="{{ ld.mineHref }}" style="color: #A85A23;">Open the conversation →</a></div>
+                <div style="margin-top: 12px; border: 1px dashed #4a7c4a; background: #DCE8D9; padding: 10px 14px; font-size: 12.5px; color: #2c4a2c;">{{ ld.mineText }} <a href="{{ ld.mineHref }}" style="color: #820101;">Open the conversation →</a></div>
               </sc-if>
               <sc-if value="{{ ld.canOffer }}">
               <div style="display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap;">
@@ -231,11 +231,11 @@ const template = `
               <!-- Offer composer -->
               <sc-if value="{{ ld.offerOpen }}" hint-placeholder-val="{{ false }}">
                 <div style="margin-top: 14px; border-top: 1px dashed #C9BFB1; padding-top: 14px; display: grid; gap: 10px;">
-                  <div style="font-family: var(--tz-mono); font-size: 11px; color: #A85A23; letter-spacing: 0.08em;">[Your formal offer — binding once accepted]</div>
+                  <div style="font-family: var(--tz-mono); font-size: 11px; color: #820101; letter-spacing: 0.08em;">[Your formal offer — binding once accepted]</div>
                   <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                     <input value="{{ ld.offerPrice }}" onChange="{{ ld.setPrice }}" inputmode="decimal" aria-label="Your price" placeholder="{{ ld.pricePlaceholder }}" style="flex: 1; min-width: 140px; border: 2px solid #1F3A38; background: #F7F1E6; padding: 12px 14px; font-family: var(--tz-mono); font-size: 13px; outline: none;">
                     <input value="{{ ld.offerNote }}" onChange="{{ ld.setNote }}" maxlength="600" aria-label="What's included" placeholder="What's included…" style="flex: 2; min-width: 200px; border: 2px solid #1F3A38; background: #F7F1E6; padding: 12px 14px; font-family: var(--tz-sans); font-size: 13.5px; outline: none;">
-                    <button onClick="{{ ld.submitOffer }}" style="font-family: var(--tz-display); font-size: 14px; text-transform: uppercase; background: #D97A3B; color: #1F3A38; border: 2px solid #1F3A38; padding: 10px 20px; cursor: pointer;">Submit →</button>
+                    <button onClick="{{ ld.submitOffer }}" style="font-family: var(--tz-display); font-size: 14px; text-transform: uppercase; background: #820101; color: #F7F1E6; border: 2px solid #1F3A38; padding: 10px 20px; cursor: pointer;">Submit →</button>
                   </div>
                 </div>
               </sc-if>
@@ -247,7 +247,7 @@ const template = `
                 </div>
               </sc-if>
               <sc-if value="{{ ld.sent }}" hint-placeholder-val="{{ false }}">
-                <div style="margin-top: 12px; border: 1px dashed #4a7c4a; background: #DCE8D9; padding: 10px 14px; font-size: 12.5px; color: #2c4a2c;">{{ ld.sentMsg }} <a href="{{ ld.sentHref }}" style="color: #A85A23;">Open in Messages →</a></div>
+                <div style="margin-top: 12px; border: 1px dashed #4a7c4a; background: #DCE8D9; padding: 10px 14px; font-size: 12.5px; color: #2c4a2c;">{{ ld.sentMsg }} <a href="{{ ld.sentHref }}" style="color: #820101;">Open in Messages →</a></div>
               </sc-if>
             </div>
           </sc-for>
@@ -255,12 +255,12 @@ const template = `
 
         <!-- Direct requests -->
         <sc-if value="{{ hasRequests }}">
-          <h2 style="font-family: var(--tz-display); font-size: 24px; text-transform: uppercase; margin: 36px 0 12px;">Asked for you by name<span style="color: #D97A3B;">.</span></h2>
+          <h2 style="font-family: var(--tz-display); font-size: 24px; text-transform: uppercase; margin: 36px 0 12px;">Asked for you by name<span style="color: #820101;">.</span></h2>
           <div style="display: grid; gap: 10px;">
             <sc-for list="{{ requests }}" as="rq">
               <a href="{{ rq.href }}" style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 14px 18px; text-decoration: none; color: #14201F; display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: center;">
                 <div><div style="font-weight: 700; font-size: 14px;">{{ rq.name }} <span style="font-family: var(--tz-mono); font-size: 10.5px; color: #6E6155;">· {{ rq.when }}</span></div><div style="font-size: 13px; color: #3A2F25; margin-top: 3px; line-height: 1.45;">{{ rq.message }}</div></div>
-                <span style="font-family: var(--tz-mono); font-size: 11px; border: 2px solid #1F3A38; background: #D97A3B; padding: 7px 12px; white-space: nowrap;">REPLY →</span>
+                <span style="font-family: var(--tz-mono); font-size: 11px; border: 2px solid #1F3A38; background: #820101; padding: 7px 12px; white-space: nowrap; color: #F7F1E6;">REPLY →</span>
               </a>
             </sc-for>
           </div>
@@ -270,10 +270,10 @@ const template = `
         <div style="display: flex; justify-content: space-between; align-items: center; margin: 40px 0 16px; flex-wrap: wrap; gap: 10px;">
           <div style="display: flex; align-items: center; gap: 14px;">
             <button onClick="{{ prevMonth }}" aria-label="Previous month" style="border: 2px solid #1F3A38; background: #FFFDF8; font-family: var(--tz-mono); font-size: 14px; padding: 8px 14px; cursor: pointer;">←</button>
-            <h2 style="font-family: var(--tz-display); font-size: 28px; text-transform: uppercase; margin: 0; min-width: 240px; text-align: center;">{{ monthName }}<span style="color: #D97A3B;">.</span></h2>
+            <h2 style="font-family: var(--tz-display); font-size: 28px; text-transform: uppercase; margin: 0; min-width: 240px; text-align: center;">{{ monthName }}<span style="color: #820101;">.</span></h2>
             <button onClick="{{ nextMonth }}" aria-label="Next month" style="border: 2px solid #1F3A38; background: #FFFDF8; font-family: var(--tz-mono); font-size: 14px; padding: 8px 14px; cursor: pointer;">→</button>
           </div>
-          <a href="/api/providers/me/calendar" download style="font-family: var(--tz-mono); font-size: 12px; color: #A85A23;">↓ ADD BOOKINGS TO YOUR CALENDAR (.ICS)</a>
+          <a href="/api/providers/me/calendar" download style="font-family: var(--tz-mono); font-size: 12px; color: #820101;">↓ ADD BOOKINGS TO YOUR CALENDAR (.ICS)</a>
         </div>
         <div style="display: grid; grid-template-columns: repeat(7, 1fr); border: 2px solid #1F3A38; border-bottom: 0; background: #1F3A38; color: #F7F1E6; font-family: var(--tz-mono); font-size: 10.5px; text-align: center;">
           <span style="padding: 7px 0;">MON</span><span style="padding: 7px 0;">TUE</span><span style="padding: 7px 0;">WED</span><span style="padding: 7px 0;">THU</span><span style="padding: 7px 0;">FRI</span><span style="padding: 7px 0;">SAT</span><span style="padding: 7px 0;">SUN</span>
@@ -289,9 +289,9 @@ const template = `
           </sc-for>
         </div>
         <sc-if value="{{ selectedBooking }}">
-          <a href="{{ selectedHref }}" style="display: flex; justify-content: space-between; gap: 12px; margin-top: 12px; border: 2px solid #1F3A38; background: #FFFDF8; box-shadow: 5px 5px 0 #D97A3B; padding: 14px 18px; text-decoration: none; color: #14201F;">
+          <a href="{{ selectedHref }}" style="display: flex; justify-content: space-between; gap: 12px; margin-top: 12px; border: 2px solid #1F3A38; background: #FFFDF8; box-shadow: 5px 5px 0 #820101; padding: 14px 18px; text-decoration: none; color: #14201F;">
             <span><strong>{{ selectedTitle }}</strong><br><span style="font-family: var(--tz-mono); font-size: 11px; color: #6E6155;">{{ selectedMeta }}</span></span>
-            <span style="font-family: var(--tz-mono); font-size: 11px; color: #A85A23; align-self: center;">OPEN →</span>
+            <span style="font-family: var(--tz-mono); font-size: 11px; color: #820101; align-self: center;">OPEN →</span>
           </a>
         </sc-if>
         <div style="font-size: 12.5px; color: #6E6155; margin-top: 10px;">Orange: paid into escrow. Sand: accepted, waiting for payment. Tap a booked day for details; the calendar file keeps your phone in step.</div>
@@ -301,18 +301,18 @@ const template = `
       <aside style="display: grid; gap: 18px;">
         <!-- Membership -->
         <div style="border: 2px solid #1F3A38; background: #1F3A38; color: #F7F1E6; padding: 24px;">
-          <div style="font-family: var(--tz-mono); font-size: 11px; color: #E8A472; letter-spacing: 0.08em;">[Uanachama — membership]</div>
+          <div style="font-family: var(--tz-mono); font-size: 11px; color: #E9B4AC; letter-spacing: 0.08em;">[Uanachama — membership]</div>
           <div style="font-family: var(--tz-display); font-size: 26px; text-transform: uppercase; margin: 10px 0 4px;">{{ membershipStatus }}</div>
           <div style="font-size: 13px; color: rgba(247,241,230,0.75); line-height: 1.5;">12-month listing · {{ membership.price }} / yr. Profile, gallery and reviews stay live and matchable.</div>
-          <div style="font-family: var(--tz-mono); font-size: 10.5px; color: #E8A472; margin-top: 8px; line-height: 1.6;">{{ billingNote }}</div>
-          <div style="height: 8px; background: rgba(247,241,230,0.2); margin: 14px 0;"><div style="height: 100%; width: {{ membershipPct }}; background: #D97A3B; transition: width 300ms ease;"></div></div>
-          <button onClick="{{ renew }}" style="width: 100%; font-family: var(--tz-display); font-size: 14px; text-transform: uppercase; background: {{ renewBg }}; color: #1F3A38; border: 0; padding: 12px; cursor: pointer;">{{ renewLabel }}</button>
+          <div style="font-family: var(--tz-mono); font-size: 10.5px; color: #E9B4AC; margin-top: 8px; line-height: 1.6;">{{ billingNote }}</div>
+          <div style="height: 8px; background: rgba(247,241,230,0.2); margin: 14px 0;"><div style="height: 100%; width: {{ membershipPct }}; background: #820101; transition: width 300ms ease; color: #F7F1E6;"></div></div>
+          <button onClick="{{ renew }}" style="width: 100%; font-family: var(--tz-display); font-size: 14px; text-transform: uppercase; background: {{ renewBg }}; color: {{ renewFg }}; border: 0; padding: 12px; cursor: pointer;">{{ renewLabel }}</button>
           <button onClick="{{ renewPoints }}" style="width: 100%; margin-top: 8px; font-family: var(--tz-mono); font-size: 11.5px; background: none; color: #F7F1E6; border: 1px solid rgba(247,241,230,0.5); padding: 10px; cursor: pointer;">OR PAY WITH POINTS</button>
         </div>
 
         <!-- Earnings (business ledger — separate from personal wallet) -->
         <div style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 24px;">
-          <div style="font-family: var(--tz-mono); font-size: 11px; color: #A85A23; letter-spacing: 0.08em;">[Mapato — business earnings]</div>
+          <div style="font-family: var(--tz-mono); font-size: 11px; color: #820101; letter-spacing: 0.08em;">[Mapato — business earnings]</div>
           <div style="font-family: var(--tz-display); font-size: 34px; margin: 10px 0 2px;">{{ earningsTotal }}</div>
           <div style="font-size: 12.5px; color: #6E6155;">{{ earningsNote }}</div>
           <div style="display: flex; align-items: flex-end; gap: 6px; height: 64px; margin-top: 16px;">
@@ -329,7 +329,7 @@ const template = `
 
         <!-- Notification prefs -->
         <div style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 24px;">
-          <div style="font-family: var(--tz-mono); font-size: 11px; color: #A85A23; letter-spacing: 0.08em;">[Arifa — notification controls]</div>
+          <div style="font-family: var(--tz-mono); font-size: 11px; color: #820101; letter-spacing: 0.08em;">[Arifa — notification controls]</div>
           <div style="display: grid; gap: 12px; margin-top: 14px;">
             <sc-for list="{{ prefs }}" as="p" hint-placeholder-count="4">
               <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">
@@ -344,7 +344,7 @@ const template = `
 
         <!-- Public listing -->
         <div style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 24px;">
-          <div style="font-family: var(--tz-mono); font-size: 11px; color: #A85A23; letter-spacing: 0.08em;">[Your public listing]</div>
+          <div style="font-family: var(--tz-mono); font-size: 11px; color: #820101; letter-spacing: 0.08em;">[Your public listing]</div>
           <div style="display: flex; gap: 12px; align-items: center; margin-top: 12px;">
             <img src="{{ provider.coverUrl }}" alt="" style="width: 72px; height: 72px; object-fit: cover; border: 2px solid #1F3A38; background: #EFE7D6;">
             <div>

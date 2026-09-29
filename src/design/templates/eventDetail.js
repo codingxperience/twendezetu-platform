@@ -1,25 +1,12 @@
 // Markup for the eventDetail page. Bindings are resolved by src/design/render.js.
 
+import { SITE_HEADER, SITE_TABBAR } from './shell';
+
 const template = `
-<div style="font-family: var(--tz-sans); background: #F7F1E6; color: #14201F; min-height: 100vh;">
+<div class="tz-page" style="font-family: var(--tz-sans); background: #F7F1E6; color: #14201F; min-height: 100vh;">
 
   <!-- Header -->
-  <header style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 18px 24px; border-bottom: 2px solid #1F3A38; background: #F7F1E6; position: sticky; top: 0; z-index: 40;">
-    <div style="display: flex; align-items: center; gap: 36px;">
-      <a href="/" class="tz-logo-link" aria-label="Twendezetu home"><img src="/brand/logo.png" alt="Twendezetu" width="1211" height="229" class="tz-logo tz-logo--md"></a>
-      <nav class="tw-nav" style="display: flex; gap: 24px; font-size: 14px; font-weight: 500;">
-        <a href="/" style="color: #6E6155; text-decoration: none;">Event guide</a>
-        <a href="/create-event" style="color: #6E6155; text-decoration: none;">Post an event or need</a>
-        <a href="/provider-dashboard" style="color: #6E6155; text-decoration: none;">For providers</a>
-      </nav>
-    </div>
-    <div style="display: flex; gap: 10px; align-items: center;">
-      <sc-if value="{{ me.signedOut }}">
-        <a href="{{ signInHref }}" style="font-size: 14px; font-weight: 600; color: #14201F; text-decoration: none; padding: 10px 16px;">Sign in</a>
-      </sc-if>
-      <a href="/my-twende" style="font-family: var(--tz-mono); font-size: 13px; background: #1F3A38; color: #F7F1E6; text-decoration: none; padding: 12px 20px; box-shadow: 4px 4px 0 #D97A3B;">MY TWENDE →</a>
-    </div>
-  </header>
+  ${SITE_HEADER}
 
   <!-- Guest banner -->
   <div style="background: #1F3A38; color: #F7F1E6; font-family: var(--tz-mono); font-size: 12px; padding: 10px 24px; text-align: center; line-height: 1.5;">
@@ -27,18 +14,18 @@ const template = `
   </div>
 
   <div style="max-width: 1200px; margin: 0 auto; padding: 20px 24px 0; font-family: var(--tz-mono); font-size: 12px; color: #6E6155;">
-    <a href="/" style="color: #A85A23;">← Back to guide</a> · {{ category }} · {{ price }}
+    <a href="/events" style="color: #820101;">← Back to events</a> · {{ category }} · {{ price }}
   </div>
 
   <!-- Title block -->
   <section style="max-width: 1200px; margin: 0 auto; padding: 18px 24px 28px;">
-    <div style="font-family: var(--tz-mono); font-size: 12px; color: #A85A23; letter-spacing: 0.08em;">[Tukio — event]</div>
-    <h1 style="font-family: var(--tz-display); font-size: clamp(40px, 6.5vw, 92px); text-transform: uppercase; line-height: 0.92; margin: 8px 0 0;">{{ title }}<span style="color: #D97A3B;">.</span></h1>
+    <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Tukio — event]</div>
+    <h1 style="font-family: var(--tz-display); font-size: clamp(40px, 6.5vw, 92px); text-transform: uppercase; line-height: 0.92; margin: 8px 0 0;">{{ title }}<span style="color: #820101;">.</span></h1>
     <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; font-family: var(--tz-mono); font-size: 13px;">
       <span style="background: #1F3A38; color: #F7F1E6; padding: 8px 14px;">{{ dateLine }}</span>
       <span style="border: 2px solid #1F3A38; padding: 6px 14px;">{{ venue }}</span>
       <sc-if value="{{ badge }}" hint-placeholder-val="{{ false }}">
-        <span style="background: #D97A3B; border: 2px solid #1F3A38; color: #1F3A38; padding: 6px 14px;">{{ badge }}</span>
+        <span style="background: #820101; border: 2px solid #1F3A38; color: #F7F1E6; padding: 6px 14px;">{{ badge }}</span>
       </sc-if>
     </div>
   </section>
@@ -48,7 +35,7 @@ const template = `
     <div class="tw-2col" style="display: grid; grid-template-columns: 1.5fr 0.9fr; gap: 40px; align-items: start;">
       <div>
         <img src="{{ img }}" alt="{{ title }}" style="width: 100%; aspect-ratio: 16/10; object-fit: cover; border: 2px solid #1F3A38; display: block; box-shadow: 6px 6px 0 #1F3A38;">
-        <h2 style="font-family: var(--tz-display); font-size: 26px; text-transform: uppercase; margin: 32px 0 10px;">About this event<span style="color: #D97A3B;">.</span></h2>
+        <h2 style="font-family: var(--tz-display); font-size: 26px; text-transform: uppercase; margin: 32px 0 10px;">About this event<span style="color: #820101;">.</span></h2>
         <p style="font-size: 16px; line-height: 1.6; color: #3A2F25; max-width: 640px; white-space: pre-line;">{{ description }}</p>
         <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 22px; max-width: 640px;">
           <div style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 14px 16px;">
@@ -83,7 +70,7 @@ const template = `
             </sc-if>
 
             <sc-if value="{{ canBuy }}" hint-placeholder-val="{{ false }}">
-              <a href="{{ ticketsHref }}" onClick="{{ goTickets }}" style="display: block; text-align: center; font-family: var(--tz-display); font-size: 17px; text-transform: uppercase; background: #1F3A38; color: #F7F1E6; text-decoration: none; padding: 14px; box-shadow: 4px 4px 0 #D97A3B;">Get tickets →</a>
+              <a href="{{ ticketsHref }}" onClick="{{ goTickets }}" style="display: block; text-align: center; font-family: var(--tz-display); font-size: 17px; text-transform: uppercase; background: #1F3A38; color: #F7F1E6; text-decoration: none; padding: 14px; box-shadow: 4px 4px 0 #E9B4AC;">Get tickets →</a>
               <div style="font-size: 12px; color: #6E6155; line-height: 1.5;">Buy as a guest with your card, or sign in to pay with Twende points. Your QR ticket arrives by email and in My Twende.</div>
             </sc-if>
 
@@ -93,7 +80,7 @@ const template = `
                   <div style="font-family: var(--tz-display); font-size: 18px; text-transform: uppercase;">✓ You're going, {{ gNameShown }}!</div>
                   <div style="font-size: 12.5px; color: rgba(247,241,230,0.82); line-height: 1.5; margin-top: 6px;">{{ rsvpNote }}</div>
                   <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">
-                    <a href="{{ afterRsvpHref }}" style="display: inline-block; font-family: var(--tz-mono); font-size: 11.5px; background: #D97A3B; color: #14201F; padding: 8px 14px; text-decoration: none;">{{ afterRsvpLabel }}</a>
+                    <a href="{{ afterRsvpHref }}" style="display: inline-block; font-family: var(--tz-mono); font-size: 11.5px; background: #820101; color: #F7F1E6; padding: 8px 14px; text-decoration: none;">{{ afterRsvpLabel }}</a>
                     <a href="{{ calendarHref }}" style="display: inline-block; font-family: var(--tz-mono); font-size: 11.5px; border: 1px solid rgba(247,241,230,0.5); color: #F7F1E6; padding: 8px 14px; text-decoration: none;">🗓 ADD TO CALENDAR</a>
                     <sc-if value="{{ canCancelRsvp }}">
                       <button onClick="{{ withdrawRsvp }}" style="font-family: var(--tz-mono); font-size: 11.5px; background: none; border: 1px solid rgba(247,241,230,0.5); color: #F7F1E6; padding: 8px 14px; cursor: pointer;">CAN'T MAKE IT</button>
@@ -102,7 +89,7 @@ const template = `
                 </div>
               </sc-if>
               <sc-if value="{{ notRsvped }}" hint-placeholder-val="{{ true }}">
-                <button onClick="{{ toggleRsvp }}" style="width: 100%; font-family: var(--tz-display); font-size: 17px; text-transform: uppercase; background: {{ rsvpBg }}; color: {{ rsvpFg }}; border: 2px solid #1F3A38; padding: 14px; cursor: pointer; box-shadow: 4px 4px 0 #D97A3B;">{{ rsvpLabel }}</button>
+                <button onClick="{{ toggleRsvp }}" style="width: 100%; font-family: var(--tz-display); font-size: 17px; text-transform: uppercase; background: {{ rsvpBg }}; color: {{ rsvpFg }}; border: 2px solid #1F3A38; padding: 14px; cursor: pointer; box-shadow: 4px 4px 0 #820101;">{{ rsvpLabel }}</button>
                 <sc-if value="{{ rsvpForm }}" hint-placeholder-val="{{ false }}">
                   <div style="display: grid; gap: 8px;">
                     <input placeholder="Your name" value="{{ gName }}" onChange="{{ setGName }}" style="border: 2px solid #1F3A38; background: #F7F1E6; padding: 11px 13px; font-family: var(--tz-sans); font-size: 14px; outline: none;">
@@ -129,10 +116,10 @@ const template = `
 
             <!-- Share -->
             <div style="border-top: 2px solid #1F3A38; padding-top: 14px;">
-              <div style="font-family: var(--tz-mono); font-size: 11px; color: #A85A23; letter-spacing: 0.08em; margin-bottom: 8px;">[Sambaza — share this event]</div>
+              <div style="font-family: var(--tz-mono); font-size: 11px; color: #820101; letter-spacing: 0.08em; margin-bottom: 8px;">[Sambaza — share this event]</div>
               <div style="display: flex; border: 2px solid #1F3A38; margin-bottom: 8px;">
                 <input value="{{ shareUrl }}" readOnly style="flex: 1; min-width: 0; border: 0; background: #EFE7D6; font-family: var(--tz-mono); font-size: 11.5px; padding: 10px 11px; outline: none;">
-                <button onClick="{{ copyLink }}" style="border: 0; border-left: 2px solid #1F3A38; background: #D97A3B; font-family: var(--tz-mono); font-size: 11px; padding: 0 12px; cursor: pointer;">{{ copyLabel }}</button>
+                <button onClick="{{ copyLink }}" style="border: 0; border-left: 2px solid #1F3A38; background: #820101; font-family: var(--tz-mono); font-size: 11px; padding: 0 12px; cursor: pointer; color: #F7F1E6;">{{ copyLabel }}</button>
               </div>
               <div style="display: flex; gap: 6px;">
                 <a href="{{ waHref }}" onClick="{{ shareWa }}" target="_blank" rel="noopener" aria-label="Share on WhatsApp" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--tz-mono); font-size: 10.5px; border: 2px solid #1F3A38; background: #FFFDF8; color: #14201F; padding: 9px; text-decoration: none;">
@@ -159,12 +146,12 @@ const template = `
   <section style="border-top: 2px solid #1F3A38; background: #EFE7D6; padding: 40px 24px;">
     <div style="max-width: 1200px; margin: 0 auto;">
       <div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 18px;">
-        <h2 style="font-family: var(--tz-display); font-size: 28px; text-transform: uppercase; margin: 0;">More {{ category }}<span style="color: #D97A3B;">.</span></h2>
-        <span style="color: #D97A3B; font-family: var(--tz-display); font-size: 22px;">›</span>
+        <h2 style="font-family: var(--tz-display); font-size: 28px; text-transform: uppercase; margin: 0;">More {{ category }}<span style="color: #820101;">.</span></h2>
+        <span style="color: #820101; font-family: var(--tz-display); font-size: 22px;">›</span>
       </div>
       <div style="display: flex; gap: 16px; overflow-x: auto; padding-bottom: 8px;">
         <sc-for list="{{ similar }}" as="ev" hint-placeholder-count="6">
-          <a href="{{ ev.href }}" style="flex: 0 0 230px; text-decoration: none; color: #14201F; background: #FFFDF8; border: 2px solid #1F3A38; display: flex; flex-direction: column;" style-hover="transform: translate(-3px,-3px); box-shadow: 5px 5px 0 #D97A3B;">
+          <a href="{{ ev.href }}" style="flex: 0 0 230px; text-decoration: none; color: #14201F; background: #FFFDF8; border: 2px solid #1F3A38; display: flex; flex-direction: column;" style-hover="transform: translate(-3px,-3px); box-shadow: 5px 5px 0 #820101;">
             <div style="position: relative;">
               <img src="{{ ev.img }}" alt="{{ ev.title }}" style="width: 100%; aspect-ratio: 4/5; object-fit: cover; display: block; border-bottom: 2px solid #1F3A38;">
               <span style="position: absolute; top: 10px; left: 10px; background: #F7F1E6; border: 2px solid #1F3A38; font-family: var(--tz-mono); font-size: 11px; padding: 4px 8px;">{{ ev.date }}</span>
@@ -172,7 +159,7 @@ const template = `
             <div style="padding: 14px; display: flex; flex-direction: column; gap: 6px; flex: 1;">
               <div style="font-family: var(--tz-display); font-size: 18px; text-transform: uppercase; line-height: 1.05;">{{ ev.title }}</div>
               <div style="font-size: 13px; color: #6E6155;">{{ ev.city }}</div>
-              <div style="margin-top: auto; font-family: var(--tz-mono); font-size: 12px; color: #A85A23;">{{ ev.price }}</div>
+              <div style="margin-top: auto; font-family: var(--tz-mono); font-size: 12px; color: #820101;">{{ ev.price }}</div>
             </div>
           </a>
         </sc-for>
@@ -187,6 +174,7 @@ const template = `
       <div style="font-family: var(--tz-mono); font-size: 11px; color: rgba(247,241,230,0.7);">Gather anywhere · Fees only when money moves</div>
     </div>
   </footer>
+  ${SITE_TABBAR}
 </div>
 `;
 

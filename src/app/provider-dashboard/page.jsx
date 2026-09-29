@@ -4,7 +4,7 @@ import { providerDashboardView } from '@/server/views/providerDashboard';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata = { title: 'Provider portal — Twendezetu', robots: { index: false } };
+export const metadata = { title: 'Vendor portal — Twendezetu', robots: { index: false } };
 
 export default async function ProviderDashboardPage({ searchParams }) {
   const params = (await searchParams) || {};

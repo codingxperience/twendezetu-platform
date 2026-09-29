@@ -12,7 +12,7 @@ const RICH_MIN_MEDIA = 3;
 const SAMPLE_THREADS = 30;
 const MIN_SAMPLES = 3;
 
-// Median time from a customer's first message to the provider's first
+// Median time from a customer's first message to the vendor's first
 // reply, over recent conversations. Null until there is enough to go on.
 async function typicalResponse(provider) {
   const threads = await prisma.thread.findMany({
@@ -74,6 +74,6 @@ export async function providerView(viewer, { slug } = {}) {
     following: page.following,
     isOwner: page.isOwner,
     commissionPercent: `${FEES.bookingCommissionBps / 100}%`,
-    shareUrl: `${appUrl()}/providers/${provider.slug}`,
+    shareUrl: `${appUrl()}/vendors/${provider.slug}`,
   };
 }

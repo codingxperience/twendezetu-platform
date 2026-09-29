@@ -66,9 +66,8 @@ const nextConfig = {
       { source: '/inbox', destination: '/messages', permanent: true },
       { source: '/account', destination: '/settings', permanent: true },
       { source: '/favorites', destination: '/my-twende?tab=saved', permanent: true },
-      { source: '/browse', destination: '/providers', permanent: true },
-      { source: '/vendors/:slug', destination: '/providers/:slug', permanent: true },
-      { source: '/book/:id', destination: '/providers', permanent: true },
+      { source: '/browse', destination: '/vendors', permanent: true },
+      { source: '/book/:id', destination: '/vendors', permanent: true },
       { source: '/confirm/:id', destination: '/my-twende', permanent: true },
       { source: '/about', destination: '/', permanent: true },
     ];

@@ -88,7 +88,7 @@ function frame({ title, inner, button, footer }) {
 <tr><td style="background:#1F3A38;color:#F7F1E6;padding:18px 24px;font-size:18px;font-weight:bold;letter-spacing:1px"><img src="${escapeHtml(config().appUrl)}/brand/logo-light.png" alt="Twendezetu" width="170" height="32" style="display:block;height:32px;width:170px;border:0"></td></tr>
 <tr><td style="padding:28px 24px"><h1 style="margin:0 0 12px;font-size:22px">${escapeHtml(title)}</h1>
 ${inner}
-${button ? `<a href="${escapeHtml(button.href)}" style="display:inline-block;background:#D97A3B;color:#1F3A38;text-decoration:none;font-weight:bold;padding:12px 20px">${escapeHtml(button.label)}</a>` : ''}
+${button ? `<a href="${escapeHtml(button.href)}" style="display:inline-block;background:#820101;color:#F7F1E6;text-decoration:none;font-weight:bold;padding:12px 20px">${escapeHtml(button.label)}</a>` : ''}
 </td></tr>
 <tr><td style="padding:16px 24px;border-top:1px solid #EFE7D6;font-size:12px;color:#6E6155">${footer}</td></tr>
 </table></td></tr></table></body></html>`;
@@ -109,7 +109,7 @@ function emailBodies(message) {
     title: message.subject,
     inner: paragraphs(message.body),
     button: link ? { href: link, label: 'Open Twendezetu →' } : null,
-    footer: `You receive this because of your Twendezetu activity. <a href="${escapeHtml(settings)}" style="color:#A85A23">Notification settings</a>`,
+    footer: `You receive this because of your Twendezetu activity. <a href="${escapeHtml(settings)}" style="color:#820101">Notification settings</a>`,
   });
   return { text, html };
 }

@@ -54,7 +54,7 @@ export function values(state, set, ctx) {
     if (state.busy?.auth) return;
     const email = state.email.trim();
     if (state.step === 'credentials') {
-      if (register && state.name.trim().length < 2) return fail('Add your name — it is how hosts and providers see you.');
+      if (register && state.name.trim().length < 2) return fail('Add your name — it is how hosts and vendors see you.');
       if (!EMAIL_PATTERN.test(email)) return fail('Enter a valid email address.');
       if (!state.password) return fail('Enter your password.');
       if (register && state.password.length < 10) return fail('Use at least 10 characters for your password.');
@@ -130,7 +130,7 @@ export function values(state, set, ctx) {
     linkProblem: LINK_PROBLEMS[state.linkStatus] || LINK_PROBLEMS.invalid,
     sentTo: state.sentTo,
     resendLabel: state.canResend ? 'Send it again' : 'You can ask again in a minute',
-    resendColor: state.canResend ? '#A85A23' : '#8A7F74',
+    resendColor: state.canResend ? COLORS.rust : '#8A7F74',
     resend: async () => {
       if (!state.canResend || state.busy?.auth) return;
       set((current) => ({ ...current, busy: { ...current.busy, auth: true }, error: null }));
@@ -161,7 +161,7 @@ export function values(state, set, ctx) {
     roleCards: [
       mkRole('user', 'User / guest', 'Browse, RSVP, save events, reminders, refer friends.', 'FREE'),
       mkRole('advertiser', 'Advertiser / event maker', 'Post events & needs. Free RSVP events, or add ticket tiers when you post — 5% fee only when tickets sell.', 'FREE TO POST'),
-      mkRole('provider', 'Provider', 'Offer services — drivers, DJs, tents, catering. Joining is free; the yearly listing membership starts when you want to answer leads.', 'FREE TO JOIN'),
+      mkRole('provider', 'Vendor', 'Offer services — drivers, DJs, tents, catering. Joining is free; the yearly listing membership starts when you want to answer leads.', 'FREE TO JOIN'),
     ],
     name: state.name,
     setName: setField('name'),

@@ -191,7 +191,7 @@ export async function submitApplication(user) {
 
     const reviewers = await tx.user.findMany({ where: { role: { in: ['ADMIN', 'MODERATOR'] }, status: 'ACTIVE' }, select: { id: true } });
     for (const reviewer of reviewers) {
-      await notify(tx, { userId: reviewer.id, topic: 'LEADS', title: `Verification waiting: ${provider.name}`, body: 'A provider submitted all five sections for review.', href: '/admin?section=verify' });
+      await notify(tx, { userId: reviewer.id, topic: 'LEADS', title: `Verification waiting: ${provider.name}`, body: 'A vendor submitted all five sections for review.', href: '/admin?section=verify' });
     }
     await audit(tx, { actorId: user.id, action: 'verification.submitted', targetType: 'Provider', targetId: provider.id });
   });
@@ -228,7 +228,7 @@ export async function reviewApplication(reviewer, applicationId, { decision, not
   if (app.status !== 'SUBMITTED') throw conflict('This application is not waiting for review.', 'not_pending');
   const status = { approve: 'APPROVED', info: 'NEEDS_INFO', reject: 'REJECTED' }[decision];
   if (!status) throw badRequest('Unknown decision.');
-  if (status !== 'APPROVED' && !note) throw invalid('Tell the provider what is missing.');
+  if (status !== 'APPROVED' && !note) throw invalid('Tell the vendor what is missing.');
 
   await transaction(async (tx) => {
     await tx.verificationApplication.update({ where: { id: app.id }, data: { status, reviewedAt: new Date(), reviewerId: reviewer.id, reviewNote: note || null } });
@@ -238,7 +238,7 @@ export async function reviewApplication(reviewer, applicationId, { decision, not
       topic: 'MONEY',
       title: status === 'APPROVED' ? 'You are verified' : status === 'NEEDS_INFO' ? 'Your verification needs one more thing' : 'Your verification was not approved',
       body: status === 'APPROVED' ? 'The verified badge is now live on your listing.' : note,
-      href: status === 'APPROVED' ? `/providers/${app.provider.slug}` : '/provider-verification',
+      href: status === 'APPROVED' ? `/vendors/${app.provider.slug}` : '/provider-verification',
     });
     await audit(tx, { actorId: reviewer.id, action: `verification.${decision}`, targetType: 'Provider', targetId: app.providerId, meta: { note } });
     // Once there is a final decision, the identity documents have done their

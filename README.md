@@ -1,11 +1,12 @@
 # Twendezetu
 
-Where the East African diaspora finds its events and the people who make
-them happen. Members RSVP and buy tickets, post needs ("a photographer for
-a ruracio in Kiambu") and take offers from providers, chip in to group
-pools, split a table's tickets by link, and pay with cards or Twende
-points. Providers and organizers get paid through escrow, with disputes,
-payouts and a finance console behind it.
+An events marketplace for East Africa and the diaspora, with the vendors
+who make events happen. People find events on the home page and at
+/events, RSVP and buy tickets, post events of their own, and book vendors
+at /vendors or post a need ("a photographer for a ruracio in Kiambu") and
+take offers. They chip in to group pools, split a table's tickets by link,
+and pay with cards or Twende points. Vendors and organizers get paid
+through escrow, with disputes, payouts and a finance console behind it.
 
 **Stack:** Next.js 15 (App Router, React 19) · Prisma 5 · Postgres
 (Supabase) · Stripe · Resend or SMTP · Africa's Talking · Supabase Storage ·

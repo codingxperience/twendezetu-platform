@@ -19,7 +19,7 @@ const KPI_TONES = [
   { bg: COLORS.paper, fg: COLORS.ink },
   { bg: COLORS.paper, fg: COLORS.ink },
   { bg: COLORS.forest, fg: COLORS.cream },
-  { bg: COLORS.clay, fg: COLORS.ink },
+  { bg: COLORS.clay, fg: COLORS.cream },
 ];
 
 export function values(state, set, ctx) {
@@ -55,7 +55,7 @@ export function values(state, set, ctx) {
 
     isPaid: Boolean(analytics && !analytics.event.isFree),
     weekSales: analytics?.sales.week || '',
-    salesBars: (analytics?.sales.bars || []).map((bar) => ({ ...bar, color: bar.peak ? COLORS.clay : 'rgba(247,241,230,0.35)' })),
+    salesBars: (analytics?.sales.bars || []).map((bar) => ({ ...bar, color: bar.peak ? COLORS.clayLight : 'rgba(247,241,230,0.35)' })),
     salesPeak: analytics?.sales.peak ? `BEST DAY: ${analytics.sales.peak}` : 'NO SALES IN THE LAST 8 DAYS',
     salesTerms: analytics?.sales.terms || '',
 

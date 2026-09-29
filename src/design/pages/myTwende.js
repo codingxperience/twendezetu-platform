@@ -21,13 +21,13 @@ const STAGES = ['DRAFT', 'LIVE', 'OFFERS', 'ACCEPTED', 'DONE'];
 
 const AVATAR_TONES = [
   { bg: COLORS.forest, fg: COLORS.cream },
-  { bg: COLORS.clay, fg: COLORS.forest },
+  { bg: COLORS.clay, fg: COLORS.cream },
   { bg: COLORS.sand, fg: COLORS.ink },
   { bg: COLORS.sage, fg: COLORS.cream },
 ];
 
 const STATUS_TONES = {
-  GOING: { bg: COLORS.clay, fg: COLORS.ink },
+  GOING: { bg: COLORS.clay, fg: COLORS.cream },
   INTERESTED: { bg: COLORS.sand, fg: COLORS.ink },
   'ON HOLD': { bg: COLORS.sand, fg: COLORS.ink },
   CANCELLED: { bg: COLORS.red, fg: COLORS.cream },
@@ -36,9 +36,8 @@ const STATUS_TONES = {
 const STAGE_TONES = {
   DRAFT: { bg: COLORS.sand, fg: COLORS.ink },
   PAUSED: { bg: COLORS.sand, fg: COLORS.ink },
-  LIVE: { bg: COLORS.clay, fg: COLORS.ink },
-  'LIVE ON THE GUIDE': { bg: COLORS.clay, fg: COLORS.ink },
-  'OFFERS IN': { bg: COLORS.clay, fg: COLORS.ink },
+  LIVE: { bg: COLORS.clay, fg: COLORS.cream },
+  'OFFERS IN': { bg: COLORS.clay, fg: COLORS.cream },
   ACCEPTED: { bg: COLORS.forest, fg: COLORS.cream },
   DONE: { bg: COLORS.sage, fg: COLORS.cream },
   CANCELLED: { bg: COLORS.red, fg: COLORS.cream },
@@ -71,7 +70,7 @@ function monthGrid(month, entries, today, selectedDay, pick) {
     const key = `${month}-${String(day).padStart(2, '0')}`;
     const onDay = byDay.get(key) || [];
     const first = onDay[0];
-    const tone = !first ? { bg: COLORS.paper, fg: COLORS.ink } : first.kind === 'event' ? { bg: COLORS.clay, fg: COLORS.ink } : { bg: COLORS.forest, fg: COLORS.cream };
+    const tone = !first ? { bg: COLORS.paper, fg: COLORS.ink } : first.kind === 'event' ? { bg: COLORS.clay, fg: COLORS.cream } : { bg: COLORS.forest, fg: COLORS.cream };
     const outline = key === selectedDay ? `3px solid ${COLORS.ink}` : key === today ? `3px solid ${COLORS.clay}` : 'none';
     cells.push({
       num: day,
@@ -203,6 +202,7 @@ export function values(state, set, ctx) {
       : 'When a seat frees up — a refund, an expired hold, an unpaid group split — we tell people in the order they joined. Seats are not held, so move quickly when you hear from us.',
     ctaLabel: entry.notified ? 'CHECK OUT NOW →' : 'VIEW TICKETS',
     ctaBg: entry.notified ? COLORS.clay : COLORS.cream,
+    ctaFg: entry.notified ? COLORS.cream : COLORS.ink,
     leave: async () => {
       const sure = await ctx.ask({ title: 'Leave this waitlist?', body: `You will stop hearing about seats for ${entry.title}.`, input: false, confirmLabel: 'Leave waitlist', danger: true });
       if (sure) ctx.run(`waitlist:${entry.id}`, () => ctx.api.delete(`/api/waitlist/${entry.id}`), { success: 'You left the waitlist.' });
@@ -218,7 +218,7 @@ export function values(state, set, ctx) {
       accept: async () => {
         const sure = await ctx.ask({
           title: `Accept ${offer.name}'s offer?`,
-          body: `${offer.price} for "${need.title}". The other offers on this need are declined and each provider is told. You pay into escrow next; ${offer.name} is only paid after the job.`,
+          body: `${offer.price} for "${need.title}". The other offers on this need are declined and each vendor is told. You pay into escrow next; ${offer.name} is only paid after the job.`,
           input: false,
           confirmLabel: 'Accept offer',
         });
@@ -250,17 +250,18 @@ export function values(state, set, ctx) {
       pipeline: STAGES.map((label, index) => ({
         label,
         bg: index < post.stageIndex ? COLORS.forest : index === post.stageIndex ? COLORS.clay : COLORS.paper,
-        fg: index <= post.stageIndex ? COLORS.ink : COLORS.muted,
+        fg: index === post.stageIndex ? COLORS.cream : index < post.stageIndex ? COLORS.cream : COLORS.muted,
       })),
       hasOffers: post.offers > 0,
       hasAnalytics: post.kind === 'EVENT' && post.status !== 'DRAFT',
       pauseLabel: post.paused ? 'RESUME' : 'PAUSE',
       pauseBg: post.paused ? COLORS.clay : COLORS.cream,
+      pauseFg: post.paused ? COLORS.cream : COLORS.ink,
       pause: () =>
         post.kind === 'NEED'
-          ? setStatus(post.paused ? 'resume' : 'pause', {}, post.paused ? 'Your need is live again.' : 'Paused. Providers cannot send new offers until you resume.')
-          : setStatus(post.paused ? 'publish' : 'pause', {}, post.paused ? 'Back on the guide.' : 'Paused. The event is off the guide until you resume.'),
-      publish: () => setStatus('publish', {}, 'Published. It is on the guide now.'),
+          ? setStatus(post.paused ? 'resume' : 'pause', {}, post.paused ? 'Your need is live again.' : 'Paused. Vendors cannot send new offers until you resume.')
+          : setStatus(post.paused ? 'publish' : 'pause', {}, post.paused ? 'It is live again.' : 'Paused. The event is hidden until you resume.'),
+      publish: () => setStatus('publish', {}, 'Published. It is live now.'),
       shareLabel: state.copied === shareKey ? '✓ LINK COPIED' : '⧉ SHARE',
       share: () => {
         copyText(post.shareUrl);
@@ -269,7 +270,7 @@ export function values(state, set, ctx) {
       closeLabel: post.kind === 'NEED' ? 'CLOSE' : post.status === 'DRAFT' ? 'DELETE DRAFT' : 'CANCEL EVENT',
       close: async () => {
         if (post.kind === 'NEED') {
-          const sure = await ctx.ask({ title: 'Close this need?', body: 'Open offers are declined and each provider is told. This cannot be undone.', input: false, confirmLabel: 'Close need', danger: true });
+          const sure = await ctx.ask({ title: 'Close this need?', body: 'Open offers are declined and each vendor is told. This cannot be undone.', input: false, confirmLabel: 'Close need', danger: true });
           if (sure) setStatus('close', {}, 'Closed.');
           return;
         }
@@ -348,10 +349,10 @@ export function values(state, set, ctx) {
     fyFollow: data.providers.map((provider, index) => ({
       ...provider,
       ...AVATAR_TONES[(index + 1) % AVATAR_TONES.length],
-      href: `/providers/${provider.slug}`,
+      href: `/vendors/${provider.slug}`,
       btnLabel: provider.following ? '✓ FOLLOWING' : '+ FOLLOW',
       btnBg: provider.following ? COLORS.forest : COLORS.clay,
-      btnFg: provider.following ? COLORS.cream : COLORS.ink,
+      btnFg: COLORS.cream,
       toggle: () => followProvider(provider),
     })),
     hasFollowCards: data.providers.length > 0,

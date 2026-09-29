@@ -13,11 +13,13 @@
   --tz-forest-500: #2d524f;
   --tz-forest-300: #5a7d7a;
 
-  --tz-saffron-900:#7a3e0f;
-  --tz-saffron-700:#a85a23;
-  --tz-saffron-500:#D97A3B;   /* warm saffron accent */
-  --tz-saffron-300:#e8a472;
-  --tz-saffron-100:#f6dcc0;
+  /* The accent follows the logo: maroon, with a rose partner for dark panels.
+     The names stay so existing rules keep working. */
+  --tz-saffron-900:#5C0000;
+  --tz-saffron-700:#820101;
+  --tz-saffron-500:#820101;
+  --tz-saffron-300:#E9B4AC;
+  --tz-saffron-100:#F6E6E2;
   --tz-saffron-050:#fbeed8;
 
   --tz-paper:      #FFFFFF;

@@ -1,37 +1,26 @@
 // Markup for the providerDetail page. Bindings are resolved by src/design/render.js.
 
+import { SITE_HEADER, SITE_TABBAR } from './shell';
+
 const template = `
-<div style="font-family: var(--tz-sans); background: #F7F1E6; color: #14201F; min-height: 100vh;">
+<div class="tz-page" style="font-family: var(--tz-sans); background: #F7F1E6; color: #14201F; min-height: 100vh;">
 
   <!-- Header -->
-  <header style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 18px 24px; border-bottom: 2px solid #1F3A38; background: #F7F1E6; position: sticky; top: 0; z-index: 40;">
-    <div style="display: flex; align-items: center; gap: 36px;">
-      <a href="/" class="tz-logo-link" aria-label="Twendezetu home"><img src="/brand/logo.png" alt="Twendezetu" width="1211" height="229" class="tz-logo tz-logo--md"></a>
-      <nav class="tw-nav" style="display: flex; gap: 24px; font-size: 14px; font-weight: 500;">
-        <a href="/" style="color: #6E6155; text-decoration: none;">Event guide</a>
-        <a href="/providers" style="color: #6E6155; text-decoration: none;">Directory</a>
-        <a href="/create-event" style="color: #6E6155; text-decoration: none;">Post a need</a>
-      </nav>
-    </div>
-    <div style="display: flex; gap: 10px; align-items: center;">
-      <a href="{{ accountHref }}" style="font-size: 14px; font-weight: 600; color: #14201F; text-decoration: none; padding: 10px 16px;">{{ accountLabelPlain }}</a>
-      <a href="/provider-dashboard" style="font-family: var(--tz-mono); font-size: 13px; background: #1F3A38; color: #F7F1E6; text-decoration: none; padding: 12px 20px; box-shadow: 4px 4px 0 #D97A3B;">FOR PROVIDERS →</a>
-    </div>
-  </header>
+  ${SITE_HEADER}
 
   <!-- Guest banner -->
   <div style="background: #1F3A38; color: #F7F1E6; font-family: var(--tz-mono); font-size: 12px; padding: 10px 24px; text-align: center; line-height: 1.5;">
-    No account needed to browse or request a quote — your phone and email stay <strong style="color: #E8A472;">masked</strong> until you choose to reveal them.
+    No account needed to browse or request a quote — your phone and email stay <strong style="color: #E9B4AC;">masked</strong> until you choose to reveal them.
   </div>
 
   <div style="max-width: 1200px; margin: 0 auto; padding: 20px 24px 0; font-family: var(--tz-mono); font-size: 12px; color: #6E6155;">
-    <a href="/providers" style="color: #A85A23;">← Back to directory</a> · <a href="{{ categoryHref }}" style="color: #6E6155;">{{ category }}</a> · {{ place }}
+    <a href="/vendors" style="color: #820101;">← Back to directory</a> · <a href="{{ categoryHref }}" style="color: #6E6155;">{{ category }}</a> · {{ place }}
   </div>
 
   <!-- Title -->
   <section style="max-width: 1200px; margin: 0 auto; padding: 16px 24px 24px;">
     <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-      <h1 style="font-family: var(--tz-display); font-size: clamp(38px, 6vw, 80px); text-transform: uppercase; line-height: 0.92; margin: 0;">{{ name }}<span style="color: #D97A3B;">.</span></h1>
+      <h1 style="font-family: var(--tz-display); font-size: clamp(38px, 6vw, 80px); text-transform: uppercase; line-height: 0.92; margin: 0;">{{ name }}<span style="color: #820101;">.</span></h1>
       <sc-if value="{{ isVerified }}">
         <span style="font-family: var(--tz-mono); font-size: 11px; background: #1F3A38; color: #F7F1E6; padding: 6px 12px;">✓ ID VERIFIED</span>
       </sc-if>
@@ -40,8 +29,8 @@ const template = `
     <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; font-family: var(--tz-mono); font-size: 13px;">
       <span style="background: #1F3A38; color: #F7F1E6; padding: 8px 14px;">{{ category }}</span>
       <span style="border: 2px solid #1F3A38; padding: 6px 14px;">{{ city }}</span>
-      <span style="border: 2px solid #1F3A38; color: #A85A23; padding: 6px 14px;">{{ ratingChip }}</span>
-      <sc-if value="{{ rate }}"><span style="background: #D97A3B; border: 2px solid #1F3A38; color: #1F3A38; padding: 6px 14px;">{{ rate }}</span></sc-if>
+      <span style="border: 2px solid #1F3A38; color: #820101; padding: 6px 14px;">{{ ratingChip }}</span>
+      <sc-if value="{{ rate }}"><span style="background: #820101; border: 2px solid #1F3A38; color: #F7F1E6; padding: 6px 14px;">{{ rate }}</span></sc-if>
       <sc-if value="{{ response }}"><span style="border: 2px solid #1F3A38; padding: 6px 14px;">{{ response }}</span></sc-if>
     </div>
   </section>
@@ -51,28 +40,28 @@ const template = `
     <div class="tw-2col" style="display: grid; grid-template-columns: 1.5fr 0.9fr; gap: 40px; align-items: start;">
       <div>
         <img src="{{ img }}" alt="{{ name }}" style="width: 100%; aspect-ratio: 16/10; object-fit: cover; border: 2px solid #1F3A38; display: block; box-shadow: 6px 6px 0 #1F3A38;">
-        <h2 style="font-family: var(--tz-display); font-size: 26px; text-transform: uppercase; margin: 32px 0 10px;">About<span style="color: #D97A3B;">.</span></h2>
+        <h2 style="font-family: var(--tz-display); font-size: 26px; text-transform: uppercase; margin: 32px 0 10px;">About<span style="color: #820101;">.</span></h2>
         <p style="font-size: 16px; line-height: 1.6; color: #3A2F25; max-width: 640px; white-space: pre-line;">{{ description }}</p>
         <sc-if value="{{ hasServices }}">
-          <h2 style="font-family: var(--tz-display); font-size: 26px; text-transform: uppercase; margin: 30px 0 12px;">Services<span style="color: #D97A3B;">.</span></h2>
+          <h2 style="font-family: var(--tz-display); font-size: 26px; text-transform: uppercase; margin: 30px 0 12px;">Services<span style="color: #820101;">.</span></h2>
           <div style="border: 2px solid #1F3A38; max-width: 640px;">
             <sc-for list="{{ services }}" as="sv">
               <div style="display: grid; grid-template-columns: 1fr auto; gap: 16px; padding: 14px 16px; border-bottom: 1px solid #E3D9C6; background: #FFFDF8; align-items: center;">
                 <div><div style="font-weight: 700; font-size: 14.5px;">{{ sv.title }}</div><div style="font-size: 13px; color: #6E6155; margin-top: 2px;">{{ sv.desc }}</div></div>
-                <span style="font-family: var(--tz-mono); font-size: 12.5px; color: #A85A23; white-space: nowrap;">{{ sv.rate }}</span>
+                <span style="font-family: var(--tz-mono); font-size: 12.5px; color: #820101; white-space: nowrap;">{{ sv.rate }}</span>
               </div>
             </sc-for>
           </div>
         </sc-if>
 
         <!-- Reviews -->
-        <h2 style="font-family: var(--tz-display); font-size: 26px; text-transform: uppercase; margin: 30px 0 12px;">Reviews<span style="color: #D97A3B;">.</span></h2>
+        <h2 style="font-family: var(--tz-display); font-size: 26px; text-transform: uppercase; margin: 30px 0 12px;">Reviews<span style="color: #820101;">.</span></h2>
         <div style="display: grid; gap: 12px; max-width: 640px;">
           <sc-if value="{{ noReviews }}"><div style="border: 2px dashed #1F3A38; padding: 14px 16px; font-size: 13.5px; color: #6E6155;">No reviews yet. Reviews on Twendezetu only come from completed bookings.</div></sc-if>
           <sc-for list="{{ reviews }}" as="rv" hint-placeholder-count="3">
             <div style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 14px 16px;">
               <div style="display: flex; justify-content: space-between; gap: 10px; font-family: var(--tz-mono); font-size: 11px;">
-                <span style="color: #A85A23;">{{ rv.stars }} · {{ rv.job }}</span>
+                <span style="color: #820101;">{{ rv.stars }} · {{ rv.job }}</span>
                 <span style="color: #6E6155;">{{ rv.who }}</span>
               </div>
               <div style="font-size: 14px; color: #3A2F25; line-height: 1.5; margin-top: 8px;">{{ rv.body }}</div>
@@ -91,7 +80,7 @@ const template = `
           <div style="padding: 18px 20px; display: grid; gap: 10px;">
 
             <!-- Request a quote (guest) -->
-            <button onClick="{{ toggleReq }}" aria-expanded="{{ reqOpen }}" style="width: 100%; font-family: var(--tz-display); font-size: 16px; text-transform: uppercase; background: {{ reqBg }}; color: {{ reqFg }}; border: 2px solid #1F3A38; padding: 13px; cursor: pointer; box-shadow: 4px 4px 0 #D97A3B;">{{ reqBtnLabel }}</button>
+            <button onClick="{{ toggleReq }}" aria-expanded="{{ reqOpen }}" style="width: 100%; font-family: var(--tz-display); font-size: 16px; text-transform: uppercase; background: {{ reqBg }}; color: {{ reqFg }}; border: 2px solid #1F3A38; padding: 13px; cursor: pointer; box-shadow: 4px 4px 0 #820101;">{{ reqBtnLabel }}</button>
             <sc-if value="{{ reqOpen }}" hint-placeholder-val="{{ false }}">
               <sc-if value="{{ reqDone }}" hint-placeholder-val="{{ false }}">
                 <div style="border: 2px solid #1F3A38; background: #1F3A38; color: #F7F1E6; padding: 14px 16px;">
@@ -101,7 +90,7 @@ const template = `
               </sc-if>
               <sc-if value="{{ reqNotDone }}" hint-placeholder-val="{{ true }}">
                 <div style="display: grid; gap: 8px;">
-                  <div style="font-family: var(--tz-mono); font-size: 10.5px; color: #A85A23;">[Request a service — masked, via platform]</div>
+                  <div style="font-family: var(--tz-mono); font-size: 10.5px; color: #820101;">[Request a service — masked, via platform]</div>
                   <sc-if value="{{ me.signedOut }}">
                   <input placeholder="Your name" autocomplete="name" aria-label="Your name" value="{{ reqName }}" onChange="{{ setReqName }}" style="border: 2px solid #1F3A38; background: #F7F1E6; padding: 10px 12px; font-family: var(--tz-sans); font-size: 13.5px; outline: none;">
                   <input type="email" placeholder="Email — replies come here, kept hidden" autocomplete="email" aria-label="Your email" value="{{ reqEmail }}" onChange="{{ setReqEmail }}" style="border: 2px solid #1F3A38; background: #F7F1E6; padding: 10px 12px; font-family: var(--tz-sans); font-size: 13.5px; outline: none;">
@@ -122,16 +111,16 @@ const template = `
             <sc-if value="{{ askOpen }}" hint-placeholder-val="{{ false }}">
               <div style="display: grid; gap: 8px;">
                 <textarea rows="2" placeholder="Ask about availability, travel, pricing…" aria-label="Your question" maxlength="1000" value="{{ question }}" onChange="{{ setQuestion }}" style="border: 2px solid #1F3A38; background: #F7F1E6; padding: 10px 12px; font-family: var(--tz-sans); font-size: 13.5px; outline: none; resize: vertical;"></textarea>
-                <button onClick="{{ sendAsk }}" style="font-family: var(--tz-mono); font-size: 12px; background: #D97A3B; color: #14201F; border: 2px solid #1F3A38; padding: 11px; cursor: pointer;">SEND QUESTION</button>
+                <button onClick="{{ sendAsk }}" style="font-family: var(--tz-mono); font-size: 12px; background: #820101; color: #F7F1E6; border: 2px solid #1F3A38; padding: 11px; cursor: pointer;">SEND QUESTION</button>
               </div>
             </sc-if>
 
             <!-- Share -->
             <div style="border-top: 2px solid #1F3A38; padding-top: 14px;">
-              <div style="font-family: var(--tz-mono); font-size: 11px; color: #A85A23; letter-spacing: 0.08em; margin-bottom: 8px;">[Share this provider]</div>
+              <div style="font-family: var(--tz-mono); font-size: 11px; color: #820101; letter-spacing: 0.08em; margin-bottom: 8px;">[Share this vendor]</div>
               <div style="display: flex; border: 2px solid #1F3A38; margin-bottom: 8px;">
-                <input value="{{ shareUrl }}" readOnly aria-label="Link to this provider" style="flex: 1; min-width: 0; border: 0; background: #EFE7D6; font-family: var(--tz-mono); font-size: 11.5px; padding: 10px 11px; outline: none;">
-                <button onClick="{{ copyLink }}" style="border: 0; border-left: 2px solid #1F3A38; background: #D97A3B; font-family: var(--tz-mono); font-size: 11px; padding: 0 12px; cursor: pointer;">{{ copyLabel }}</button>
+                <input value="{{ shareUrl }}" readOnly aria-label="Link to this vendor" style="flex: 1; min-width: 0; border: 0; background: #EFE7D6; font-family: var(--tz-mono); font-size: 11.5px; padding: 10px 11px; outline: none;">
+                <button onClick="{{ copyLink }}" style="border: 0; border-left: 2px solid #1F3A38; background: #820101; font-family: var(--tz-mono); font-size: 11px; padding: 0 12px; cursor: pointer; color: #F7F1E6;">{{ copyLabel }}</button>
               </div>
               <div style="display: flex; gap: 6px;">
                 <a href="{{ waHref }}" target="_blank" rel="noopener" aria-label="Share on WhatsApp" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--tz-mono); font-size: 10.5px; border: 2px solid #1F3A38; background: #FFFDF8; color: #14201F; padding: 9px; text-decoration: none;">
@@ -158,17 +147,17 @@ const template = `
   <section style="border-top: 2px solid #1F3A38; background: #EFE7D6; padding: 40px 24px;">
     <div style="max-width: 1200px; margin: 0 auto;">
       <div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 18px;">
-        <h2 style="font-family: var(--tz-display); font-size: 28px; text-transform: uppercase; margin: 0;">More {{ category }}<span style="color: #D97A3B;">.</span></h2>
-        <span style="color: #D97A3B; font-family: var(--tz-display); font-size: 22px;">›</span>
+        <h2 style="font-family: var(--tz-display); font-size: 28px; text-transform: uppercase; margin: 0;">More {{ category }}<span style="color: #820101;">.</span></h2>
+        <span style="color: #820101; font-family: var(--tz-display); font-size: 22px;">›</span>
       </div>
       <div style="display: flex; gap: 16px; overflow-x: auto; padding-bottom: 8px;">
         <sc-for list="{{ similar }}" as="pv" hint-placeholder-count="6">
-          <a href="{{ pv.href }}" style="flex: 0 0 230px; text-decoration: none; color: #14201F; background: #FFFDF8; border: 2px solid #1F3A38; display: flex; flex-direction: column;" style-hover="transform: translate(-3px,-3px); box-shadow: 5px 5px 0 #D97A3B;">
+          <a href="{{ pv.href }}" style="flex: 0 0 230px; text-decoration: none; color: #14201F; background: #FFFDF8; border: 2px solid #1F3A38; display: flex; flex-direction: column;" style-hover="transform: translate(-3px,-3px); box-shadow: 5px 5px 0 #820101;">
             <img src="{{ pv.img }}" alt="{{ pv.name }}" style="width: 100%; height: 130px; object-fit: cover; display: block; border-bottom: 2px solid #1F3A38;">
             <div style="padding: 14px; display: flex; flex-direction: column; gap: 5px; flex: 1;">
               <div style="font-family: var(--tz-display); font-size: 17px; text-transform: uppercase; line-height: 1.05;">{{ pv.name }}</div>
               <div style="font-size: 12.5px; color: #6E6155;">{{ pv.city }} · ★ {{ pv.rating }}</div>
-              <div style="margin-top: auto; font-family: var(--tz-mono); font-size: 12px; color: #A85A23;">{{ pv.rate }}</div>
+              <div style="margin-top: auto; font-family: var(--tz-mono); font-size: 12px; color: #820101;">{{ pv.rate }}</div>
             </div>
           </a>
         </sc-for>
@@ -183,6 +172,7 @@ const template = `
       <div style="font-family: var(--tz-mono); font-size: 11px; color: rgba(247,241,230,0.7);">Masked contacts · Fees only when money moves</div>
     </div>
   </footer>
+  ${SITE_TABBAR}
 </div>
 `;
 

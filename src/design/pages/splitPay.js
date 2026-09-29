@@ -102,7 +102,7 @@ export function values(state, set, ctx) {
         unpaid: !item.paid,
         bg: item.paid ? '#E4EBDD' : item.mine ? '#FBEED8' : COLORS.paper,
         avBg: [COLORS.clay, COLORS.forest, COLORS.sage, COLORS.clayLight, COLORS.sand][index % 5],
-        avFg: index % 5 === 1 ? COLORS.cream : COLORS.ink,
+        avFg: index % 5 <= 1 ? COLORS.cream : COLORS.ink,
         remind: () => ctx.run(`remind:${item.position}`, () => ctx.api.post(`/api/splits/${split.slug}/shares/${item.position}/remind`), { success: 'Reminder sent.' }),
         remindLabel: state.busy?.[`remind:${item.position}`] ? 'SENDING…' : 'REMIND',
         showPay: item.canPay && !choosing,

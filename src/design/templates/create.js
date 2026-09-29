@@ -1,7 +1,7 @@
 // Markup for the create page. Bindings are resolved by src/design/render.js.
 
 const field = 'border: 2px solid #1F3A38; background: #FFFDF8; padding: 14px 16px; font-family: var(--tz-sans); font-size: 15px; outline: none; width: 100%; box-sizing: border-box;';
-const label = 'font-family: var(--tz-mono); font-size: 12px; color: #A85A23;';
+const label = 'font-family: var(--tz-mono); font-size: 12px; color: #820101;';
 const hint = 'font-size: 12px; color: #6E6155; line-height: 1.5;';
 
 const template = `
@@ -18,7 +18,7 @@ const template = `
 
     <!-- Stepper rail -->
     <aside class="tw-sticky" style="position: sticky; top: 96px;">
-      <div style="font-family: var(--tz-mono); font-size: 12px; color: #A85A23; letter-spacing: 0.08em; margin-bottom: 16px;">[Hatua — steps]</div>
+      <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em; margin-bottom: 16px;">[Hatua — steps]</div>
       <nav aria-label="Steps">
       <sc-for list="{{ steps }}" as="s">
         <button onClick="{{ s.go }}" aria-current="{{ s.current }}" style="display: grid; grid-template-columns: 34px 1fr; gap: 12px; align-items: center; width: 100%; text-align: left; background: none; border: 0; padding: 10px 0; cursor: {{ s.cursor }}; font-family: inherit;">
@@ -27,8 +27,8 @@ const template = `
         </button>
       </sc-for>
       </nav>
-      <div style="margin-top: 24px; border: 1px dashed #A85A23; background: #FBEED8; padding: 14px; font-size: 12.5px; line-height: 1.5; color: #7A3E0F;">
-        <strong>Why masked?</strong> Providers answer in-platform. Your email and phone are never shown unless you choose to share them when you accept an offer.
+      <div style="margin-top: 24px; border: 1px dashed #820101; background: #FBEED8; padding: 14px; font-size: 12.5px; line-height: 1.5; color: #5C0000;">
+        <strong>Why masked?</strong> Vendors answer in-platform. Your email and phone are never shown unless you choose to share them when you accept an offer.
       </div>
     </aside>
 
@@ -37,28 +37,28 @@ const template = `
       <!-- STEP 1: kind -->
       <sc-if value="{{ isStep1 }}">
         <div>
-          <h1 style="font-family: var(--tz-display); font-size: clamp(36px, 5vw, 56px); text-transform: uppercase; line-height: 0.95; margin: 0 0 8px;">What are you posting<span style="color: #D97A3B;">?</span></h1>
+          <h1 style="font-family: var(--tz-display); font-size: clamp(36px, 5vw, 56px); text-transform: uppercase; line-height: 0.95; margin: 0 0 8px;">What are you posting<span style="color: #820101;">?</span></h1>
           <p style="font-size: 15px; color: #6E6155; margin: 0 0 28px;">Both are free to post. Fees apply only when money moves.</p>
           <div class="tw-2col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px;">
             <button onClick="{{ pickEvent }}" aria-pressed="{{ isEventKind }}" style="text-align: left; background: {{ eventCardBg }}; color: {{ eventCardFg }}; border: 2px solid #1F3A38; padding: 28px; cursor: pointer; box-shadow: {{ eventCardShadow }}; font-family: inherit;">
               <div style="font-family: var(--tz-mono); font-size: 12px; opacity: 0.7;">(01)</div>
               <div style="font-family: var(--tz-display); font-size: 28px; text-transform: uppercase; margin: 28px 0 10px;">An event</div>
-              <div style="font-size: 14px; line-height: 1.55; opacity: 0.85;">A festival, cookout, harusi, fundraiser or show. Free RSVP or ticket tiers. It goes on the guide with a link to share.</div>
+              <div style="font-size: 14px; line-height: 1.55; opacity: 0.85;">A festival, cookout, harusi, fundraiser or show. Free RSVP or ticket tiers. It goes live on Twendezetu with a link to share.</div>
             </button>
             <button onClick="{{ pickNeed }}" aria-pressed="{{ isNeedKind }}" style="text-align: left; background: {{ needCardBg }}; color: {{ needCardFg }}; border: 2px solid #1F3A38; padding: 28px; cursor: pointer; box-shadow: {{ needCardShadow }}; font-family: inherit;">
               <div style="font-family: var(--tz-mono); font-size: 12px; opacity: 0.7;">(02)</div>
               <div style="font-family: var(--tz-display); font-size: 28px; text-transform: uppercase; margin: 28px 0 10px;">A need</div>
-              <div style="font-size: 14px; line-height: 1.55; opacity: 0.85;">"Driver needed Kampala → Jinja." "DJ for a cookout." Matching providers are told, send offers, and you compare and accept.</div>
+              <div style="font-size: 14px; line-height: 1.55; opacity: 0.85;">"Driver needed Kampala → Jinja." "DJ for a cookout." Matching vendors are told, send offers, and you compare and accept.</div>
             </button>
           </div>
-          <button onClick="{{ next }}" style="margin-top: 28px; font-family: var(--tz-display); font-size: 16px; text-transform: uppercase; background: #D97A3B; color: #1F3A38; border: 2px solid #1F3A38; padding: 14px 32px; cursor: pointer; box-shadow: 4px 4px 0 #1F3A38;">Continue →</button>
+          <button onClick="{{ next }}" style="margin-top: 28px; font-family: var(--tz-display); font-size: 16px; text-transform: uppercase; background: #820101; color: #F7F1E6; border: 2px solid #1F3A38; padding: 14px 32px; cursor: pointer; box-shadow: 4px 4px 0 #1F3A38;">Continue →</button>
         </div>
       </sc-if>
 
       <!-- STEP 2: details -->
       <sc-if value="{{ isStep2 }}">
         <div>
-          <h1 style="font-family: var(--tz-display); font-size: clamp(36px, 5vw, 56px); text-transform: uppercase; line-height: 0.95; margin: 0 0 8px;">{{ detailsTitle }}<span style="color: #D97A3B;">.</span></h1>
+          <h1 style="font-family: var(--tz-display); font-size: clamp(36px, 5vw, 56px); text-transform: uppercase; line-height: 0.95; margin: 0 0 8px;">{{ detailsTitle }}<span style="color: #820101;">.</span></h1>
           <p style="font-size: 15px; color: #6E6155; margin: 0 0 28px;">{{ detailsIntro }}</p>
           <div style="display: grid; gap: 18px; max-width: 640px;">
             <label style="display: grid; gap: 6px;">
@@ -68,7 +68,7 @@ const template = `
 
             <sc-if value="{{ isEventKind }}">
               <label style="display: grid; gap: 6px;">
-                <span style="${label}">ONE-LINE SUMMARY * <span style="color: #6E6155;">— shown on the guide card</span></span>
+                <span style="${label}">ONE-LINE SUMMARY * <span style="color: #6E6155;">— shown on the event card</span></span>
                 <input value="{{ form.blurb }}" onChange="{{ set.blurb }}" maxlength="240" placeholder="e.g. A diaspora dancefloor — afrobeat, amapiano and gengetone till late." style="${field}">
               </label>
             </sc-if>
@@ -145,7 +145,7 @@ const template = `
                   <sc-if value="{{ hasCover }}">
                     <img src="{{ form.coverUrl }}" alt="Cover preview" style="width: 160px; height: 100px; object-fit: cover; border: 2px solid #1F3A38; display: block;">
                   </sc-if>
-                  <label style="border: 2px dashed #A85A23; background: #FBEED8; color: #7A3E0F; font-family: var(--tz-mono); font-size: 12px; padding: 14px 18px; cursor: pointer;">
+                  <label style="border: 2px dashed #820101; background: #FBEED8; color: #5C0000; font-family: var(--tz-mono); font-size: 12px; padding: 14px 18px; cursor: pointer;">
                     {{ coverLabel }}
                     <input type="file" accept="image/jpeg,image/png,image/webp" onChange="{{ uploadCover }}" aria-label="Upload a cover photo" style="position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none;">
                   </label>
@@ -157,7 +157,7 @@ const template = `
             <!-- Ticketing (events) -->
             <sc-if value="{{ isEventKind }}">
               <div style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 20px 22px;">
-                <div style="font-family: var(--tz-mono); font-size: 12px; color: #A85A23; letter-spacing: 0.08em; margin-bottom: 12px;">[Tiketi — how do people get in?]</div>
+                <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em; margin-bottom: 12px;">[Tiketi — how do people get in?]</div>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                   <button onClick="{{ pickFree }}" aria-pressed="{{ form.isFree }}" style="flex: 1; min-width: 160px; text-align: left; border: 2px solid #1F3A38; background: {{ freeBg }}; color: {{ freeFg }}; padding: 14px 16px; cursor: pointer; font-family: inherit;">
                     <div style="font-family: var(--tz-display); font-size: 17px; text-transform: uppercase;">Free RSVP</div>
@@ -184,7 +184,7 @@ const template = `
                       <sc-if value="{{ tr.soldNote }}"><div style="${hint} margin-top: -4px;">{{ tr.soldNote }}</div></sc-if>
                     </sc-for>
                     <sc-if value="{{ canAddTier }}">
-                      <button onClick="{{ addTier }}" style="border: 2px dashed #A85A23; background: #FBEED8; color: #7A3E0F; font-family: var(--tz-mono); font-size: 12px; padding: 11px; cursor: pointer;">+ ADD A TIER (E.G. EARLY BIRD, VIP)</button>
+                      <button onClick="{{ addTier }}" style="border: 2px dashed #820101; background: #FBEED8; color: #5C0000; font-family: var(--tz-mono); font-size: 12px; padding: 11px; cursor: pointer;">+ ADD A TIER (E.G. EARLY BIRD, VIP)</button>
                     </sc-if>
                     <div style="${hint}">Ticket money is held in escrow and released to you {{ releaseHours }} hours after the event. Buyers can also reserve and pay at the door.</div>
                   </div>
@@ -212,13 +212,13 @@ const template = `
             </sc-if>
           </div>
           <sc-if value="{{ formError }}">
-            <div role="alert" style="margin-top: 18px; max-width: 640px; border: 2px solid #B8463A; background: #FBEED8; color: #7A3E0F; padding: 12px 16px; font-size: 13.5px;">{{ formError }}</div>
+            <div role="alert" style="margin-top: 18px; max-width: 640px; border: 2px solid #B8463A; background: #FBEED8; color: #5C0000; padding: 12px 16px; font-size: 13.5px;">{{ formError }}</div>
           </sc-if>
           <div style="display: flex; gap: 12px; margin-top: 28px;">
             <sc-if value="{{ canGoBack }}">
               <button onClick="{{ back }}" style="font-family: var(--tz-mono); font-size: 13px; background: none; border: 2px solid #1F3A38; padding: 14px 22px; cursor: pointer;">← BACK</button>
             </sc-if>
-            <button onClick="{{ next }}" style="font-family: var(--tz-display); font-size: 16px; text-transform: uppercase; background: #D97A3B; color: #1F3A38; border: 2px solid #1F3A38; padding: 14px 32px; cursor: pointer; box-shadow: 4px 4px 0 #1F3A38;">Continue →</button>
+            <button onClick="{{ next }}" style="font-family: var(--tz-display); font-size: 16px; text-transform: uppercase; background: #820101; color: #F7F1E6; border: 2px solid #1F3A38; padding: 14px 32px; cursor: pointer; box-shadow: 4px 4px 0 #1F3A38;">Continue →</button>
           </div>
         </div>
       </sc-if>
@@ -226,7 +226,7 @@ const template = `
       <!-- STEP 3: privacy & alerts -->
       <sc-if value="{{ isStep3 }}">
         <div>
-          <h1 style="font-family: var(--tz-display); font-size: clamp(36px, 5vw, 56px); text-transform: uppercase; line-height: 0.95; margin: 0 0 8px;">Privacy &amp; alerts<span style="color: #D97A3B;">.</span></h1>
+          <h1 style="font-family: var(--tz-display); font-size: clamp(36px, 5vw, 56px); text-transform: uppercase; line-height: 0.95; margin: 0 0 8px;">Privacy &amp; alerts<span style="color: #820101;">.</span></h1>
           <p style="font-size: 15px; color: #6E6155; margin: 0 0 28px;">You control who sees what, and how often we nudge you.</p>
           <div style="display: grid; gap: 14px; max-width: 640px;">
             <sc-for list="{{ privacyRows }}" as="row">
@@ -242,11 +242,11 @@ const template = `
             </sc-for>
           </div>
           <sc-if value="{{ formError }}">
-            <div role="alert" style="margin-top: 18px; max-width: 640px; border: 2px solid #B8463A; background: #FBEED8; color: #7A3E0F; padding: 12px 16px; font-size: 13.5px;">{{ formError }}</div>
+            <div role="alert" style="margin-top: 18px; max-width: 640px; border: 2px solid #B8463A; background: #FBEED8; color: #5C0000; padding: 12px 16px; font-size: 13.5px;">{{ formError }}</div>
           </sc-if>
           <div style="display: flex; gap: 12px; margin-top: 28px; flex-wrap: wrap;">
             <button onClick="{{ back }}" style="font-family: var(--tz-mono); font-size: 13px; background: none; border: 2px solid #1F3A38; padding: 14px 22px; cursor: pointer;">← BACK</button>
-            <button onClick="{{ submit }}" aria-busy="{{ saving }}" style="font-family: var(--tz-display); font-size: 16px; text-transform: uppercase; background: #D97A3B; color: #1F3A38; border: 2px solid #1F3A38; padding: 14px 32px; cursor: pointer; box-shadow: 4px 4px 0 #1F3A38;">{{ submitLabel }}</button>
+            <button onClick="{{ submit }}" aria-busy="{{ saving }}" style="font-family: var(--tz-display); font-size: 16px; text-transform: uppercase; background: #820101; color: #F7F1E6; border: 2px solid #1F3A38; padding: 14px 32px; cursor: pointer; box-shadow: 4px 4px 0 #1F3A38;">{{ submitLabel }}</button>
           </div>
         </div>
       </sc-if>
@@ -254,15 +254,15 @@ const template = `
       <!-- STEP 4: done -->
       <sc-if value="{{ isStep4 }}">
         <div>
-          <div style="font-family: var(--tz-mono); font-size: 12px; color: #A85A23;">{{ doneKicker }}</div>
-          <h1 style="font-family: var(--tz-display); font-size: clamp(40px, 6vw, 68px); text-transform: uppercase; line-height: 0.95; margin: 8px 0;">{{ doneTitle }}<span style="color: #D97A3B;">.</span></h1>
+          <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101;">{{ doneKicker }}</div>
+          <h1 style="font-family: var(--tz-display); font-size: clamp(40px, 6vw, 68px); text-transform: uppercase; line-height: 0.95; margin: 8px 0;">{{ doneTitle }}<span style="color: #820101;">.</span></h1>
           <p style="font-size: 15px; color: #3A2F25; max-width: 560px; line-height: 1.55;">{{ doneText }}</p>
           <sc-if value="{{ hasShare }}">
-            <div style="border: 2px solid #1F3A38; background: #FFFDF8; box-shadow: 6px 6px 0 #D97A3B; padding: 24px; max-width: 560px; margin-top: 24px;">
-              <div style="font-family: var(--tz-mono); font-size: 11px; color: #A85A23;">[Your shareable link]</div>
+            <div style="border: 2px solid #1F3A38; background: #FFFDF8; box-shadow: 6px 6px 0 #820101; padding: 24px; max-width: 560px; margin-top: 24px;">
+              <div style="font-family: var(--tz-mono); font-size: 11px; color: #820101;">[Your shareable link]</div>
               <div style="display: flex; border: 2px solid #1F3A38; margin-top: 10px;">
                 <input value="{{ shareUrl }}" readOnly aria-label="Shareable link" style="flex: 1; min-width: 0; border: 0; background: #EFE7D6; font-family: var(--tz-mono); font-size: 13px; padding: 12px 14px; outline: none;">
-                <button onClick="{{ copyLink }}" style="border: 0; border-left: 2px solid #1F3A38; background: #D97A3B; font-family: var(--tz-mono); font-size: 12px; padding: 0 16px; cursor: pointer;">{{ copyLabel }}</button>
+                <button onClick="{{ copyLink }}" style="border: 0; border-left: 2px solid #1F3A38; background: #820101; font-family: var(--tz-mono); font-size: 12px; padding: 0 16px; cursor: pointer; color: #F7F1E6;">{{ copyLabel }}</button>
               </div>
               <div style="display: flex; gap: 8px; margin-top: 10px;">
                 <a href="{{ waHref }}" target="_blank" rel="noopener" style="flex: 1; text-align: center; font-family: var(--tz-mono); font-size: 12px; border: 2px solid #1F3A38; background: #F7F1E6; color: #14201F; padding: 11px; text-decoration: none;">WHATSAPP</a>
@@ -270,11 +270,11 @@ const template = `
                 <a href="{{ xHref }}" target="_blank" rel="noopener" style="flex: 1; text-align: center; font-family: var(--tz-mono); font-size: 12px; border: 2px solid #1F3A38; background: #F7F1E6; color: #14201F; padding: 11px; text-decoration: none;">X</a>
                 <a href="{{ emHref }}" style="flex: 1; text-align: center; font-family: var(--tz-mono); font-size: 12px; border: 2px solid #1F3A38; background: #F7F1E6; color: #14201F; padding: 11px; text-decoration: none;">EMAIL</a>
               </div>
-              <div style="font-size: 12.5px; color: #6E6155; margin-top: 12px; line-height: 1.5;">Anyone who opens the link sees the event. Your email and phone stay hidden, and questions reach you in <a href="/messages" style="color: #A85A23;">Messages</a>.</div>
+              <div style="font-size: 12.5px; color: #6E6155; margin-top: 12px; line-height: 1.5;">Anyone who opens the link sees the event. Your email and phone stay hidden, and questions reach you in <a href="/messages" style="color: #820101;">Messages</a>.</div>
             </div>
           </sc-if>
           <div style="display: flex; gap: 12px; margin-top: 28px; flex-wrap: wrap;">
-            <a href="{{ doneHref }}" style="font-family: var(--tz-display); font-size: 16px; text-transform: uppercase; background: #1F3A38; color: #F7F1E6; border: 2px solid #1F3A38; padding: 14px 32px; text-decoration: none; box-shadow: 4px 4px 0 #D97A3B;">{{ doneCta }}</a>
+            <a href="{{ doneHref }}" style="font-family: var(--tz-display); font-size: 16px; text-transform: uppercase; background: #1F3A38; color: #F7F1E6; border: 2px solid #1F3A38; padding: 14px 32px; text-decoration: none; box-shadow: 4px 4px 0 #E9B4AC;">{{ doneCta }}</a>
             <a href="/my-twende?tab=posts" style="font-family: var(--tz-mono); font-size: 13px; color: #14201F; border: 2px solid #1F3A38; padding: 14px 22px; text-decoration: none;">MY POSTS</a>
             <sc-if value="{{ canPostAnother }}">
               <button onClick="{{ restart }}" style="font-family: var(--tz-mono); font-size: 13px; background: none; border: 2px solid #1F3A38; padding: 14px 22px; cursor: pointer;">POST ANOTHER</button>

@@ -11,7 +11,7 @@ const MILESTONE_COPY = {
   JOINED: 'Joined + verified',
   FIRST_TICKET: 'Bought a ticket',
   FIRST_POST: 'Posted an event or a need',
-  BECAME_PROVIDER: 'Became a provider',
+  BECAME_PROVIDER: 'Became a vendor',
 };
 
 export function tierFor(friendCount) {
@@ -117,7 +117,7 @@ export async function referralSummary(db, userId) {
       { icon: '👋', label: 'Friend joins and verifies their phone number', points: REFERRAL_POINTS.JOINED },
       { icon: '🎟', label: 'Their first ticket purchase', points: REFERRAL_POINTS.FIRST_TICKET },
       { icon: '📣', label: 'They post an event or a need', points: REFERRAL_POINTS.FIRST_POST },
-      { icon: '🤝', label: 'They become a paying provider', points: REFERRAL_POINTS.BECAME_PROVIDER },
+      { icon: '🤝', label: 'They become a paying vendor', points: REFERRAL_POINTS.BECAME_PROVIDER },
     ],
     tiers: REFERRAL_TIERS.map((tier) => ({
       name: tier.name,
