@@ -19,8 +19,8 @@ const template = `
     <!-- Section nav -->
     <aside class="tw-side" style="border-right: 2px solid #1F3A38; padding: 24px 0; display: flex; flex-direction: column; gap: 2px; position: sticky; top: 79px; align-self: start;">
       <div style="padding: 0 22px 14px;">
-        <div style="font-family: var(--tz-mono); font-size: 11px; color: #A85A23; letter-spacing: 0.08em;">[PROGRESS — {{ pct }} COMPLETE]</div>
-        <div style="height: 10px; border: 2px solid #1F3A38; background: #EFE7D6; margin-top: 8px;"><div style="height: 100%; width: {{ pct }}; background: #D97A3B; transition: width 300ms ease;"></div></div>
+        <div style="font-family: var(--tz-mono); font-size: 11px; color: #820101; letter-spacing: 0.08em;">[PROGRESS — {{ pct }} COMPLETE]</div>
+        <div style="height: 10px; border: 2px solid #1F3A38; background: #EFE7D6; margin-top: 8px;"><div style="height: 100%; width: {{ pct }}; background: #820101; transition: width 300ms ease; color: #F7F1E6;"></div></div>
         <div style="font-size: 11.5px; color: #6E6155; margin-top: 8px; line-height: 1.5;">Every field autosaves. Close the tab, come back next week — you continue exactly here.</div>
       </div>
       <sc-if value="{{ statusBanner }}">
@@ -39,49 +39,49 @@ const template = `
       <!-- 1 BUSINESS INFO -->
       <sc-if value="{{ isBusiness }}" hint-placeholder-val="{{ true }}">
         <div>
-          <h1 style="font-family: var(--tz-display); font-size: clamp(28px, 4vw, 42px); text-transform: uppercase; margin: 0 0 6px;">Business information<span style="color: #D97A3B;">.</span></h1>
+          <h1 style="font-family: var(--tz-display); font-size: clamp(28px, 4vw, 42px); text-transform: uppercase; margin: 0 0 6px;">Business information<span style="color: #820101;">.</span></h1>
           <p style="font-size: 14px; color: #6E6155; margin: 0 0 24px;">Who you are and where you work. This is what the trust team checks first.</p>
           <div class="tw-2col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 720px;">
-            <label style="display: grid; gap: 6px;"><span style="font-family: var(--tz-mono); font-size: 11.5px; color: #A85A23;">BUSINESS / TRADING NAME *</span>
+            <label style="display: grid; gap: 6px;"><span style="font-family: var(--tz-mono); font-size: 11.5px; color: #820101;">BUSINESS / TRADING NAME *</span>
               <input value="{{ fBizName }}" onChange="{{ setBizName }}" style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 12px 14px; font-family: var(--tz-sans); font-size: 14px; outline: none;"></label>
-            <label style="display: grid; gap: 6px;"><span style="font-family: var(--tz-mono); font-size: 11.5px; color: #A85A23;">PRIMARY CATEGORY *</span>
+            <label style="display: grid; gap: 6px;"><span style="font-family: var(--tz-mono); font-size: 11.5px; color: #820101;">PRIMARY CATEGORY *</span>
               <select value="{{ fBizCat }}" onChange="{{ setBizCat }}" style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 12px 14px; font-family: var(--tz-sans); font-size: 14px; outline: none;">
                 <sc-for list="{{ categories }}" as="c"><option value="{{ c.label }}">{{ c.label }}</option></sc-for>
               </select></label>
-            <label style="display: grid; gap: 6px;"><span style="font-family: var(--tz-mono); font-size: 11.5px; color: #A85A23;">CITIES SERVED *</span>
+            <label style="display: grid; gap: 6px;"><span style="font-family: var(--tz-mono); font-size: 11.5px; color: #820101;">CITIES SERVED *</span>
               <input value="{{ fBizCities }}" onChange="{{ setBizCities }}" placeholder="e.g. Kampala, Jinja, Entebbe" style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 12px 14px; font-family: var(--tz-sans); font-size: 14px; outline: none;"></label>
-            <label style="display: grid; gap: 6px;"><span style="font-family: var(--tz-mono); font-size: 11.5px; color: #A85A23;">YEARS OPERATING</span>
+            <label style="display: grid; gap: 6px;"><span style="font-family: var(--tz-mono); font-size: 11.5px; color: #820101;">YEARS OPERATING</span>
               <input value="{{ fBizYears }}" onChange="{{ setBizYears }}" inputmode="numeric" maxlength="2" style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 12px 14px; font-family: var(--tz-sans); font-size: 14px; outline: none;"></label>
           </div>
-          <label style="display: grid; gap: 6px; max-width: 720px; margin-top: 16px;"><span style="font-family: var(--tz-mono); font-size: 11.5px; color: #A85A23;">DESCRIBE YOUR SERVICE (SHOWN TO THE TRUST TEAM ONLY) *</span>
+          <label style="display: grid; gap: 6px; max-width: 720px; margin-top: 16px;"><span style="font-family: var(--tz-mono); font-size: 11.5px; color: #820101;">DESCRIBE YOUR SERVICE (SHOWN TO THE TRUST TEAM ONLY) *</span>
             <textarea rows="3" value="{{ fBizDesc }}" onChange="{{ setBizDesc }}" style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 12px 14px; font-family: var(--tz-sans); font-size: 14px; outline: none; resize: vertical;"></textarea></label>
-          <button onClick="{{ goIdentity }}" style="margin-top: 22px; font-family: var(--tz-display); font-size: 15px; text-transform: uppercase; background: #D97A3B; color: #1F3A38; border: 2px solid #1F3A38; padding: 12px 26px; cursor: pointer; box-shadow: 4px 4px 0 #1F3A38;">Continue → identity</button>
+          <button onClick="{{ goIdentity }}" style="margin-top: 22px; font-family: var(--tz-display); font-size: 15px; text-transform: uppercase; background: #820101; color: #F7F1E6; border: 2px solid #1F3A38; padding: 12px 26px; cursor: pointer; box-shadow: 4px 4px 0 #1F3A38;">Continue → identity</button>
         </div>
       </sc-if>
 
       <!-- 2 IDENTITY -->
       <sc-if value="{{ isIdentity }}" hint-placeholder-val="{{ false }}">
         <div>
-          <h1 style="font-family: var(--tz-display); font-size: clamp(28px, 4vw, 42px); text-transform: uppercase; margin: 0 0 6px;">Identity<span style="color: #D97A3B;">.</span></h1>
+          <h1 style="font-family: var(--tz-display); font-size: clamp(28px, 4vw, 42px); text-transform: uppercase; margin: 0 0 6px;">Identity<span style="color: #820101;">.</span></h1>
           <p style="font-size: 14px; color: #6E6155; margin: 0 0 24px;">Government ID of the account owner. The number is encrypted, and the number and every document are deleted as soon as the trust team decides.</p>
           <div class="tw-2col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 720px;">
-            <label style="display: grid; gap: 6px;"><span style="font-family: var(--tz-mono); font-size: 11.5px; color: #A85A23;">LEGAL NAME (AS ON ID) *</span>
+            <label style="display: grid; gap: 6px;"><span style="font-family: var(--tz-mono); font-size: 11.5px; color: #820101;">LEGAL NAME (AS ON ID) *</span>
               <input value="{{ fIdName }}" onChange="{{ setIdName }}" style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 12px 14px; font-family: var(--tz-sans); font-size: 14px; outline: none;"></label>
-            <label style="display: grid; gap: 6px;"><span style="font-family: var(--tz-mono); font-size: 11.5px; color: #A85A23;">ID / PASSPORT NUMBER *</span>
+            <label style="display: grid; gap: 6px;"><span style="font-family: var(--tz-mono); font-size: 11.5px; color: #820101;">ID / PASSPORT NUMBER *</span>
               <input value="{{ fIdNumber }}" onChange="{{ setIdNumber }}" autocomplete="off" style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 12px 14px; font-family: var(--tz-mono); font-size: 14px; outline: none;"></label>
           </div>
           <div style="display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap;">
             <label style="font-family: var(--tz-mono); font-size: 12px; border: 2px solid #1F3A38; background: {{ idBtnBg }}; padding: 12px 18px; cursor: pointer;">{{ idBtnLabel }}<input type="file" accept="image/jpeg,image/png,image/webp,application/pdf" onChange="{{ uploadId }}" aria-label="Upload your ID" style="position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none;"></label>
             <span style="align-self: center; font-family: var(--tz-mono); font-size: 11px; color: #6E6155;">NATIONAL ID · PASSPORT · DRIVING PERMIT — JPG, PNG OR PDF, UP TO 4 MB</span>
           </div>
-          <button onClick="{{ goProof }}" style="margin-top: 22px; font-family: var(--tz-display); font-size: 15px; text-transform: uppercase; background: #D97A3B; color: #1F3A38; border: 2px solid #1F3A38; padding: 12px 26px; cursor: pointer; box-shadow: 4px 4px 0 #1F3A38;">Continue → business proof</button>
+          <button onClick="{{ goProof }}" style="margin-top: 22px; font-family: var(--tz-display); font-size: 15px; text-transform: uppercase; background: #820101; color: #F7F1E6; border: 2px solid #1F3A38; padding: 12px 26px; cursor: pointer; box-shadow: 4px 4px 0 #1F3A38;">Continue → business proof</button>
         </div>
       </sc-if>
 
       <!-- 3 PROOF -->
       <sc-if value="{{ isProof }}" hint-placeholder-val="{{ false }}">
         <div>
-          <h1 style="font-family: var(--tz-display); font-size: clamp(28px, 4vw, 42px); text-transform: uppercase; margin: 0 0 6px;">Business proof<span style="color: #D97A3B;">.</span></h1>
+          <h1 style="font-family: var(--tz-display); font-size: clamp(28px, 4vw, 42px); text-transform: uppercase; margin: 0 0 6px;">Business proof<span style="color: #820101;">.</span></h1>
           <p style="font-size: 14px; color: #6E6155; margin: 0 0 24px;">Formal route (a document) or informal route (portfolio + references) — built for how East African businesses actually operate.</p>
           <div class="tw-2col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 760px;">
             <button onClick="{{ pickFormal }}" aria-pressed="{{ isFormalRoute }}" style="text-align: left; border: 2px solid #1F3A38; background: {{ formalBg }}; color: {{ formalFg }}; padding: 20px; cursor: pointer;">
@@ -96,7 +96,7 @@ const template = `
           <sc-if value="{{ isFormalRoute }}" hint-placeholder-val="{{ true }}">
             <div style="display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap;">
               <label style="align-self: end; font-family: var(--tz-mono); font-size: 12px; border: 2px solid #1F3A38; background: {{ proofBtnBg }}; padding: 12px 18px; cursor: pointer;">{{ proofBtnLabel }}<input type="file" accept="image/jpeg,image/png,image/webp,application/pdf" onChange="{{ uploadProof }}" aria-label="Upload your business document" style="position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none;"></label>
-              <label style="display: grid; gap: 6px; flex: 1; min-width: 220px;"><span style="font-family: var(--tz-mono); font-size: 11.5px; color: #A85A23;">LICENCE / TIN NUMBER</span>
+              <label style="display: grid; gap: 6px; flex: 1; min-width: 220px;"><span style="font-family: var(--tz-mono); font-size: 11.5px; color: #820101;">LICENCE / TIN NUMBER</span>
                 <input value="{{ fProofNum }}" onChange="{{ setProofNum }}" style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 12px 14px; font-family: var(--tz-mono); font-size: 13px; outline: none;"></label>
             </div>
           </sc-if>
@@ -109,14 +109,14 @@ const template = `
               </div>
             </div>
           </sc-if>
-          <button onClick="{{ goPhone }}" style="margin-top: 22px; font-family: var(--tz-display); font-size: 15px; text-transform: uppercase; background: #D97A3B; color: #1F3A38; border: 2px solid #1F3A38; padding: 12px 26px; cursor: pointer; box-shadow: 4px 4px 0 #1F3A38;">Continue → phone</button>
+          <button onClick="{{ goPhone }}" style="margin-top: 22px; font-family: var(--tz-display); font-size: 15px; text-transform: uppercase; background: #820101; color: #F7F1E6; border: 2px solid #1F3A38; padding: 12px 26px; cursor: pointer; box-shadow: 4px 4px 0 #1F3A38;">Continue → phone</button>
         </div>
       </sc-if>
 
       <!-- 4 PHONE -->
       <sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
         <div>
-          <h1 style="font-family: var(--tz-display); font-size: clamp(28px, 4vw, 42px); text-transform: uppercase; margin: 0 0 6px;">Phone<span style="color: #D97A3B;">.</span></h1>
+          <h1 style="font-family: var(--tz-display); font-size: clamp(28px, 4vw, 42px); text-transform: uppercase; margin: 0 0 6px;">Phone<span style="color: #820101;">.</span></h1>
           <p style="font-size: 14px; color: #6E6155; margin: 0 0 24px;">The number that gets escrow alerts and security codes. It is never shown to customers.</p>
           <sc-if value="{{ otpIdle }}" hint-placeholder-val="{{ true }}">
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
@@ -127,8 +127,8 @@ const template = `
           <sc-if value="{{ otpSent }}" hint-placeholder-val="{{ false }}">
             <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
               <input placeholder="6-digit code" value="{{ otpValue }}" onChange="{{ setOtp }}" inputmode="numeric" autocomplete="one-time-code" maxlength="6" aria-label="Code from the text message" style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 12px 14px; font-family: var(--tz-mono); font-size: 15px; letter-spacing: 0.3em; width: 130px; outline: none;">
-              <button onClick="{{ checkOtp }}" style="font-family: var(--tz-mono); font-size: 12px; border: 2px solid #1F3A38; background: #D97A3B; padding: 12px 18px; cursor: pointer;">VERIFY</button>
-              <button onClick="{{ resendOtp }}" style="background: none; border: 0; font-family: var(--tz-mono); font-size: 11px; color: #A85A23; cursor: pointer; text-decoration: underline;">USE ANOTHER NUMBER</button>
+              <button onClick="{{ checkOtp }}" style="font-family: var(--tz-mono); font-size: 12px; border: 2px solid #1F3A38; background: #820101; padding: 12px 18px; cursor: pointer; color: #F7F1E6;">VERIFY</button>
+              <button onClick="{{ resendOtp }}" style="background: none; border: 0; font-family: var(--tz-mono); font-size: 11px; color: #820101; cursor: pointer; text-decoration: underline;">USE ANOTHER NUMBER</button>
             </div>
             <div style="font-size: 12px; color: #6E6155; margin-top: 8px;">We texted a code to {{ fPhone }}. It works for 10 minutes.</div>
             <sc-if value="{{ otpError }}" hint-placeholder-val="{{ false }}">
@@ -138,14 +138,14 @@ const template = `
           <sc-if value="{{ otpDone }}" hint-placeholder-val="{{ false }}">
             <div style="font-family: var(--tz-mono); font-size: 12.5px; color: #4a7c4a;">✓ {{ fPhone }} VERIFIED</div>
           </sc-if>
-          <button onClick="{{ goPayout }}" style="margin-top: 22px; font-family: var(--tz-display); font-size: 15px; text-transform: uppercase; background: #D97A3B; color: #1F3A38; border: 2px solid #1F3A38; padding: 12px 26px; cursor: pointer; box-shadow: 4px 4px 0 #1F3A38;">Continue → payout</button>
+          <button onClick="{{ goPayout }}" style="margin-top: 22px; font-family: var(--tz-display); font-size: 15px; text-transform: uppercase; background: #820101; color: #F7F1E6; border: 2px solid #1F3A38; padding: 12px 26px; cursor: pointer; box-shadow: 4px 4px 0 #1F3A38;">Continue → payout</button>
         </div>
       </sc-if>
 
       <!-- 5 PAYOUT -->
       <sc-if value="{{ isPayout }}" hint-placeholder-val="{{ false }}">
         <div>
-          <h1 style="font-family: var(--tz-display); font-size: clamp(28px, 4vw, 42px); text-transform: uppercase; margin: 0 0 6px;">Payout details<span style="color: #D97A3B;">.</span></h1>
+          <h1 style="font-family: var(--tz-display); font-size: clamp(28px, 4vw, 42px); text-transform: uppercase; margin: 0 0 6px;">Payout details<span style="color: #820101;">.</span></h1>
           <p style="font-size: 14px; color: #6E6155; margin: 0 0 24px;">Where your earnings go when you withdraw. The number is encrypted, and it becomes a saved payout method when you submit.</p>
           <div style="display: grid; gap: 10px; max-width: 560px;">
             <sc-for list="{{ payoutOpts }}" as="po" hint-placeholder-count="3">
@@ -157,28 +157,28 @@ const template = `
                 <span style="font-family: var(--tz-mono); font-size: 10.5px; border: 1px solid currentColor; padding: 4px 8px;">{{ po.chip }}</span>
               </button>
             </sc-for>
-            <label style="display: grid; gap: 6px;"><span style="font-family: var(--tz-mono); font-size: 11.5px; color: #A85A23;">ACCOUNT / NUMBER *</span>
+            <label style="display: grid; gap: 6px;"><span style="font-family: var(--tz-mono); font-size: 11.5px; color: #820101;">ACCOUNT / NUMBER *</span>
               <input value="{{ fPayoutNum }}" onChange="{{ setPayoutNum }}" autocomplete="off" aria-label="Account or wallet number" style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 12px 14px; font-family: var(--tz-mono); font-size: 13px; outline: none;"></label>
           </div>
-          <button onClick="{{ goReview }}" style="margin-top: 22px; font-family: var(--tz-display); font-size: 15px; text-transform: uppercase; background: #D97A3B; color: #1F3A38; border: 2px solid #1F3A38; padding: 12px 26px; cursor: pointer; box-shadow: 4px 4px 0 #1F3A38;">Continue → review</button>
+          <button onClick="{{ goReview }}" style="margin-top: 22px; font-family: var(--tz-display); font-size: 15px; text-transform: uppercase; background: #820101; color: #F7F1E6; border: 2px solid #1F3A38; padding: 12px 26px; cursor: pointer; box-shadow: 4px 4px 0 #1F3A38;">Continue → review</button>
         </div>
       </sc-if>
 
       <!-- 6 REVIEW -->
       <sc-if value="{{ isReview }}" hint-placeholder-val="{{ false }}">
         <div>
-          <h1 style="font-family: var(--tz-display); font-size: clamp(28px, 4vw, 42px); text-transform: uppercase; margin: 0 0 6px;">Review &amp; submit<span style="color: #D97A3B;">.</span></h1>
+          <h1 style="font-family: var(--tz-display); font-size: clamp(28px, 4vw, 42px); text-transform: uppercase; margin: 0 0 6px;">Review &amp; submit<span style="color: #820101;">.</span></h1>
           <p style="font-size: 14px; color: #6E6155; margin: 0 0 24px;">Everything below was autosaved as you went. Fix anything by clicking its section.</p>
           <div style="border: 2px solid #1F3A38; max-width: 720px;">
             <sc-for list="{{ reviewRows }}" as="rr" hint-placeholder-count="5">
               <button onClick="{{ rr.go }}" style="display: grid; grid-template-columns: 150px 1fr auto; gap: 14px; width: 100%; text-align: left; align-items: center; background: #FFFDF8; border: 0; border-bottom: 1px solid #E3D9C6; padding: 14px 18px; cursor: pointer;">
-                <span style="font-family: var(--tz-mono); font-size: 11px; color: #A85A23;">{{ rr.label }}</span>
+                <span style="font-family: var(--tz-mono); font-size: 11px; color: #820101;">{{ rr.label }}</span>
                 <span style="font-size: 13.5px; color: #3A2F25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ rr.value }}</span>
                 <span style="font-family: var(--tz-mono); font-size: 10.5px; color: {{ rr.chipColor }};">{{ rr.chip }}</span>
               </button>
             </sc-for>
           </div>
-          <button onClick="{{ submit }}" aria-busy="{{ submitting }}" style="margin-top: 22px; width: 100%; max-width: 720px; font-family: var(--tz-display); font-size: 16px; text-transform: uppercase; background: {{ submitBg }}; color: {{ submitFg }}; border: 2px solid #1F3A38; padding: 15px; cursor: pointer; box-shadow: 4px 4px 0 #D97A3B;">{{ submitLabel }}</button>
+          <button onClick="{{ submit }}" aria-busy="{{ submitting }}" style="margin-top: 22px; width: 100%; max-width: 720px; font-family: var(--tz-display); font-size: 16px; text-transform: uppercase; background: {{ submitBg }}; color: {{ submitFg }}; border: 2px solid #1F3A38; padding: 15px; cursor: pointer; box-shadow: 4px 4px 0 #820101;">{{ submitLabel }}</button>
           <sc-if value="{{ submitted }}" hint-placeholder-val="{{ false }}">
             <div style="margin-top: 14px; max-width: 720px; border: 2px solid #1F3A38; background: #1F3A38; color: #F7F1E6; padding: 20px 22px;">
               <div style="font-family: var(--tz-display); font-size: 20px; text-transform: uppercase;">✓ Submitted — in review</div>

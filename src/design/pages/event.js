@@ -102,7 +102,7 @@ export function values(state, set, ctx) {
     rsvpForm: state.rsvpStep === 'form' && !rsvped,
     rsvpLabel: state.rsvpStep === 'form' ? 'Finish below ↓' : 'RSVP — I am going',
     rsvpBg: state.rsvpStep === 'form' ? COLORS.forest : COLORS.clay,
-    rsvpFg: state.rsvpStep === 'form' ? COLORS.cream : COLORS.forest,
+    rsvpFg: COLORS.cream,
     toggleRsvp: () => {
       if (state.rsvpStep === 'idle') track(ctx, event.slug, 'cta');
       if (signedIn && state.rsvpStep === 'idle') {

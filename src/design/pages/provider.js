@@ -163,7 +163,7 @@ export function values(state, set, ctx) {
     toggleWrite: () => set((current) => ({ ...current, writeOpen: !current.writeOpen, reviewError: null })),
     reviewBecause: reviewing ? `your booking "${reviewing.label}" is complete` : '',
     starPicker: [1, 2, 3, 4, 5].map((value) => ({
-      color: value <= state.rating ? COLORS.clay : 'rgba(247,241,230,0.3)',
+      color: value <= state.rating ? COLORS.clayLight : 'rgba(247,241,230,0.3)',
       label: `${value} star${value === 1 ? '' : 's'}`,
       pick: () => set((current) => ({ ...current, rating: value })),
     })),
@@ -182,7 +182,7 @@ export function values(state, set, ctx) {
     toggleReq: () => set((current) => ({ ...current, reqOpen: !current.reqOpen })),
     reqBtnLabel: state.reqOpen && !state.reqDone ? 'Close' : 'Request a quote',
     reqBg: state.reqOpen ? COLORS.forest : COLORS.clay,
-    reqFg: state.reqOpen ? COLORS.cream : COLORS.forest,
+    reqFg: COLORS.cream,
     reqDone: state.reqDone,
     reqNotDone: !state.reqDone,
     reqDoneNote: signedIn

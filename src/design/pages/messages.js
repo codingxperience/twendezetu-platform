@@ -262,7 +262,7 @@ export function values(state, set, ctx) {
         current,
         bg: current ? COLORS.forest : COLORS.paper,
         fg: current ? COLORS.cream : COLORS.ink,
-        metaColor: current ? COLORS.clayLight : '#A85A23',
+        metaColor: current ? COLORS.clayLight : COLORS.rust,
         previewColor: current ? 'rgba(247,241,230,0.8)' : COLORS.muted,
         unread: thread.unread && !current,
         open: () => openThread(thread),

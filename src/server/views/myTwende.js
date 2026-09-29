@@ -60,7 +60,7 @@ function offerView(offer, need) {
   return {
     id: offer.id,
     name: offer.provider.name,
-    providerHref: `/providers/${offer.provider.slug}`,
+    providerHref: `/vendors/${offer.provider.slug}`,
     rating: ratingLabel(offer.provider),
     jobs: offer.provider.jobsCompleted,
     note: offer.note || offer.title,

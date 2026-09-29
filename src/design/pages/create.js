@@ -295,7 +295,7 @@ export function values(state, set, ctx) {
         label,
         current: active ? 'step' : 'false',
         bg: active ? COLORS.clay : done ? COLORS.forest : COLORS.paper,
-        fg: active ? COLORS.forest : done ? COLORS.cream : COLORS.ink,
+        fg: active || done ? COLORS.cream : COLORS.ink,
         weight: active ? 700 : 500,
         labelColor: active || done ? COLORS.ink : COLORS.muted,
         cursor: reachable ? 'pointer' : 'default',

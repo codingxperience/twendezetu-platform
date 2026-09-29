@@ -16,14 +16,14 @@ const template = `
 
     <!-- Thread list -->
     <aside class="tw-threads" style="border-right: 2px solid #1F3A38; background: #FFFDF8; overflow-y: auto;">
-      <div style="padding: 16px 20px; border-bottom: 2px solid #1F3A38; font-family: var(--tz-mono); font-size: 12px; color: #A85A23; letter-spacing: 0.08em;">[Mazungumzo — threads]</div>
+      <div style="padding: 16px 20px; border-bottom: 2px solid #1F3A38; font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Mazungumzo — threads]</div>
       <sc-if value="{{ noThreads }}">
         <div style="padding: 24px 20px; font-size: 13.5px; color: #6E6155; line-height: 1.55;">No conversations yet. They start when you message an organizer, ask a vendor for a quote, or get an offer on a need you posted.</div>
       </sc-if>
       <sc-for list="{{ threads }}" as="th">
         <button onClick="{{ th.open }}" aria-current="{{ th.current }}" style="display: block; width: 100%; text-align: left; padding: 16px 20px; border: 0; border-bottom: 1px solid #E3D9C6; background: {{ th.bg }}; cursor: pointer; font-family: inherit;">
           <div style="display: flex; justify-content: space-between; gap: 10px; align-items: baseline;">
-            <span style="font-weight: 700; font-size: 14px; color: {{ th.fg }};">{{ th.name }}<sc-if value="{{ th.unread }}"><span aria-label="unread" style="display: inline-block; width: 8px; height: 8px; background: #D97A3B; border-radius: 50%; margin-left: 8px;"></span></sc-if></span>
+            <span style="font-weight: 700; font-size: 14px; color: {{ th.fg }};">{{ th.name }}<sc-if value="{{ th.unread }}"><span aria-label="unread" style="display: inline-block; width: 8px; height: 8px; background: #820101; border-radius: 50%; margin-left: 8px; color: #F7F1E6;"></span></sc-if></span>
             <span style="font-family: var(--tz-mono); font-size: 10.5px; color: {{ th.metaColor }}; white-space: nowrap;">{{ th.time }}</span>
           </div>
           <div style="font-family: var(--tz-mono); font-size: 11px; color: {{ th.metaColor }}; margin-top: 3px;">{{ th.re }}</div>
@@ -36,9 +36,9 @@ const template = `
     <section class="tw-convo" aria-label="Conversation" style="display: flex; flex-direction: column; min-height: 0; background: #F7F1E6;">
       <sc-if value="{{ noActive }}">
         <div style="margin: auto; max-width: 420px; text-align: center; padding: 40px 24px;">
-          <div style="font-family: var(--tz-display); font-size: 26px; text-transform: uppercase;">Nothing open<span style="color: #D97A3B;">.</span></div>
+          <div style="font-family: var(--tz-display); font-size: 26px; text-transform: uppercase;">Nothing open<span style="color: #820101;">.</span></div>
           <p style="font-size: 14px; color: #6E6155; line-height: 1.55;">Every conversation on Twendezetu is masked: names, phones and emails stay hidden until an offer is accepted, and payments stay protected in escrow.</p>
-          <a href="/vendors" style="display: inline-block; font-family: var(--tz-mono); font-size: 12px; border: 2px solid #1F3A38; background: #D97A3B; color: #1F3A38; padding: 10px 16px; text-decoration: none;">FIND A VENDOR →</a>
+          <a href="/vendors" style="display: inline-block; font-family: var(--tz-mono); font-size: 12px; border: 2px solid #1F3A38; background: #820101; color: #F7F1E6; padding: 10px 16px; text-decoration: none;">FIND A VENDOR →</a>
         </div>
       </sc-if>
 
@@ -50,11 +50,11 @@ const template = `
           <div style="width: 42px; height: 42px; flex-shrink: 0; background: #1F3A38; color: #F7F1E6; font-family: var(--tz-display); font-size: 16px; display: flex; align-items: center; justify-content: center;">{{ activeInitials }}</div>
           <div style="min-width: 0;">
             <div style="font-weight: 700; font-size: 15px;">{{ activeName }} <span style="font-family: var(--tz-mono); font-size: 11px; color: #6E6155;">{{ activeSub }}</span></div>
-            <div style="font-family: var(--tz-mono); font-size: 11px; color: #A85A23;">{{ activeRe }}</div>
+            <div style="font-family: var(--tz-mono); font-size: 11px; color: #820101;">{{ activeRe }}</div>
           </div>
         </div>
         <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-          <span style="font-family: var(--tz-mono); font-size: 11px; background: {{ maskBg }}; border: 1px solid #A85A23; color: #7A3E0F; padding: 5px 10px;">{{ maskLabel }}</span>
+          <span style="font-family: var(--tz-mono); font-size: 11px; background: {{ maskBg }}; border: 1px solid #820101; color: #5C0000; padding: 5px 10px;">{{ maskLabel }}</span>
           <sc-if value="{{ canDispute }}">
             <a href="{{ disputeHref }}" style="font-family: var(--tz-mono); font-size: 11px; border: 2px solid #B8463A; color: #B8463A; background: #F7F1E6; padding: 8px 12px; text-decoration: none;">DISPUTE</a>
           </sc-if>
@@ -99,40 +99,40 @@ const template = `
           <!-- platform notice -->
           <sc-if value="{{ msg.isWarn }}">
             <div style="justify-self: center; max-width: 560px;">
-              <div role="note" style="border: 2px dashed #B8463A; background: #FBEED8; padding: 12px 16px; font-size: 12.5px; line-height: 1.55; color: #7A3E0F;">{{ msg.text }}</div>
+              <div role="note" style="border: 2px dashed #B8463A; background: #FBEED8; padding: 12px 16px; font-size: 12.5px; line-height: 1.55; color: #5C0000;">{{ msg.text }}</div>
             </div>
           </sc-if>
           <!-- offer card -->
           <sc-if value="{{ msg.isOffer }}">
             <div style="justify-self: {{ msg.align }}; max-width: 70%; min-width: min(360px, 100%); border: 2px solid #1F3A38; background: #1F3A38; color: #F7F1E6; padding: 18px 20px;">
-              <div style="font-family: var(--tz-mono); font-size: 10.5px; color: #E8A472; letter-spacing: 0.08em;">[FORMAL OFFER · {{ msg.offerRef }}] · {{ msg.time }}</div>
+              <div style="font-family: var(--tz-mono); font-size: 10.5px; color: #E9B4AC; letter-spacing: 0.08em;">[FORMAL OFFER · {{ msg.offerRef }}] · {{ msg.time }}</div>
               <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 16px; margin-top: 8px; flex-wrap: wrap;">
                 <span style="font-family: var(--tz-display); font-size: 20px; text-transform: uppercase;">{{ msg.offerTitle }}</span>
-                <span style="font-family: var(--tz-display); font-size: 22px; color: #D97A3B;">{{ msg.offerPrice }}</span>
+                <span style="font-family: var(--tz-display); font-size: 22px; color: #E9B4AC;">{{ msg.offerPrice }}</span>
               </div>
               <div style="font-size: 12.5px; color: rgba(247,241,230,0.8); margin-top: 6px; line-height: 1.5;">{{ msg.offerNote }}</div>
               <sc-if value="{{ msg.canRespond }}">
                 <div style="display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap;">
-                  <button onClick="{{ msg.accept }}" style="flex: 1; font-family: var(--tz-display); font-size: 14px; text-transform: uppercase; background: #D97A3B; color: #1F3A38; border: 0; padding: 11px; cursor: pointer;">Accept — {{ msg.offerPrice }}</button>
+                  <button onClick="{{ msg.accept }}" style="flex: 1; font-family: var(--tz-display); font-size: 14px; text-transform: uppercase; background: #820101; color: #F7F1E6; border: 0; padding: 11px; cursor: pointer;">Accept — {{ msg.offerPrice }}</button>
                   <sc-if value="{{ msg.canCounter }}">
                     <button onClick="{{ msg.counter }}" style="font-family: var(--tz-mono); font-size: 11px; background: none; color: #F7F1E6; border: 1px solid rgba(247,241,230,0.5); padding: 11px 14px; cursor: pointer;">COUNTER</button>
                   </sc-if>
-                  <button onClick="{{ msg.decline }}" style="font-family: var(--tz-mono); font-size: 11px; background: none; color: #E8A472; border: 1px solid rgba(232,164,114,0.5); padding: 11px 14px; cursor: pointer;">DECLINE</button>
+                  <button onClick="{{ msg.decline }}" style="font-family: var(--tz-mono); font-size: 11px; background: none; color: #E9B4AC; border: 1px solid rgba(232,164,114,0.5); padding: 11px 14px; cursor: pointer;">DECLINE</button>
                 </div>
               </sc-if>
               <sc-if value="{{ msg.canWithdraw }}">
                 <div style="display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap;">
-                  <button onClick="{{ msg.counter }}" style="flex: 1; font-family: var(--tz-mono); font-size: 11px; background: #D97A3B; color: #1F3A38; border: 0; padding: 11px 14px; cursor: pointer;">REVISE PRICE</button>
-                  <button onClick="{{ msg.withdraw }}" style="font-family: var(--tz-mono); font-size: 11px; background: none; color: #E8A472; border: 1px solid rgba(232,164,114,0.5); padding: 11px 14px; cursor: pointer;">WITHDRAW</button>
+                  <button onClick="{{ msg.counter }}" style="flex: 1; font-family: var(--tz-mono); font-size: 11px; background: #820101; color: #F7F1E6; border: 0; padding: 11px 14px; cursor: pointer;">REVISE PRICE</button>
+                  <button onClick="{{ msg.withdraw }}" style="font-family: var(--tz-mono); font-size: 11px; background: none; color: #E9B4AC; border: 1px solid rgba(232,164,114,0.5); padding: 11px 14px; cursor: pointer;">WITHDRAW</button>
                 </div>
               </sc-if>
               <sc-if value="{{ msg.offerDone }}">
-                <div style="margin-top: 12px; border-top: 1px solid rgba(247,241,230,0.3); padding-top: 10px; font-family: var(--tz-mono); font-size: 11.5px; color: #E8A472;">{{ msg.offerStatus }}</div>
+                <div style="margin-top: 12px; border-top: 1px solid rgba(247,241,230,0.3); padding-top: 10px; font-family: var(--tz-mono); font-size: 11.5px; color: #E9B4AC;">{{ msg.offerStatus }}</div>
               </sc-if>
             </div>
             <sc-if value="{{ msg.composerOpen }}">
               <div style="justify-self: end; max-width: 70%; width: 100%; border: 2px solid #1F3A38; background: #FFFDF8; padding: 16px 18px;">
-                <div style="font-family: var(--tz-mono); font-size: 10.5px; color: #A85A23; letter-spacing: 0.08em;">{{ composerLabel }}</div>
+                <div style="font-family: var(--tz-mono); font-size: 10.5px; color: #820101; letter-spacing: 0.08em;">{{ composerLabel }}</div>
                 <div style="font-size: 12.5px; color: #6E6155; margin-top: 6px; line-height: 1.5;">{{ composerHint }}</div>
                 <div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap;">
                   <input value="{{ counterVal }}" onChange="{{ setCounterVal }}" onKeyDown="{{ counterKey }}" placeholder="{{ composerPlaceholder }}" aria-label="{{ composerLabel }}" style="flex: 1; min-width: 200px; border: 2px solid #1F3A38; background: #F7F1E6; padding: 11px 13px; font-family: var(--tz-mono); font-size: 13px; outline: none;">
@@ -154,11 +154,11 @@ const template = `
             <div style="font-family: var(--tz-mono); font-size: 11.5px; color: #6E6155; margin-top: 6px;">{{ bookingLine }}</div>
             <div class="tw-2col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; font-size: 13px;">
               <div style="border: 1px solid #E3D9C6; padding: 12px 14px;">
-                <div style="font-family: var(--tz-mono); font-size: 10.5px; color: #A85A23;">{{ activeNameUpper }}</div>
+                <div style="font-family: var(--tz-mono); font-size: 10.5px; color: #820101;">{{ activeNameUpper }}</div>
                 <div style="margin-top: 4px; line-height: 1.5; overflow-wrap: anywhere;">{{ contactLine }}</div>
               </div>
               <div style="border: 1px solid #E3D9C6; padding: 12px 14px;">
-                <div style="font-family: var(--tz-mono); font-size: 10.5px; color: #A85A23;">MONEY</div>
+                <div style="font-family: var(--tz-mono); font-size: 10.5px; color: #820101;">MONEY</div>
                 <div style="margin-top: 4px; line-height: 1.5;">{{ moneyLine }}</div>
               </div>
             </div>
@@ -168,13 +168,13 @@ const template = `
                 <button onClick="{{ payWithPoints }}" style="font-family: var(--tz-mono); font-size: 11.5px; border: 2px solid #1F3A38; background: #F7F1E6; padding: 9px 14px; cursor: pointer;">PAY WITH POINTS</button>
               </sc-if>
               <sc-if value="{{ booking.canConfirm }}">
-                <button onClick="{{ confirmDone }}" style="font-family: var(--tz-mono); font-size: 11.5px; border: 2px solid #1F3A38; background: #D97A3B; padding: 9px 14px; cursor: pointer;">JOB DONE — RELEASE PAYMENT</button>
+                <button onClick="{{ confirmDone }}" style="font-family: var(--tz-mono); font-size: 11.5px; border: 2px solid #1F3A38; background: #820101; padding: 9px 14px; cursor: pointer; color: #F7F1E6;">JOB DONE — RELEASE PAYMENT</button>
               </sc-if>
               <sc-if value="{{ booking.canCancel }}">
                 <button onClick="{{ cancelBooking }}" style="font-family: var(--tz-mono); font-size: 11.5px; border: 2px solid #B8463A; color: #B8463A; background: none; padding: 9px 14px; cursor: pointer;">CANCEL BOOKING</button>
               </sc-if>
               <sc-if value="{{ booking.canReview }}">
-                <a href="{{ reviewHref }}" style="font-family: var(--tz-mono); font-size: 11.5px; border: 2px solid #1F3A38; background: #D97A3B; color: #14201F; padding: 9px 14px; text-decoration: none;">LEAVE A REVIEW →</a>
+                <a href="{{ reviewHref }}" style="font-family: var(--tz-mono); font-size: 11.5px; border: 2px solid #1F3A38; background: #820101; color: #F7F1E6; padding: 9px 14px; text-decoration: none;">LEAVE A REVIEW →</a>
               </sc-if>
             </div>
           </div>
@@ -187,7 +187,7 @@ const template = `
           ＋<input type="file" accept="image/jpeg,image/png,image/webp,application/pdf" onChange="{{ attach }}" aria-label="Attach a photo or PDF" style="position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none;">
         </label>
         <input value="{{ draft }}" onChange="{{ setDraft }}" placeholder="Andika ujumbe… (contacts auto-masked)" aria-label="Message" maxlength="2000" style="flex: 1; min-width: 0; border: 2px solid #1F3A38; background: #F7F1E6; padding: 13px 16px; font-family: var(--tz-sans); font-size: 14px; outline: none;">
-        <button type="submit" aria-busy="{{ sending }}" style="font-family: var(--tz-display); font-size: 15px; text-transform: uppercase; background: #1F3A38; color: #F7F1E6; border: 2px solid #1F3A38; padding: 12px 24px; cursor: pointer; box-shadow: 3px 3px 0 #D97A3B;">Send</button>
+        <button type="submit" aria-busy="{{ sending }}" style="font-family: var(--tz-display); font-size: 15px; text-transform: uppercase; background: #1F3A38; color: #F7F1E6; border: 2px solid #1F3A38; padding: 12px 24px; cursor: pointer; box-shadow: 3px 3px 0 #E9B4AC;">Send</button>
       </form>
       </sc-if>
     </section>

@@ -8,9 +8,12 @@ export const COLORS = Object.freeze({
   cream: '#F7F1E6',
   paper: '#FFFDF8',
   sand: '#EFE7D6',
-  clay: '#D97A3B',
-  clayLight: '#E8A472',
-  rust: '#A85A23',
+  // The brand accent: maroon from the logo. `clay` fills and marks on
+  // light backgrounds (text on it is cream); `clayLight` is its light
+  // partner for accents on the dark green panels.
+  clay: '#820101',
+  clayLight: '#E9B4AC',
+  rust: '#820101',
   sage: '#7B8B6E',
   red: '#B8463A',
   muted: '#6E6155',

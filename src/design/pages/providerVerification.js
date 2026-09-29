@@ -225,7 +225,7 @@ export function values(state, set, ctx) {
     submitting: Boolean(state.busy?.submit),
     submitLabel: data.status === 'APPROVED' ? '✓ Verified' : data.submitted ? '✓ Submitted — in review' : doneCount === 5 ? 'Submit for review →' : `${5 - doneCount} section${5 - doneCount === 1 ? '' : 's'} left before you can submit`,
     submitBg: doneCount === 5 && !locked ? COLORS.clay : COLORS.sand,
-    submitFg: COLORS.forest,
+    submitFg: doneCount === 5 && !locked ? COLORS.cream : COLORS.forest,
     submit: () => {
       if (locked) return;
       if (doneCount < 5) {

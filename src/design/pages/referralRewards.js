@@ -41,7 +41,7 @@ export function values(state, set, ctx) {
     tiers: data.tiers.map((tier) => ({
       ...tier,
       bg: tier.current ? COLORS.clay : tier.reached ? COLORS.forest : COLORS.paper,
-      fg: tier.current || !tier.reached ? COLORS.ink : COLORS.cream,
+      fg: !tier.current && !tier.reached ? COLORS.ink : COLORS.cream,
       badge: tier.current ? 'YOU ARE HERE' : tier.reached ? 'REACHED' : 'LOCKED',
       badgeColor: tier.current ? COLORS.ink : tier.reached ? COLORS.clayLight : COLORS.muted,
     })),
@@ -50,7 +50,7 @@ export function values(state, set, ctx) {
       ...friend,
       pts: `+${points(friend.points)}`,
       avBg: [COLORS.clay, COLORS.forest, COLORS.sage, COLORS.clayLight][index % 4],
-      avFg: index % 4 === 1 ? COLORS.cream : COLORS.ink,
+      avFg: index % 4 <= 1 ? COLORS.cream : COLORS.ink,
       color: COLORS.rust,
     })),
     hasFriends: data.friends.length > 0,

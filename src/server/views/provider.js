@@ -74,6 +74,6 @@ export async function providerView(viewer, { slug } = {}) {
     following: page.following,
     isOwner: page.isOwner,
     commissionPercent: `${FEES.bookingCommissionBps / 100}%`,
-    shareUrl: `${appUrl()}/providers/${provider.slug}`,
+    shareUrl: `${appUrl()}/vendors/${provider.slug}`,
   };
 }

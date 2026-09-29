@@ -145,8 +145,8 @@ export function values(state, set, ctx) {
   const posts = (data.posts || []).map((item) => ({
     ...item,
     canFeature: item.kind === 'event',
-    featBg: item.featured ? COLORS.clay : 'transparent',
-    featFg: item.featured ? COLORS.ink : COLORS.clay,
+    featBg: item.featured ? COLORS.clayLight : 'transparent',
+    featFg: item.featured ? COLORS.ink : COLORS.clayLight,
     featLabel: item.featured ? 'FEATURED ✓' : 'FEATURE',
     feature: () => post(`p:${item.id}`, '/api/admin/content', { kind: item.kind, id: item.id, action: item.featured ? 'unfeature' : 'feature' }, item.featured ? 'No longer featured.' : 'Featured on the home page.'),
     hideLabel: item.hidden ? 'RESTORE' : 'HIDE',
@@ -160,7 +160,7 @@ export function values(state, set, ctx) {
 
   // ── Settings ──────────────────────────────────────────────────────────
   const settings = (data.settings || []).map((item) => {
-    const style = toggleStyle(item.on, { onBg: COLORS.clay, offBg: 'rgba(247,241,230,0.2)' });
+    const style = toggleStyle(item.on, { onBg: COLORS.clayLight, offBg: 'rgba(247,241,230,0.2)' });
     return {
       ...item,
       bg: style.bg,
@@ -190,7 +190,7 @@ export function values(state, set, ctx) {
       iconPath,
       badge: badges[key] || null,
       go: () => go(key),
-      bg: section === key ? COLORS.clay : 'transparent',
+      bg: section === key ? COLORS.clayLight : 'transparent',
       fg: section === key ? COLORS.ink : COLORS.cream,
       current: section === key ? 'page' : 'false',
     })),

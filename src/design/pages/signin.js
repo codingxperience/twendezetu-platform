@@ -130,7 +130,7 @@ export function values(state, set, ctx) {
     linkProblem: LINK_PROBLEMS[state.linkStatus] || LINK_PROBLEMS.invalid,
     sentTo: state.sentTo,
     resendLabel: state.canResend ? 'Send it again' : 'You can ask again in a minute',
-    resendColor: state.canResend ? '#A85A23' : '#8A7F74',
+    resendColor: state.canResend ? COLORS.rust : '#8A7F74',
     resend: async () => {
       if (!state.canResend || state.busy?.auth) return;
       set((current) => ({ ...current, busy: { ...current.busy, auth: true }, error: null }));

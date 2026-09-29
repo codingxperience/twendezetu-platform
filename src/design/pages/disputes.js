@@ -186,6 +186,7 @@ export function values(state, set, ctx) {
     uploading: Boolean(state.busy?.['upload:files']),
     submit,
     submitBg: ready ? COLORS.clay : COLORS.sand,
+    submitFg: ready ? COLORS.cream : COLORS.ink,
     submitLabel: state.busy?.open ? 'Opening…' : 'Open case & freeze the money',
     formError: state.formError,
 

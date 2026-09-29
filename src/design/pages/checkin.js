@@ -9,7 +9,7 @@ const SAME_CODE_MS = 3000;
 
 const TONES = {
   ADMITTED: { bg: '#7B8B6E', fg: '#14201F', color: '#9FB58F' },
-  DUPLICATE: { bg: '#E8A472', fg: '#14201F', color: '#E8A472' },
+  DUPLICATE: { bg: '#E9B4AC', fg: '#14201F', color: '#E9B4AC' },
   INVALID: { bg: '#B8463A', fg: '#F7F1E6', color: '#F2A197' },
 };
 
@@ -119,6 +119,7 @@ export function values(state, set, ctx) {
     cameraNote: state.cameraError || (state.supported ? 'Start the camera and hold a ticket QR inside the frame.' : 'This browser cannot read QR codes from the camera. Chrome on Android can; here, type the code under the QR.'),
     cameraBtnLabel: state.cameraOn ? 'Stop camera' : 'Start camera',
     cameraBtnBg: state.cameraOn ? COLORS.sand : COLORS.clay,
+    cameraBtnFg: state.cameraOn ? COLORS.ink : COLORS.cream,
     toggleCamera: () => {
       if (state.cameraOn) {
         stopCamera();

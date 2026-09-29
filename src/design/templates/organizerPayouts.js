@@ -10,14 +10,14 @@ const template = `
     </div>
     <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
       <a href="/organizer-analytics" style="font-family: var(--tz-mono); font-size: 12px; border: 2px solid #1F3A38; color: #14201F; text-decoration: none; padding: 9px 14px;">▤ ANALYTICS</a>
-      <a href="/checkin" style="font-family: var(--tz-mono); font-size: 12px; border: 2px solid #1F3A38; background: #D97A3B; color: #14201F; text-decoration: none; padding: 9px 14px;">▣ CHECK-IN</a>
+      <a href="/checkin" style="font-family: var(--tz-mono); font-size: 12px; border: 2px solid #1F3A38; background: #820101; color: #F7F1E6; text-decoration: none; padding: 9px 14px;">▣ CHECK-IN</a>
     </div>
   </header>
 
   <section style="max-width: 1160px; margin: 0 auto; padding: 32px 24px 80px;">
-    <div style="font-family: var(--tz-mono); font-size: 12px; color: #A85A23; letter-spacing: 0.08em;">[Malipo — how ticket money reaches you]</div>
+    <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Malipo — how ticket money reaches you]</div>
     <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin: 8px 0 24px;">
-      <h1 style="font-family: var(--tz-display); font-size: clamp(30px, 4.5vw, 52px); text-transform: uppercase; line-height: 0.95; margin: 0;">Payouts<span style="color: #D97A3B;">.</span></h1>
+      <h1 style="font-family: var(--tz-display); font-size: clamp(30px, 4.5vw, 52px); text-transform: uppercase; line-height: 0.95; margin: 0;">Payouts<span style="color: #820101;">.</span></h1>
       <sc-if value="{{ hasTabs }}" hint-placeholder-val="{{ false }}">
         <nav aria-label="Currency" style="display: flex; gap: 6px; flex-wrap: wrap;">
           <sc-for list="{{ currencyTabs }}" as="ct" hint-placeholder-count="2">
@@ -42,13 +42,13 @@ const template = `
     <div class="tw-2col" style="display: grid; grid-template-columns: 0.9fr 1.3fr; gap: 24px; align-items: start;">
       <div style="display: grid; gap: 16px;">
         <!-- Available -->
-        <div style="border: 2px solid #1F3A38; background: #1F3A38; color: #F7F1E6; padding: 24px; box-shadow: 6px 6px 0 #D97A3B;">
-          <div style="font-family: var(--tz-mono); font-size: 11px; color: #E8A472; letter-spacing: 0.08em;">[Available to withdraw]</div>
+        <div style="border: 2px solid #1F3A38; background: #1F3A38; color: #F7F1E6; padding: 24px; box-shadow: 6px 6px 0 #E9B4AC;">
+          <div style="font-family: var(--tz-mono); font-size: 11px; color: #E9B4AC; letter-spacing: 0.08em;">[Available to withdraw]</div>
           <div style="font-family: var(--tz-display); font-size: clamp(38px, 5vw, 52px); line-height: 1; margin: 10px 0 4px; overflow-wrap: anywhere;">{{ availableLabel }}</div>
           <div style="font-family: var(--tz-mono); font-size: 12px; color: rgba(247,241,230,0.7);">{{ lastRelease }}</div>
 
           <sc-if value="{{ canWithdraw }}" hint-placeholder-val="{{ true }}">
-            <button onClick="{{ toggleWithdraw }}" aria-expanded="{{ withdrawOpen }}" style="width: 100%; margin-top: 16px; font-family: var(--tz-display); font-size: 16px; text-transform: uppercase; background: #D97A3B; color: #14201F; border: 0; padding: 14px; cursor: pointer;">{{ withdrawLabel }}</button>
+            <button onClick="{{ toggleWithdraw }}" aria-expanded="{{ withdrawOpen }}" style="width: 100%; margin-top: 16px; font-family: var(--tz-display); font-size: 16px; text-transform: uppercase; background: #820101; color: #F7F1E6; border: 0; padding: 14px; cursor: pointer;">{{ withdrawLabel }}</button>
           </sc-if>
           <sc-if value="{{ noWithdraw }}" hint-placeholder-val="{{ false }}">
             <div style="margin-top: 16px; border: 1px dashed rgba(247,241,230,0.4); padding: 12px 14px; font-size: 12.5px; color: rgba(247,241,230,0.8);">{{ noWithdrawNote }}</div>
@@ -57,7 +57,7 @@ const template = `
           <sc-if value="{{ withdrawOpen }}" hint-placeholder-val="{{ false }}">
             <div style="margin-top: 16px; display: grid; gap: 12px;">
               <label style="display: grid; gap: 6px;">
-                <span style="font-family: var(--tz-mono); font-size: 10.5px; color: #E8A472;">AMOUNT ({{ currency }})</span>
+                <span style="font-family: var(--tz-mono); font-size: 10.5px; color: #E9B4AC;">AMOUNT ({{ currency }})</span>
                 <div style="display: flex; gap: 6px;">
                   <input value="{{ amount }}" onChange="{{ setAmount }}" inputmode="decimal" autocomplete="off" aria-label="Amount to withdraw" placeholder="0" style="flex: 1; min-width: 0; border: 2px solid #F7F1E6; background: transparent; color: #F7F1E6; padding: 11px 12px; font-family: var(--tz-display); font-size: 20px; outline: none;">
                   <button onClick="{{ fillAll }}" style="font-family: var(--tz-mono); font-size: 11px; border: 2px solid #F7F1E6; background: none; color: #F7F1E6; padding: 0 12px; cursor: pointer;">ALL</button>
@@ -67,12 +67,12 @@ const template = `
               <sc-if value="{{ hasMethods }}" hint-placeholder-val="{{ true }}">
                 <div role="radiogroup" aria-label="Send to" style="display: grid; gap: 6px;">
                   <sc-for list="{{ methods }}" as="m" hint-placeholder-count="2">
-                    <button onClick="{{ m.pick }}" role="radio" aria-checked="{{ m.on }}" style="display: flex; justify-content: space-between; gap: 10px; text-align: left; border: 2px solid {{ m.border }}; background: {{ m.bg }}; color: #F7F1E6; padding: 10px 12px; font-size: 13px; cursor: pointer;">{{ m.label }}<span style="font-family: var(--tz-mono); font-size: 10px; color: #E8A472;">{{ m.tag }}</span></button>
+                    <button onClick="{{ m.pick }}" role="radio" aria-checked="{{ m.on }}" style="display: flex; justify-content: space-between; gap: 10px; text-align: left; border: 2px solid {{ m.border }}; background: {{ m.bg }}; color: #F7F1E6; padding: 10px 12px; font-size: 13px; cursor: pointer;">{{ m.label }}<span style="font-family: var(--tz-mono); font-size: 10px; color: #E9B4AC;">{{ m.tag }}</span></button>
                   </sc-for>
                 </div>
               </sc-if>
               <sc-if value="{{ noMethods }}" hint-placeholder-val="{{ false }}">
-                <div style="font-size: 12.5px; color: rgba(247,241,230,0.85);">Add a mobile money or bank account first. <a href="/settings?tab=payments" style="color: #E8A472;">Payout methods →</a></div>
+                <div style="font-size: 12.5px; color: rgba(247,241,230,0.85);">Add a mobile money or bank account first. <a href="/settings?tab=payments" style="color: #E9B4AC;">Payout methods →</a></div>
               </sc-if>
               <button onClick="{{ withdraw }}" style="font-family: var(--tz-display); font-size: 15px; text-transform: uppercase; background: #F7F1E6; color: #14201F; border: 0; padding: 13px; cursor: pointer;">{{ sendLabel }}</button>
             </div>
@@ -81,7 +81,7 @@ const template = `
 
         <!-- Held -->
         <div style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 20px 22px;">
-          <div style="font-family: var(--tz-mono); font-size: 11px; color: #A85A23; letter-spacing: 0.08em;">[Held in escrow]</div>
+          <div style="font-family: var(--tz-mono); font-size: 11px; color: #820101; letter-spacing: 0.08em;">[Held in escrow]</div>
           <div style="font-family: var(--tz-display); font-size: 34px; margin: 8px 0 2px;">{{ heldLabel }}</div>
           <div style="font-size: 12.5px; color: #6E6155; line-height: 1.5;">{{ heldNote }}</div>
         </div>
@@ -89,8 +89,8 @@ const template = `
         <!-- Payout methods -->
         <div style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 20px 22px;">
           <div style="display: flex; justify-content: space-between; gap: 10px; align-items: center;">
-            <span style="font-family: var(--tz-mono); font-size: 11px; color: #A85A23; letter-spacing: 0.08em;">[Payout methods]</span>
-            <a href="/settings?tab=payments" style="font-family: var(--tz-mono); font-size: 11px; color: #A85A23;">MANAGE</a>
+            <span style="font-family: var(--tz-mono); font-size: 11px; color: #820101; letter-spacing: 0.08em;">[Payout methods]</span>
+            <a href="/settings?tab=payments" style="font-family: var(--tz-mono); font-size: 11px; color: #820101;">MANAGE</a>
           </div>
           <sc-if value="{{ hasMethods }}" hint-placeholder-val="{{ true }}">
             <div style="display: grid; gap: 8px; margin-top: 10px;">
@@ -121,7 +121,7 @@ const template = `
                   <div style="font-weight: 700; font-size: 13.5px;">{{ s.title }}</div>
                   <div style="font-family: var(--tz-mono); font-size: 11px; color: #6E6155;">{{ s.when }}</div>
                 </div>
-                <span style="font-family: var(--tz-display); font-size: 16px; color: #A85A23;">{{ s.amount }}</span>
+                <span style="font-family: var(--tz-display); font-size: 16px; color: #820101;">{{ s.amount }}</span>
               </div>
             </sc-for>
           </div>

@@ -149,13 +149,13 @@ export function values(state, set, ctx) {
       countLabel: pool.count === 1 ? '1 mchangiaji' : `${pool.count} wachangiaji`,
       contributors: pool.contributors.map((init, index) => {
         const bg = init.startsWith('+') ? COLORS.sand : AVATAR_TONES[index % AVATAR_TONES.length];
-        return { init, bg, fg: bg === COLORS.forest || bg === COLORS.sage ? COLORS.cream : COLORS.ink };
+        return { init, bg, fg: bg === COLORS.sand ? COLORS.ink : COLORS.cream };
       }),
       canChip: pool.status === 'OPEN' || pool.status === 'CLOSING SOON',
       chipOpen: state.chipFor === pool.slug,
       chipLabel: state.chipFor === pool.slug ? 'Close' : 'Chip in',
       chipBg: state.chipFor === pool.slug ? COLORS.forest : COLORS.clay,
-      chipFg: state.chipFor === pool.slug ? COLORS.cream : COLORS.forest,
+      chipFg: COLORS.cream,
       chipIn: () => set((current) => ({ ...current, chipFor: current.chipFor === pool.slug ? null : pool.slug })),
       chipAmts: CHIP_AMOUNTS.map((amount) => ({
         label: `${points(amount)} PTS`,
@@ -189,6 +189,7 @@ export function values(state, set, ctx) {
     sendOpen: state.panel === 'send',
     cashOpen: state.panel === 'cash',
     topUpBg: state.panel === 'topup' ? COLORS.clayLight : COLORS.clay,
+    topUpFg: state.panel === 'topup' ? COLORS.ink : COLORS.cream,
     sendBg: state.panel === 'send' ? 'rgba(247,241,230,0.18)' : 'transparent',
     cashBg: state.panel === 'cash' ? 'rgba(247,241,230,0.18)' : 'transparent',
     toggleTopUp: () => togglePanel('topup'),
@@ -218,7 +219,7 @@ export function values(state, set, ctx) {
     cashDests: data.methods.map((item) => ({
       label: item.label,
       selected: item.id === state.methodId,
-      border: item.id === state.methodId ? COLORS.clay : 'rgba(247,241,230,0.4)',
+      border: item.id === state.methodId ? COLORS.clayLight : 'rgba(247,241,230,0.4)',
       bg: item.id === state.methodId ? 'rgba(217,122,59,0.2)' : 'rgba(247,241,230,0.08)',
       pick: () => set((current) => ({ ...current, methodId: item.id })),
     })),

@@ -210,7 +210,7 @@ a { color: inherit; }
 
 /* Claude design export integration */
 ::selection {
-  background: #D97A3B;
+  background: #820101;
   color: #F7F1E6;
 }
 
@@ -322,7 +322,7 @@ a { color: inherit; }
 
 .claude-design [style*="background-clip: text"],
 .claude-design [style*="-webkit-background-clip: text"] {
-  background-color: #D97A3B;
+  background-color: #820101;
 }
 
 .tw-ios-device {
@@ -498,7 +498,7 @@ a { color: inherit; }
   background: #1F3A38;
   color: #F7F1E6;
   border: 2px solid #1F3A38;
-  box-shadow: 5px 5px 0 #D97A3B;
+  box-shadow: 5px 5px 0 #820101;
   padding: 14px 16px 14px 20px;
   font-family: var(--tz-sans);
   font-size: 13.5px;
@@ -534,7 +534,7 @@ a { color: inherit; }
 .claude-design input:focus-visible,
 .claude-design select:focus-visible,
 .claude-design textarea:focus-visible {
-  outline: 3px solid #D97A3B;
+  outline: 3px solid #820101;
   outline-offset: 2px;
 }
 
@@ -561,7 +561,7 @@ a { color: inherit; }
   background: #FFFDF8;
   color: #14201F;
   border: 2px solid #1F3A38;
-  box-shadow: 8px 8px 0 #D97A3B;
+  box-shadow: 8px 8px 0 #820101;
   padding: 24px;
   display: grid;
   gap: 14px;
@@ -589,7 +589,7 @@ a { color: inherit; }
   outline: none;
 }
 
-.tw-dialog input:focus-visible { outline: 3px solid #D97A3B; outline-offset: 2px; }
+.tw-dialog input:focus-visible { outline: 3px solid #820101; outline-offset: 2px; }
 
 .tw-dialog-actions { display: flex; justify-content: flex-end; gap: 10px; }
 
@@ -605,7 +605,7 @@ a { color: inherit; }
   cursor: pointer;
 }
 
-.tw-dialog-actions button[type="submit"] { background: #1F3A38; color: #F7F1E6; box-shadow: 3px 3px 0 #D97A3B; }
+.tw-dialog-actions button[type="submit"] { background: #1F3A38; color: #F7F1E6; box-shadow: 3px 3px 0 #820101; }
 .tw-dialog-actions button.tw-danger { background: #B8463A; border-color: #B8463A; }
 
 /* Door check-in: the scan line sweeping the viewfinder. */

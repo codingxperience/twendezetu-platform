@@ -28,7 +28,7 @@ export function providerCard(provider) {
   return {
     id: provider.id,
     slug: provider.slug,
-    href: `/providers/${provider.slug}`,
+    href: `/vendors/${provider.slug}`,
     name: provider.name,
     cat: PROVIDER_CATEGORIES[provider.category].upper,
     category: provider.category,
@@ -524,7 +524,7 @@ export async function submitReview(user, slug, { rating, body, bookingId }) {
       topic: 'SOCIAL',
       title: `You received a ${rating}-star review`,
       body: `${shortName(user.name)}: “${review.body.slice(0, 140)}”`,
-      href: `/providers/${provider.slug}`,
+      href: `/vendors/${provider.slug}`,
     });
     return reviewView(review);
   });

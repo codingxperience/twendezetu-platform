@@ -238,7 +238,7 @@ export async function reviewApplication(reviewer, applicationId, { decision, not
       topic: 'MONEY',
       title: status === 'APPROVED' ? 'You are verified' : status === 'NEEDS_INFO' ? 'Your verification needs one more thing' : 'Your verification was not approved',
       body: status === 'APPROVED' ? 'The verified badge is now live on your listing.' : note,
-      href: status === 'APPROVED' ? `/providers/${app.provider.slug}` : '/provider-verification',
+      href: status === 'APPROVED' ? `/vendors/${app.provider.slug}` : '/provider-verification',
     });
     await audit(tx, { actorId: reviewer.id, action: `verification.${decision}`, targetType: 'Provider', targetId: app.providerId, meta: { note } });
     // Once there is a final decision, the identity documents have done their

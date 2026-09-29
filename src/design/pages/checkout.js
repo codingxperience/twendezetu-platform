@@ -81,7 +81,7 @@ export function values(state, set, ctx) {
       opacity: soldOut || door ? 0.6 : 1,
       wlLabel: waitlisted ? '✓ ON WAITLIST' : 'JOIN WAITLIST',
       wlBg: waitlisted ? COLORS.sage : COLORS.clay,
-      wlFg: waitlisted ? COLORS.cream : COLORS.ink,
+      wlFg: COLORS.cream,
       waitlist: async () => {
         if (waitlisted) return;
         let email = data.me.email;
