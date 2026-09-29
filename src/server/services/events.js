@@ -97,6 +97,56 @@ async function searchEventIds(q, take) {
   return rows.map((row) => row.id);
 }
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+// The date window for "this week", "this weekend" and "this month". Days
+// are counted in UTC, which is within a few hours of every city we serve.
+export function whenWindow(when, now = new Date()) {
+  const startOfToday = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  if (when === 'week') return { from: now, to: new Date(startOfToday + 8 * DAY_MS) };
+  if (when === 'month') return { from: now, to: new Date(startOfToday + 31 * DAY_MS) };
+  if (when === 'weekend') {
+    const day = now.getUTCDay(); // 0 Sunday … 6 Saturday
+    const daysToFriday = day === 0 ? -2 : day === 6 ? -1 : 5 - day;
+    const friday = startOfToday + daysToFriday * DAY_MS;
+    return { from: new Date(Math.max(friday, now.getTime())), to: new Date(friday + 3 * DAY_MS) };
+  }
+  return null;
+}
+
+export const BROWSE_SORTS = ['soon', 'trending', 'new'];
+
+// The events page: every upcoming public event, filtered and sorted.
+export async function browseEvents({ q, category, city, when, price, organizer, sort = 'soon', limit = 48 } = {}) {
+  const where = { ...PUBLIC_EVENT, ...stillOn() };
+  if (category) where.category = category;
+  if (city) where.city = { equals: city, mode: 'insensitive' };
+  if (price === 'free') where.isFree = true;
+  if (organizer) where.organizer = { slug: organizer };
+  const range = whenWindow(when);
+  if (range) where.startsAt = { gte: range.from, lt: range.to };
+  if (q) where.id = { in: await searchEventIds(q, 400) };
+
+  const orderBy =
+    sort === 'trending'
+      ? [{ goingCount: 'desc' }, { startsAt: 'asc' }]
+      : sort === 'new'
+        ? [{ publishedAt: { sort: 'desc', nulls: 'last' } }, { startsAt: 'asc' }]
+        : [{ startsAt: 'asc' }];
+
+  const [total, events] = await Promise.all([
+    prisma.event.count({ where }),
+    prisma.event.findMany({ where, include: CARD_INCLUDE, orderBy, take: Math.min(Math.max(limit, 1), 240) }),
+  ]);
+  return { total, events: events.map(toEventCard) };
+}
+
+// Cities with upcoming events, busiest first, for the city filter.
+export async function eventCities() {
+  const rows = await prisma.event.groupBy({ by: ['city'], where: { ...PUBLIC_EVENT, ...stillOn() }, _count: { _all: true } });
+  return rows.sort((a, b) => b._count._all - a._count._all).map((row) => ({ name: row.city, count: row._count._all }));
+}
+
 export async function categoryCounts() {
   const rows = await prisma.event.groupBy({ by: ['category'], where: { ...PUBLIC_EVENT, ...stillOn() }, _count: { _all: true } });
   return Object.fromEntries(rows.map((row) => [row.category, row._count._all]));

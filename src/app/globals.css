@@ -1203,6 +1203,56 @@ a.tz-shelf__title:hover { color: var(--tz-maroon); }
   .tz-hero { flex-direction: column; align-items: flex-start; gap: 20px; }
 }
 
+/* The events page: heading, filter rows and the results grid. */
+.tz-browse-head { margin: 4px 0 22px; }
+
+.tz-browse-head h1 { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 0; font: 700 clamp(28px, 3.4vw, 38px)/1.1 var(--tz-sans); letter-spacing: -0.02em; }
+
+.tz-browse-head p { margin: 6px 0 0; font-size: 14px; color: var(--tz-muted); }
+
+.tz-verified { padding: 5px 10px; border-radius: 999px; background: var(--tz-blush); color: var(--tz-maroon); font-size: 12px; font-weight: 700; letter-spacing: 0; }
+
+.tz-filters { display: grid; gap: 10px; margin: 0 0 30px; padding: 16px 18px; border: 1px solid var(--tz-line); border-radius: 14px; background: var(--tz-paper); }
+
+.tz-filter { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+
+.tz-filter__label { width: 58px; flex: none; font-family: var(--tz-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--tz-muted); }
+
+.tz-filter__gap { width: 10px; }
+
+.tz-filter__clear { margin-left: auto; color: var(--tz-maroon); }
+
+.tz-fpill {
+  display: inline-flex;
+  align-items: center;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 17px;
+  background: var(--tz-sand);
+  color: #3a2f25;
+  font-size: 13.5px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.tz-fpill:hover { background: var(--tz-blush); color: var(--tz-maroon); }
+
+.tz-fpill[aria-current='true'] { background: var(--tz-ink); color: var(--tz-cream); }
+
+.claude-design .tz-cityselect { flex: none; width: auto !important; min-width: 170px; }
+
+.tz-cityselect { height: 34px; padding: 0 12px; border: 1px solid var(--tz-line); border-radius: 17px; background: var(--tz-paper); color: var(--tz-ink); font: 600 13.5px var(--tz-sans); }
+
+.tz-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 28px 18px; }
+
+@media (max-width: 640px) {
+  .tz-filters { padding: 12px; }
+  .tz-filter { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .tz-filter__label { width: auto; margin-right: 4px; }
+  .tz-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 14px; }
+}
+
 /* The older page headers have phone rules that stretch a header's last block
    and hide overflow on page wrappers; the browsing frame opts out of both. */
 .claude-design .tz-top > .tz-top__actions { width: auto !important; margin-left: auto; justify-content: flex-end !important; }
