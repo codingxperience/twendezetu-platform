@@ -12,7 +12,7 @@ const template = `
   <header style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 18px 24px; border-bottom: 2px solid #1F3A38; background: #F7F1E6; position: sticky; top: 0; z-index: 40;">
     <div style="display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
       <a href="/" class="tz-logo-link" aria-label="Twendezetu home"><img src="/brand/logo.png" alt="Twendezetu" width="1211" height="229" class="tz-logo tz-logo--md"></a>
-      <span style="font-family: var(--tz-mono); font-size: 12px; background: #1F3A38; color: #F7F1E6; padding: 5px 10px;">PROVIDER PORTAL</span>
+      <span style="font-family: var(--tz-mono); font-size: 12px; background: #1F3A38; color: #F7F1E6; padding: 5px 10px;">VENDOR PORTAL</span>
     </div>
     <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; position: relative;">
       <button onClick="{{ toggleBell }}" aria-label="Notifications" aria-expanded="{{ bellOpen }}" style="position: relative; background: none; border: 2px solid #1F3A38; padding: 9px 12px; cursor: pointer; font-family: var(--tz-mono); font-size: 13px;">▲<sc-if value="{{ hasUnread }}"><span style="position: absolute; top: -7px; right: -7px; background: #D97A3B; border: 2px solid #1F3A38; font-family: var(--tz-mono); font-size: 10px; padding: 1px 5px;">{{ unread }}</span></sc-if></button>

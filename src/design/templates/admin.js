@@ -215,7 +215,7 @@ const template = `
       <!-- VERIFICATION -->
       <sc-if value="{{ isVerify }}" hint-placeholder-val="{{ false }}">
         <div>
-          <h1 style="font-family: var(--tz-display); font-size: clamp(30px, 4vw, 48px); text-transform: uppercase; margin: 0 0 8px;">Provider verification<span style="color: #D97A3B;">.</span></h1>
+          <h1 style="font-family: var(--tz-display); font-size: clamp(30px, 4vw, 48px); text-transform: uppercase; margin: 0 0 8px;">Vendor verification<span style="color: #D97A3B;">.</span></h1>
           <p style="font-size: 14px; color: rgba(247,241,230,0.7); margin: 0 0 24px; max-width: 680px;">ID and business checks before the ✓ badge. Once you approve or reject, identity documents and numbers are deleted and only the decision is kept.</p>
           <sc-if value="{{ noVerifications }}" hint-placeholder-val="{{ false }}">
             <div style="border: 2px dashed rgba(247,241,230,0.4); padding: 20px; font-size: 14px; color: rgba(247,241,230,0.75);">No application is waiting.</div>

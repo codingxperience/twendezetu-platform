@@ -11,7 +11,7 @@ export const SETTING_DEFAULTS = Object.freeze({
 });
 
 export const SETTING_COPY = Object.freeze({
-  providerSignups: ['New provider sign-ups', 'Pause during fraud waves; existing providers unaffected.'],
+  providerSignups: ['New vendor sign-ups', 'Pause during fraud waves; existing vendors unaffected.'],
   autoScamDetection: ['Automated scam detection', 'Scan masked threads for payment-redirect language.'],
   guestRsvp: ['Guest RSVP without account', 'Growth loop; only disable under attack.'],
   poolReleaseReview: ['Manual review of pool releases > $1,000', 'Adds finance review before large harambee payouts.'],

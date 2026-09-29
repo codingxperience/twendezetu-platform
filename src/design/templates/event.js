@@ -8,10 +8,10 @@ const template = `
     <div style="display: flex; align-items: center; gap: 36px;">
       <a href="/" class="tz-logo-link" aria-label="Twendezetu home"><img src="/brand/logo.png" alt="Twendezetu" width="1211" height="229" class="tz-logo tz-logo--md"></a>
       <nav class="tw-nav" style="display: flex; gap: 24px; font-size: 14px; font-weight: 500;">
-        <a href="/" style="color: #6E6155; text-decoration: none;">Event guide</a>
+        <a href="/events" style="color: #6E6155; text-decoration: none;">Events</a>
         <a href="/events/nyama-choma-festival-2026" style="color: #14201F; text-decoration: none; border-bottom: 2px solid #D97A3B; padding-bottom: 2px;">Featured</a>
         <a href="/create-event" style="color: #6E6155; text-decoration: none;">Post an event or need</a>
-        <a href="/provider-dashboard" style="color: #6E6155; text-decoration: none;">For providers</a>
+        <a href="/provider-dashboard" style="color: #6E6155; text-decoration: none;">For vendors</a>
       </nav>
     </div>
     <div style="display: flex; gap: 10px; align-items: center;">
@@ -272,7 +272,7 @@ const template = `
   <footer style="background: #1F3A38; color: #F7F1E6; padding: 40px 24px 0; overflow: hidden; border-top: 2px solid #1F3A38;">
     <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; padding-bottom: 32px; font-size: 14px;">
       <span style="color: rgba(247,241,230,0.75);">IMETOLEWA NA UONGOZI-NYTC · JULY 3, 2026</span>
-      <a href="/" style="color: #F7F1E6;">← Back to the guide</a>
+      <a href="/" style="color: #F7F1E6;">← Back to events</a>
     </div>
     <div style="font-family: var(--tz-display); font-size: clamp(64px, 12vw, 200px); text-transform: uppercase; line-height: 0.78; text-align: center; transform: translateY(12%);">HII SI YA KUKOSA</div>
   </footer>

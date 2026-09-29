@@ -211,7 +211,7 @@ export function values(state, set, ctx) {
       statusLine: '○ NOT LISTED',
       statusColor: COLORS.muted,
       verificationLabel: 'after you list',
-      listingHref: '/providers',
+      listingHref: '/vendors',
       headlineTail: 'List your service',
       isDraft: false,
     };
@@ -220,7 +220,7 @@ export function values(state, set, ctx) {
   const { provider, membership, tiles } = data;
   const currency = provider.currency;
   const pricePlaceholder = `e.g. ${CURRENCIES[currency]?.exponent ? '450' : '450,000'} (${currency})`;
-  const listingHref = `/providers/${provider.slug}`;
+  const listingHref = `/vendors/${provider.slug}`;
 
   // ── Leads ─────────────────────────────────────────────────────────────
   const leads = data.leads.map((lead) => {

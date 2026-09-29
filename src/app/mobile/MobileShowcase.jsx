@@ -149,7 +149,7 @@ function ScreenCard({ screen, status = false }) {
 function HomeFeedScreen() {
   return (
     <div className={styles.homeScreen}>
-      <div className={styles.displayTitle}>EVENT GUIDE</div>
+      <div className={styles.displayTitle}>EVENTS</div>
 
       <div className={styles.searchBox}>
         <span>Tafuta events, needs...</span>

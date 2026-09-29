@@ -391,7 +391,7 @@ export async function adminOverview() {
   const attention = [];
   if (highReports) attention.push({ label: `${highReports} high-severity report${highReports === 1 ? '' : 's'} waiting`, action: 'MODERATE', section: 'moderation' });
   if (escalated) attention.push({ label: `${escalated} refund case${escalated === 1 ? '' : 's'} waiting for a decision (money is frozen)`, action: 'DECIDE', section: 'cases' });
-  if (stalledVerifications) attention.push({ label: `${stalledVerifications} provider verification${stalledVerifications === 1 ? '' : 's'} waiting over 48h`, action: 'REVIEW', section: 'verify' });
+  if (stalledVerifications) attention.push({ label: `${stalledVerifications} vendor verification${stalledVerifications === 1 ? '' : 's'} waiting over 48h`, action: 'REVIEW', section: 'verify' });
   if (payoutCount) attention.push({ label: `Payout batch of ${usdShort(payoutUsd)} awaits finance approval`, action: 'FINANCE', href: '/finance' });
   if (featuredEligible) attention.push({ label: `${featuredEligible} popular event${featuredEligible === 1 ? ' is' : 's are'} not featured yet`, action: 'CURATE', section: 'content' });
 

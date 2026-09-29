@@ -43,7 +43,7 @@ export function values(state, set, ctx) {
     suspend: async () => {
       const sure = await ctx.ask({
         title: 'Suspend this account?',
-        body: 'They are signed out everywhere, their posts are hidden and a provider listing is taken down until you reinstate them.',
+        body: 'They are signed out everywhere, their posts are hidden and a vendor listing is taken down until you reinstate them.',
         input: false,
         confirmLabel: 'Suspend',
         danger: true,
@@ -126,10 +126,10 @@ export function values(state, set, ctx) {
   const review = async (item, decision) => {
     let note;
     if (decision !== 'approve') {
-      note = await ctx.ask({ title: decision === 'info' ? 'What is missing?' : 'Why is it not approved?', body: 'The provider reads this, so say exactly what to fix.', maxLength: 500, confirmLabel: decision === 'info' ? 'Ask for it' : 'Reject' , danger: decision === 'reject' });
+      note = await ctx.ask({ title: decision === 'info' ? 'What is missing?' : 'Why is it not approved?', body: 'The vendor reads this, so say exactly what to fix.', maxLength: 500, confirmLabel: decision === 'info' ? 'Ask for it' : 'Reject' , danger: decision === 'reject' });
       if (!note) return;
     }
-    post(`v:${item.id}`, `/api/admin/verifications/${item.id}`, { decision, note }, decision === 'approve' ? `${item.name} is verified.` : 'The provider has been told.');
+    post(`v:${item.id}`, `/api/admin/verifications/${item.id}`, { decision, note }, decision === 'approve' ? `${item.name} is verified.` : 'The vendor has been told.');
   };
   const verifications = (data.verifications || []).map((item) => ({
     ...item,

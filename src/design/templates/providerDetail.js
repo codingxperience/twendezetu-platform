@@ -8,14 +8,14 @@ const template = `
     <div style="display: flex; align-items: center; gap: 36px;">
       <a href="/" class="tz-logo-link" aria-label="Twendezetu home"><img src="/brand/logo.png" alt="Twendezetu" width="1211" height="229" class="tz-logo tz-logo--md"></a>
       <nav class="tw-nav" style="display: flex; gap: 24px; font-size: 14px; font-weight: 500;">
-        <a href="/" style="color: #6E6155; text-decoration: none;">Event guide</a>
-        <a href="/providers" style="color: #6E6155; text-decoration: none;">Directory</a>
+        <a href="/events" style="color: #6E6155; text-decoration: none;">Events</a>
+        <a href="/vendors" style="color: #6E6155; text-decoration: none;">Directory</a>
         <a href="/create-event" style="color: #6E6155; text-decoration: none;">Post a need</a>
       </nav>
     </div>
     <div style="display: flex; gap: 10px; align-items: center;">
       <a href="{{ accountHref }}" style="font-size: 14px; font-weight: 600; color: #14201F; text-decoration: none; padding: 10px 16px;">{{ accountLabelPlain }}</a>
-      <a href="/provider-dashboard" style="font-family: var(--tz-mono); font-size: 13px; background: #1F3A38; color: #F7F1E6; text-decoration: none; padding: 12px 20px; box-shadow: 4px 4px 0 #D97A3B;">FOR PROVIDERS →</a>
+      <a href="/provider-dashboard" style="font-family: var(--tz-mono); font-size: 13px; background: #1F3A38; color: #F7F1E6; text-decoration: none; padding: 12px 20px; box-shadow: 4px 4px 0 #D97A3B;">FOR VENDORS →</a>
     </div>
   </header>
 
@@ -25,7 +25,7 @@ const template = `
   </div>
 
   <div style="max-width: 1200px; margin: 0 auto; padding: 20px 24px 0; font-family: var(--tz-mono); font-size: 12px; color: #6E6155;">
-    <a href="/providers" style="color: #A85A23;">← Back to directory</a> · <a href="{{ categoryHref }}" style="color: #6E6155;">{{ category }}</a> · {{ place }}
+    <a href="/vendors" style="color: #A85A23;">← Back to directory</a> · <a href="{{ categoryHref }}" style="color: #6E6155;">{{ category }}</a> · {{ place }}
   </div>
 
   <!-- Title -->
@@ -128,9 +128,9 @@ const template = `
 
             <!-- Share -->
             <div style="border-top: 2px solid #1F3A38; padding-top: 14px;">
-              <div style="font-family: var(--tz-mono); font-size: 11px; color: #A85A23; letter-spacing: 0.08em; margin-bottom: 8px;">[Share this provider]</div>
+              <div style="font-family: var(--tz-mono); font-size: 11px; color: #A85A23; letter-spacing: 0.08em; margin-bottom: 8px;">[Share this vendor]</div>
               <div style="display: flex; border: 2px solid #1F3A38; margin-bottom: 8px;">
-                <input value="{{ shareUrl }}" readOnly aria-label="Link to this provider" style="flex: 1; min-width: 0; border: 0; background: #EFE7D6; font-family: var(--tz-mono); font-size: 11.5px; padding: 10px 11px; outline: none;">
+                <input value="{{ shareUrl }}" readOnly aria-label="Link to this vendor" style="flex: 1; min-width: 0; border: 0; background: #EFE7D6; font-family: var(--tz-mono); font-size: 11.5px; padding: 10px 11px; outline: none;">
                 <button onClick="{{ copyLink }}" style="border: 0; border-left: 2px solid #1F3A38; background: #D97A3B; font-family: var(--tz-mono); font-size: 11px; padding: 0 12px; cursor: pointer;">{{ copyLabel }}</button>
               </div>
               <div style="display: flex; gap: 6px;">

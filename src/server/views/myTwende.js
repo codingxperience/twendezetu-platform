@@ -264,7 +264,7 @@ export async function myTwendeView(viewer) {
 
   const eventPosts = events.map((event) => {
     const over = (event.endsAt || event.startsAt) < now;
-    const stage = { DRAFT: 'DRAFT', PAUSED: 'PAUSED', CANCELLED: 'CANCELLED' }[event.status] || (over ? 'DONE' : 'LIVE ON THE GUIDE');
+    const stage = { DRAFT: 'DRAFT', PAUSED: 'PAUSED', CANCELLED: 'CANCELLED' }[event.status] || (over ? 'DONE' : 'LIVE');
     const manageable = ['DRAFT', 'PUBLISHED', 'PAUSED'].includes(event.status) && !over;
     return {
       kind: 'EVENT',
@@ -355,7 +355,7 @@ export async function myTwendeView(viewer) {
       unread: !notice.readAt,
     })),
     featured: featuredEvent
-      ? { ...toEventCard(featuredEvent), by: fromFollowed[0] ? `FROM ${featuredEvent.organizer.name.toUpperCase()}, WHO YOU FOLLOW` : 'FEATURED ON THE GUIDE' }
+      ? { ...toEventCard(featuredEvent), by: fromFollowed[0] ? `FROM ${featuredEvent.organizer.name.toUpperCase()}, WHO YOU FOLLOW` : 'STAFF PICK' }
       : null,
     explore: featured
       .filter((event) => event.id !== featuredEvent?.id)

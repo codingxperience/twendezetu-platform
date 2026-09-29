@@ -28,8 +28,8 @@ export default function NotFound() {
             <Link href="/" style={{ fontFamily: 'var(--tz-display)', fontSize: 16, textTransform: 'uppercase', background: '#D97A3B', color: '#14201F', border: '2px solid #1F3A38', padding: '14px 24px', textDecoration: 'none', boxShadow: '4px 4px 0 #1F3A38' }}>
               Find events →
             </Link>
-            <Link href="/providers" style={{ ...mono, border: '2px solid #1F3A38', color: '#14201F', padding: '14px 18px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
-              BROWSE PROVIDERS
+            <Link href="/vendors" style={{ ...mono, border: '2px solid #1F3A38', color: '#14201F', padding: '14px 18px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
+              BROWSE VENDORS
             </Link>
             <Link href="/my-twende" style={{ ...mono, border: '2px solid #1F3A38', color: '#14201F', padding: '14px 18px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
               MY TWENDE

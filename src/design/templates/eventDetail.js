@@ -8,9 +8,9 @@ const template = `
     <div style="display: flex; align-items: center; gap: 36px;">
       <a href="/" class="tz-logo-link" aria-label="Twendezetu home"><img src="/brand/logo.png" alt="Twendezetu" width="1211" height="229" class="tz-logo tz-logo--md"></a>
       <nav class="tw-nav" style="display: flex; gap: 24px; font-size: 14px; font-weight: 500;">
-        <a href="/" style="color: #6E6155; text-decoration: none;">Event guide</a>
+        <a href="/events" style="color: #6E6155; text-decoration: none;">Events</a>
         <a href="/create-event" style="color: #6E6155; text-decoration: none;">Post an event or need</a>
-        <a href="/provider-dashboard" style="color: #6E6155; text-decoration: none;">For providers</a>
+        <a href="/provider-dashboard" style="color: #6E6155; text-decoration: none;">For vendors</a>
       </nav>
     </div>
     <div style="display: flex; gap: 10px; align-items: center;">

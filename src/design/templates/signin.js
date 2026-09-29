@@ -183,7 +183,7 @@ const template = `
         <span style="flex: 1; height: 1px; background: #C9BFB1;"></span>
       </div>
       <a href="{{ guestHref }}" style="display: block; text-align: center; border: 2px solid #1F3A38; background: #FFFDF8; color: #14201F; text-decoration: none; font-size: 14px; font-weight: 600; padding: 14px;">Continue as guest — browse without an account →</a>
-      <div style="font-size: 12px; color: #6E6155; text-align: center; margin-top: 14px; line-height: 1.5;">Guests can view, RSVP and share. Saving, posting, and provider tools need an account.</div>
+      <div style="font-size: 12px; color: #6E6155; text-align: center; margin-top: 14px; line-height: 1.5;">Guests can view, RSVP and share. Saving, posting, and vendor tools need an account.</div>
     </div>
   </div>
 </div>

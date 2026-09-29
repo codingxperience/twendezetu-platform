@@ -8,7 +8,7 @@ export const initialState = { copied: false };
 
 export function values(state, set, ctx) {
   const { data } = state;
-  const share = shareLinks(data.link, 'Join me on Twendezetu, where our community finds events and trusted providers.', 'Join me on Twendezetu');
+  const share = shareLinks(data.link, 'Join me on Twendezetu, where our community finds events and trusted vendors.', 'Join me on Twendezetu');
   const next = data.nextTier;
   const progress = next ? Math.round((data.verifiedFriends / next.friends) * 100) : 100;
 

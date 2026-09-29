@@ -210,7 +210,7 @@ const template = `
         </div>
 
         <div id="memberships" style="border: 2px solid #F7F1E6; background: #1F3A38; padding: 22px; scroll-margin-top: 150px;">
-          <div style="font-family: var(--tz-mono); font-size: 11px; color: #E8A472; letter-spacing: 0.08em;">[Provider memberships]</div>
+          <div style="font-family: var(--tz-mono); font-size: 11px; color: #E8A472; letter-spacing: 0.08em;">[Vendor memberships]</div>
           <div style="display: flex; gap: 24px; margin-top: 12px; flex-wrap: wrap;">
             <div><div style="font-family: var(--tz-display); font-size: 28px;">{{ activeMemberships }}</div><div style="font-size: 11.5px; color: rgba(247,241,230,0.6);">active</div></div>
             <div><div style="font-family: var(--tz-display); font-size: 28px; color: #D97A3B;">{{ renewSoon }}</div><div style="font-size: 11.5px; color: rgba(247,241,230,0.6);">end within 30 days</div></div>

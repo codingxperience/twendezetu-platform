@@ -4,7 +4,7 @@
 export const TOPICS = Object.freeze([
   { topic: 'REMINDERS', title: 'Reminders (7d · 1d · 2h)', member: "Events you RSVP'd or booked", provider: "Events you RSVP'd or booked" },
   { topic: 'OFFERS', title: 'Offers & replies', member: 'On your needs and threads', provider: 'On your offers and threads' },
-  { topic: 'LEADS', title: 'Matched leads', member: 'Providers matching your posts', provider: 'New needs in your categories and cities' },
+  { topic: 'LEADS', title: 'Matched leads', member: 'Vendors matching your posts', provider: 'New needs in your categories and cities' },
   { topic: 'MONEY', title: 'Money movement', member: 'Top-ups, sends, escrow, payouts', provider: 'Top-ups, sends, escrow, payouts' },
   { topic: 'SOCIAL', title: 'Comments & referrals', member: 'Activity on your posts and links', provider: 'Activity on your posts and links' },
   { topic: 'NEWS', title: 'Twendezetu news', member: 'Product updates, city launches', provider: 'Product updates, city launches' },

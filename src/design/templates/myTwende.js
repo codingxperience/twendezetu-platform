@@ -28,7 +28,7 @@ const template = `
           <a href="/points-wallet" style="display: block; text-decoration: none; color: #14201F; border-bottom: 1px solid #E3D9C6; padding: 13px 18px; font-size: 14px;">◍ &nbsp;Points wallet</a>
           <a href="/settings?tab=notifications" style="display: block; text-decoration: none; color: #14201F; border-bottom: 1px solid #E3D9C6; padding: 13px 18px; font-size: 14px;">▲ &nbsp;Notification settings</a>
           <sc-if value="{{ me.isProvider }}">
-            <a href="/provider-dashboard" style="display: block; text-decoration: none; color: #14201F; border-bottom: 1px solid #E3D9C6; padding: 13px 18px; font-size: 14px;">◆ &nbsp;Provider dashboard</a>
+            <a href="/provider-dashboard" style="display: block; text-decoration: none; color: #14201F; border-bottom: 1px solid #E3D9C6; padding: 13px 18px; font-size: 14px;">◆ &nbsp;Vendor dashboard</a>
           </sc-if>
           <sc-if value="{{ me.isStaff }}">
             <a href="/admin" style="display: block; text-decoration: none; color: #14201F; border-bottom: 1px solid #E3D9C6; padding: 13px 18px; font-size: 14px;">⚑ &nbsp;Trust &amp; safety desk</a>
@@ -192,7 +192,7 @@ const template = `
 
         <!-- People to follow -->
         <sc-if value="{{ hasFollowCards }}">
-        <h2 style="font-family: var(--tz-display); font-size: 24px; text-transform: uppercase; margin: 28px 0 12px;">Providers to follow<span style="color: #D97A3B;">.</span></h2>
+        <h2 style="font-family: var(--tz-display); font-size: 24px; text-transform: uppercase; margin: 28px 0 12px;">Vendors to follow<span style="color: #D97A3B;">.</span></h2>
         <div style="display: flex; gap: 12px; flex-wrap: wrap; max-width: 900px;">
           <sc-for list="{{ fyFollow }}" as="ff" hint-placeholder-count="4">
             <div style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 12px 16px; display: flex; gap: 12px; align-items: center;">
@@ -217,7 +217,7 @@ const template = `
             <div style="border: 2px dashed #1F3A38; background: #FFFDF8; padding: 28px 24px;">
               <div style="font-family: var(--tz-display); font-size: 22px; text-transform: uppercase;">Nothing on the calendar yet</div>
               <p style="font-size: 14px; color: #6E6155; line-height: 1.55; margin: 8px 0 16px; max-width: 520px;">RSVP to an event or buy a ticket and it lands here with your reminders, your ticket and a link to share.</p>
-              <a href="/" style="font-family: var(--tz-mono); font-size: 12px; border: 2px solid #1F3A38; background: #D97A3B; color: #1F3A38; padding: 10px 16px; text-decoration: none;">BROWSE THE GUIDE →</a>
+              <a href="/" style="font-family: var(--tz-mono); font-size: 12px; border: 2px solid #1F3A38; background: #D97A3B; color: #1F3A38; padding: 10px 16px; text-decoration: none;">BROWSE EVENTS →</a>
             </div>
           </sc-if>
           <sc-for list="{{ upcoming }}" as="ev" hint-placeholder-count="2">
@@ -397,9 +397,9 @@ const template = `
           <h2 style="font-family: var(--tz-display); font-size: 28px; text-transform: uppercase; margin: 0;">Your posts<span style="color: #D97A3B;">.</span></h2>
           <a href="/create-event" style="font-family: var(--tz-mono); font-size: 12px; border: 2px solid #1F3A38; color: #14201F; text-decoration: none; padding: 9px 14px;">+ NEW POST</a>
         </div>
-        <p style="font-size: 13.5px; color: #6E6155; line-height: 1.55; margin: 0 0 20px; max-width: 720px;">Every post you publish lives here <strong>and</strong> on the public boards: events appear in the <a href="/" style="color: #A85A23;">event guide</a>, needs on the needs board — and matched providers in that city are notified instantly. Each post moves through a pipeline: <span style="font-family: var(--tz-mono); font-size: 11.5px;">DRAFT → LIVE → OFFERS → ACCEPTED → DONE</span>.</p>
+        <p style="font-size: 13.5px; color: #6E6155; line-height: 1.55; margin: 0 0 20px; max-width: 720px;">Every post you publish lives here <strong>and</strong> on the public boards: events appear in the <a href="/" style="color: #A85A23;">events page</a>, needs on the needs board — and matched vendors in that city are notified instantly. Each post moves through a pipeline: <span style="font-family: var(--tz-mono); font-size: 11.5px;">DRAFT → LIVE → OFFERS → ACCEPTED → DONE</span>.</p>
         <sc-if value="{{ noPosts }}">
-          <div style="border: 2px dashed #1F3A38; background: #FFFDF8; padding: 24px; font-size: 14px; color: #6E6155; line-height: 1.55;">You haven't posted anything yet. Post an event for the guide, or post a need — tents, a DJ, a caterer — and providers nearby send you offers.</div>
+          <div style="border: 2px dashed #1F3A38; background: #FFFDF8; padding: 24px; font-size: 14px; color: #6E6155; line-height: 1.55;">You haven't posted anything yet. Post an event, or post a need — tents, a DJ, a caterer — and vendors nearby send you offers.</div>
         </sc-if>
         <div style="display: grid; gap: 14px;">
           <sc-for list="{{ myPosts }}" as="p" hint-placeholder-count="3">
@@ -458,7 +458,7 @@ const template = `
     <!-- TAB: saved -->
     <sc-if value="{{ showSaved }}" hint-placeholder-val="{{ false }}">
       <sc-if value="{{ noSaved }}">
-        <div style="border: 2px dashed #1F3A38; background: #FFFDF8; padding: 24px; font-size: 14px; color: #6E6155; max-width: 640px; line-height: 1.55;">Nothing saved yet. Tap ♡ on any event in the guide to keep it here for later.</div>
+        <div style="border: 2px dashed #1F3A38; background: #FFFDF8; padding: 24px; font-size: 14px; color: #6E6155; max-width: 640px; line-height: 1.55;">Nothing saved yet. Tap ♡ on any event to keep it here for later.</div>
       </sc-if>
       <div class="tw-4col" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
         <sc-for list="{{ saved }}" as="ev" hint-placeholder-count="4">
@@ -524,7 +524,7 @@ const template = `
   <!-- Footer strip -->
   <footer style="border-top: 2px solid #1F3A38; background: #1F3A38; color: #F7F1E6; padding: 20px 24px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; font-family: var(--tz-mono); font-size: 12px;">
     <span>TWENDEZETU · MY TWENDE</span>
-    <a href="/" style="color: #E8A472;">← BACK TO THE GUIDE</a>
+    <a href="/" style="color: #E8A472;">← BACK TO EVENTS</a>
   </footer>
 </div>
 `;

@@ -37,7 +37,6 @@ const STAGE_TONES = {
   DRAFT: { bg: COLORS.sand, fg: COLORS.ink },
   PAUSED: { bg: COLORS.sand, fg: COLORS.ink },
   LIVE: { bg: COLORS.clay, fg: COLORS.ink },
-  'LIVE ON THE GUIDE': { bg: COLORS.clay, fg: COLORS.ink },
   'OFFERS IN': { bg: COLORS.clay, fg: COLORS.ink },
   ACCEPTED: { bg: COLORS.forest, fg: COLORS.cream },
   DONE: { bg: COLORS.sage, fg: COLORS.cream },
@@ -218,7 +217,7 @@ export function values(state, set, ctx) {
       accept: async () => {
         const sure = await ctx.ask({
           title: `Accept ${offer.name}'s offer?`,
-          body: `${offer.price} for "${need.title}". The other offers on this need are declined and each provider is told. You pay into escrow next; ${offer.name} is only paid after the job.`,
+          body: `${offer.price} for "${need.title}". The other offers on this need are declined and each vendor is told. You pay into escrow next; ${offer.name} is only paid after the job.`,
           input: false,
           confirmLabel: 'Accept offer',
         });
@@ -258,9 +257,9 @@ export function values(state, set, ctx) {
       pauseBg: post.paused ? COLORS.clay : COLORS.cream,
       pause: () =>
         post.kind === 'NEED'
-          ? setStatus(post.paused ? 'resume' : 'pause', {}, post.paused ? 'Your need is live again.' : 'Paused. Providers cannot send new offers until you resume.')
-          : setStatus(post.paused ? 'publish' : 'pause', {}, post.paused ? 'Back on the guide.' : 'Paused. The event is off the guide until you resume.'),
-      publish: () => setStatus('publish', {}, 'Published. It is on the guide now.'),
+          ? setStatus(post.paused ? 'resume' : 'pause', {}, post.paused ? 'Your need is live again.' : 'Paused. Vendors cannot send new offers until you resume.')
+          : setStatus(post.paused ? 'publish' : 'pause', {}, post.paused ? 'It is live again.' : 'Paused. The event is hidden until you resume.'),
+      publish: () => setStatus('publish', {}, 'Published. It is live now.'),
       shareLabel: state.copied === shareKey ? '✓ LINK COPIED' : '⧉ SHARE',
       share: () => {
         copyText(post.shareUrl);
@@ -269,7 +268,7 @@ export function values(state, set, ctx) {
       closeLabel: post.kind === 'NEED' ? 'CLOSE' : post.status === 'DRAFT' ? 'DELETE DRAFT' : 'CANCEL EVENT',
       close: async () => {
         if (post.kind === 'NEED') {
-          const sure = await ctx.ask({ title: 'Close this need?', body: 'Open offers are declined and each provider is told. This cannot be undone.', input: false, confirmLabel: 'Close need', danger: true });
+          const sure = await ctx.ask({ title: 'Close this need?', body: 'Open offers are declined and each vendor is told. This cannot be undone.', input: false, confirmLabel: 'Close need', danger: true });
           if (sure) setStatus('close', {}, 'Closed.');
           return;
         }
@@ -348,7 +347,7 @@ export function values(state, set, ctx) {
     fyFollow: data.providers.map((provider, index) => ({
       ...provider,
       ...AVATAR_TONES[(index + 1) % AVATAR_TONES.length],
-      href: `/providers/${provider.slug}`,
+      href: `/vendors/${provider.slug}`,
       btnLabel: provider.following ? '✓ FOLLOWING' : '+ FOLLOW',
       btnBg: provider.following ? COLORS.forest : COLORS.clay,
       btnFg: provider.following ? COLORS.cream : COLORS.ink,

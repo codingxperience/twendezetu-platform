@@ -28,7 +28,7 @@ const template = `
       </sc-for>
       </nav>
       <div style="margin-top: 24px; border: 1px dashed #A85A23; background: #FBEED8; padding: 14px; font-size: 12.5px; line-height: 1.5; color: #7A3E0F;">
-        <strong>Why masked?</strong> Providers answer in-platform. Your email and phone are never shown unless you choose to share them when you accept an offer.
+        <strong>Why masked?</strong> Vendors answer in-platform. Your email and phone are never shown unless you choose to share them when you accept an offer.
       </div>
     </aside>
 
@@ -43,12 +43,12 @@ const template = `
             <button onClick="{{ pickEvent }}" aria-pressed="{{ isEventKind }}" style="text-align: left; background: {{ eventCardBg }}; color: {{ eventCardFg }}; border: 2px solid #1F3A38; padding: 28px; cursor: pointer; box-shadow: {{ eventCardShadow }}; font-family: inherit;">
               <div style="font-family: var(--tz-mono); font-size: 12px; opacity: 0.7;">(01)</div>
               <div style="font-family: var(--tz-display); font-size: 28px; text-transform: uppercase; margin: 28px 0 10px;">An event</div>
-              <div style="font-size: 14px; line-height: 1.55; opacity: 0.85;">A festival, cookout, harusi, fundraiser or show. Free RSVP or ticket tiers. It goes on the guide with a link to share.</div>
+              <div style="font-size: 14px; line-height: 1.55; opacity: 0.85;">A festival, cookout, harusi, fundraiser or show. Free RSVP or ticket tiers. It goes live on Twendezetu with a link to share.</div>
             </button>
             <button onClick="{{ pickNeed }}" aria-pressed="{{ isNeedKind }}" style="text-align: left; background: {{ needCardBg }}; color: {{ needCardFg }}; border: 2px solid #1F3A38; padding: 28px; cursor: pointer; box-shadow: {{ needCardShadow }}; font-family: inherit;">
               <div style="font-family: var(--tz-mono); font-size: 12px; opacity: 0.7;">(02)</div>
               <div style="font-family: var(--tz-display); font-size: 28px; text-transform: uppercase; margin: 28px 0 10px;">A need</div>
-              <div style="font-size: 14px; line-height: 1.55; opacity: 0.85;">"Driver needed Kampala → Jinja." "DJ for a cookout." Matching providers are told, send offers, and you compare and accept.</div>
+              <div style="font-size: 14px; line-height: 1.55; opacity: 0.85;">"Driver needed Kampala → Jinja." "DJ for a cookout." Matching vendors are told, send offers, and you compare and accept.</div>
             </button>
           </div>
           <button onClick="{{ next }}" style="margin-top: 28px; font-family: var(--tz-display); font-size: 16px; text-transform: uppercase; background: #D97A3B; color: #1F3A38; border: 2px solid #1F3A38; padding: 14px 32px; cursor: pointer; box-shadow: 4px 4px 0 #1F3A38;">Continue →</button>
@@ -68,7 +68,7 @@ const template = `
 
             <sc-if value="{{ isEventKind }}">
               <label style="display: grid; gap: 6px;">
-                <span style="${label}">ONE-LINE SUMMARY * <span style="color: #6E6155;">— shown on the guide card</span></span>
+                <span style="${label}">ONE-LINE SUMMARY * <span style="color: #6E6155;">— shown on the event card</span></span>
                 <input value="{{ form.blurb }}" onChange="{{ set.blurb }}" maxlength="240" placeholder="e.g. A diaspora dancefloor — afrobeat, amapiano and gengetone till late." style="${field}">
               </label>
             </sc-if>

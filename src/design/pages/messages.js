@@ -16,7 +16,7 @@ const REPORT_REASONS = [
 const OFFER_STATUS = {
   ACCEPTED: '✓ ACCEPTED',
   DECLINED: 'DECLINED',
-  WITHDRAWN: 'WITHDRAWN BY THE PROVIDER',
+  WITHDRAWN: 'WITHDRAWN BY THE VENDOR',
   EXPIRED: 'EXPIRED',
   COUNTERED: 'COUNTER-OFFER SENT · WAITING FOR A REVISED PRICE',
 };
@@ -200,7 +200,7 @@ export function values(state, set, ctx) {
       accept: async () => {
         const sure = await ctx.ask({
           title: `Accept ${offer.price}?`,
-          body: `${offer.title}. Other offers on your need are declined and each provider is told. You then pay into escrow; the provider is only paid after the job.`,
+          body: `${offer.title}. Other offers on your need are declined and each vendor is told. You then pay into escrow; the vendor is only paid after the job.`,
           input: false,
           confirmLabel: 'Accept offer',
         });
@@ -208,7 +208,7 @@ export function values(state, set, ctx) {
       },
       counter: () => set((current) => ({ ...current, counterFor: current.counterFor === offer.id ? null : offer.id, counterVal: '' })),
       decline: async () => {
-        const sure = await ctx.ask({ title: 'Decline this offer?', body: 'The provider is told. You cannot undo this.', input: false, confirmLabel: 'Decline', danger: true });
+        const sure = await ctx.ask({ title: 'Decline this offer?', body: 'The vendor is told. You cannot undo this.', input: false, confirmLabel: 'Decline', danger: true });
         if (sure) offerAction(offer, { action: 'decline' }, 'Offer declined.');
       },
       withdraw: async () => {
@@ -304,7 +304,7 @@ export function values(state, set, ctx) {
     messages,
     composerLabel: isPoster ? '[YOUR COUNTER-OFFER]' : '[YOUR REVISED PRICE]',
     composerHint: isPoster
-      ? 'Say what you would accept. The provider can answer with a revised price.'
+      ? 'Say what you would accept. The vendor can answer with a revised price.'
       : 'Your new total for the whole job, in the same currency as your offer.',
     composerPlaceholder: isPoster ? 'e.g. Could you do it for 650,000 with pickup at 7am?' : 'e.g. 700,000',
     composerAction: isPoster ? 'Send counter' : 'Send price',
@@ -341,7 +341,7 @@ export function values(state, set, ctx) {
       const sure = await ctx.ask({ title: 'Cancel this booking?', body: 'Nothing has been paid, so nothing moves. The need reopens for other offers.', input: false, confirmLabel: 'Cancel booking', danger: true });
       if (sure) bookingAction('cancel', () => ctx.api.post(`/api/bookings/${booking.id}/cancel`), 'Booking cancelled.');
     },
-    reviewHref: booking ? `/providers/${booking.providerSlug}?review=${booking.id}#reviews` : '#',
+    reviewHref: booking ? `/vendors/${booking.providerSlug}?review=${booking.id}#reviews` : '#',
 
     draft: state.draft,
     setDraft: (event) => set((current) => ({ ...current, draft: event.target.value })),

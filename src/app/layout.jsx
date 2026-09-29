@@ -25,12 +25,12 @@ const appUrl = resolveAppUrl();
 
 export const metadata = {
   title: 'Twendezetu — Event Portal',
-  description: 'Events, needs, providers, tickets, and masked community coordination for East Africa and the diaspora.',
+  description: 'Events, needs, vendors, tickets, and masked community coordination for East Africa and the diaspora.',
   keywords: ['East Africa', 'event portal', 'nyama choma', 'diaspora', 'providers', 'Nairobi', 'Kampala', 'New Jersey'],
   metadataBase: new URL(appUrl),
   openGraph: {
     title: 'Twendezetu — Gather anywhere.',
-    description: 'Post events and needs, discover providers, RSVP, pay, and coordinate without exposing contacts.',
+    description: 'Post events and needs, discover vendors, RSVP, pay, and coordinate without exposing contacts.',
     type: 'website',
     siteName: 'Twendezetu',
     images: [{ url: '/brand/share-card.png', width: 1200, height: 630, alt: 'Twendezetu' }],
@@ -38,7 +38,7 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Twendezetu — Gather anywhere.',
-    description: 'Post events and needs, discover providers, RSVP, pay, and coordinate without exposing contacts.',
+    description: 'Post events and needs, discover vendors, RSVP, pay, and coordinate without exposing contacts.',
     images: ['/brand/share-card.png'],
   },
   icons: {

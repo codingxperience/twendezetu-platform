@@ -8,10 +8,10 @@ const template = `
     <div style="display: flex; align-items: center; gap: 36px;">
       <a href="/" class="tz-logo-link" aria-label="Twendezetu home"><img src="/brand/logo.png" alt="Twendezetu" width="1211" height="229" class="tz-logo tz-logo--md"></a>
       <nav class="tw-nav" style="display: flex; gap: 24px; font-size: 14px; font-weight: 500;">
-        <a href="/" style="color: #6E6155; text-decoration: none;">Event guide</a>
-        <a href="/providers" style="color: #6E6155; text-decoration: none;">Directory</a>
+        <a href="/events" style="color: #6E6155; text-decoration: none;">Events</a>
+        <a href="/vendors" style="color: #6E6155; text-decoration: none;">Directory</a>
         <a href="/create-event" style="color: #6E6155; text-decoration: none;">Post an event or need</a>
-        <a href="/provider-dashboard" style="color: #6E6155; text-decoration: none;">For providers</a>
+        <a href="/provider-dashboard" style="color: #6E6155; text-decoration: none;">For vendors</a>
       </nav>
     </div>
     <a href="{{ accountHref }}" style="font-family: var(--tz-mono); font-size: 13px; background: #1F3A38; color: #F7F1E6; text-decoration: none; padding: 12px 20px; box-shadow: 4px 4px 0 #D97A3B;">{{ accountLabel }}</a>
@@ -27,7 +27,7 @@ const template = `
 
   <!-- Breadcrumb -->
   <div style="max-width: 1200px; margin: 0 auto; padding: 20px 24px 0; font-family: var(--tz-mono); font-size: 12px; color: #6E6155;">
-    <a href="/providers" style="color: #A85A23;">← Providers</a> · <a href="{{ categoryHref }}" style="color: #6E6155;">{{ category }}</a> · {{ place }}
+    <a href="/vendors" style="color: #A85A23;">← Vendors</a> · <a href="{{ categoryHref }}" style="color: #6E6155;">{{ category }}</a> · {{ place }}
   </div>
 
   <!-- Title -->
@@ -178,7 +178,7 @@ const template = `
           </sc-if>
           <sc-if value="{{ reqError }}"><div role="alert" style="font-size: 12.5px; color: #B8463A;">{{ reqError }}</div></sc-if>
           <button onClick="{{ sendReq }}" aria-busy="{{ sendingReq }}" style="font-family: var(--tz-display); font-size: 16px; text-transform: uppercase; background: #D97A3B; color: #1F3A38; border: 2px solid #1F3A38; padding: 14px; text-align: center; cursor: pointer; box-shadow: 4px 4px 0 #1F3A38;">Send request →</button>
-          <a href="/create-event?kind=need" style="font-family: var(--tz-mono); font-size: 11.5px; color: #A85A23; text-align: center;">or post a need and compare offers from several providers</a>
+          <a href="/create-event?kind=need" style="font-family: var(--tz-mono); font-size: 11.5px; color: #A85A23; text-align: center;">or post a need and compare offers from several vendors</a>
         </div>
         </sc-if>
         <sc-if value="{{ me.signedIn }}">
@@ -193,9 +193,9 @@ const template = `
       </div>
 
       <div style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 20px 22px;">
-        <div style="font-family: var(--tz-mono); font-size: 11px; color: #A85A23; letter-spacing: 0.08em;">[Share this provider]</div>
+        <div style="font-family: var(--tz-mono); font-size: 11px; color: #A85A23; letter-spacing: 0.08em;">[Share this vendor]</div>
         <div style="display: flex; border: 2px solid #1F3A38; margin-top: 10px;">
-          <input value="{{ shareUrl }}" readOnly aria-label="Link to this provider" style="flex: 1; min-width: 0; border: 0; background: #EFE7D6; font-family: var(--tz-mono); font-size: 12px; padding: 10px 12px; outline: none;">
+          <input value="{{ shareUrl }}" readOnly aria-label="Link to this vendor" style="flex: 1; min-width: 0; border: 0; background: #EFE7D6; font-family: var(--tz-mono); font-size: 12px; padding: 10px 12px; outline: none;">
           <button onClick="{{ copyLink }}" style="border: 0; border-left: 2px solid #1F3A38; background: #D97A3B; font-family: var(--tz-mono); font-size: 11px; padding: 0 14px; cursor: pointer;">{{ copyLabel }}</button>
         </div>
         <div style="display: flex; gap: 8px; margin-top: 10px;">
@@ -226,12 +226,12 @@ const template = `
     <div style="max-width: 1200px; margin: 0 auto; padding: 0 24px;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
         <div>
-          <div style="font-family: var(--tz-mono); font-size: 12px; color: #A85A23; letter-spacing: 0.08em;">[Watoa huduma wengine — more providers]</div>
+          <div style="font-family: var(--tz-mono); font-size: 12px; color: #A85A23; letter-spacing: 0.08em;">[Watoa huduma wengine — more vendors]</div>
           <h2 style="font-family: var(--tz-display); font-size: 32px; text-transform: uppercase; margin: 6px 0 0;"><a href="{{ categoryHref }}" style="color: inherit; text-decoration: none;">More {{ category }}<span style="color: #D97A3B;">.</span></a></h2>
         </div>
         <div style="display: flex; gap: 8px;">
-          <button onClick="{{ dirPrev }}" aria-label="Previous providers" style="width: 46px; height: 46px; border: 2px solid #1F3A38; background: #FFFDF8; font-family: var(--tz-mono); font-size: 17px; cursor: pointer; box-shadow: 3px 3px 0 #1F3A38;">←</button>
-          <button onClick="{{ dirNext }}" aria-label="More providers" style="width: 46px; height: 46px; border: 2px solid #1F3A38; background: #FFFDF8; font-family: var(--tz-mono); font-size: 17px; cursor: pointer; box-shadow: 3px 3px 0 #1F3A38;">→</button>
+          <button onClick="{{ dirPrev }}" aria-label="Previous vendors" style="width: 46px; height: 46px; border: 2px solid #1F3A38; background: #FFFDF8; font-family: var(--tz-mono); font-size: 17px; cursor: pointer; box-shadow: 3px 3px 0 #1F3A38;">←</button>
+          <button onClick="{{ dirNext }}" aria-label="More vendors" style="width: 46px; height: 46px; border: 2px solid #1F3A38; background: #FFFDF8; font-family: var(--tz-mono); font-size: 17px; cursor: pointer; box-shadow: 3px 3px 0 #1F3A38;">→</button>
         </div>
       </div>
       <div style="overflow: hidden;">
@@ -262,7 +262,7 @@ const template = `
   <!-- Footer -->
   <footer style="background: #1F3A38; color: #F7F1E6; padding: 32px 24px 0; overflow: hidden; border-top: 2px solid #1F3A38;">
     <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; padding-bottom: 24px; font-size: 14px; flex-wrap: wrap; gap: 12px;">
-      <span style="color: rgba(247,241,230,0.75);">PROVIDERS: LIST YOUR SERVICE — 12-MONTH MEMBERSHIP</span>
+      <span style="color: rgba(247,241,230,0.75);">VENDORS: LIST YOUR SERVICE — 12-MONTH MEMBERSHIP</span>
       <a href="/provider-dashboard" style="color: #E8A472;">List your service →</a>
     </div>
     <div aria-hidden="true" style="font-family: var(--tz-display); font-size: clamp(56px, 11vw, 180px); text-transform: uppercase; line-height: 0.78; text-align: center; transform: translateY(12%); white-space: nowrap;">{{ footerName }}</div>

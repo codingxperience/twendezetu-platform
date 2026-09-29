@@ -14,7 +14,7 @@ const template = `
   <section style="max-width: 1120px; margin: 0 auto; padding: 32px 24px 80px;">
     <div style="font-family: var(--tz-mono); font-size: 12px; color: #A85A23; letter-spacing: 0.08em;">[Alika, pata zawadi — invite &amp; earn]</div>
     <h1 style="font-family: var(--tz-display); font-size: clamp(32px, 5vw, 60px); text-transform: uppercase; line-height: 0.94; margin: 8px 0 6px;">Share Twende<span style="color: #D97A3B;">.</span> Earn points<span style="color: #D97A3B;">.</span></h1>
-    <p style="font-size: 15px; color: #3A2F25; line-height: 1.55; max-width: 580px; margin: 0 0 26px;">Friends who join from your link earn you Twende Points as they get going: points you can spend on tickets and providers, or send to family. There is no cap.</p>
+    <p style="font-size: 15px; color: #3A2F25; line-height: 1.55; max-width: 580px; margin: 0 0 26px;">Friends who join from your link earn you Twende Points as they get going: points you can spend on tickets and vendors, or send to family. There is no cap.</p>
 
     <div class="tw-2col" style="display: grid; grid-template-columns: 0.95fr 1.25fr; gap: 24px; align-items: start;">
       <div style="display: grid; gap: 16px;">

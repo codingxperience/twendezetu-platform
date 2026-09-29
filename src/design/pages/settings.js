@@ -152,7 +152,7 @@ export function values(state, set, ctx) {
   return {
     me: data.me,
     backHref: data.isProvider ? '/provider-dashboard' : '/my-twende',
-    backLabel: data.isProvider ? 'PROVIDER PORTAL' : 'MY TWENDE',
+    backLabel: data.isProvider ? 'VENDOR PORTAL' : 'MY TWENDE',
     signOut: () => ctx.run('signout', async () => {
       await ctx.api.post('/api/auth/sign-out');
       window.location.assign('/');

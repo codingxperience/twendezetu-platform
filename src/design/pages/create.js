@@ -76,7 +76,7 @@ function problemIn(step, form, data) {
     if (form.budget && parseMoneyInput(form.budget, currencyOf(form, data)) == null) return 'Budget: write it like 400K or 400,000.';
     return null;
   }
-  if (trimmed(form.blurb).length < 10) return 'Add a one-line summary (10 characters or more) for the guide card.';
+  if (trimmed(form.blurb).length < 10) return 'Add a one-line summary (10 characters or more) for the event card.';
   if (trimmed(form.venue).length < 3) return 'Add the venue.';
   const zone = zoneOf(form, data);
   const starts = fromZonedInput(form.startsAt, zone);
@@ -87,7 +87,7 @@ function problemIn(step, form, data) {
     const ends = fromZonedInput(form.endsAt, zone);
     if (!ends || ends <= starts) return 'The end time must be after the start.';
   }
-  if (!form.coverUrl) return 'Add a cover photo. It is the first thing people see on the guide.';
+  if (!form.coverUrl) return 'Add a cover photo. It is the first thing people see on the event card.';
   if (form.isFree) {
     if (Number.isNaN(wholeNumber(form.capacity))) return 'Capacity must be a whole number, or blank for no limit.';
     return null;
@@ -244,11 +244,11 @@ export function values(state, set, ctx) {
   const privacyRows = isEvent
     ? [
         toggleRow('allowGuestRsvp', 'Guests can RSVP without an account', 'They give a name and email and get a private link to change their mind. Turn off to require a free account.'),
-        ...(editing ? [] : [toggleRow('publish', 'Publish straight away', 'On: it goes on the guide now. Off: it is saved as a draft you can publish from My Twende.')]),
+        ...(editing ? [] : [toggleRow('publish', 'Publish straight away', 'On: it goes live now. Off: it is saved as a draft you can publish from My Twende.')]),
       ]
     : [
         toggleRow('notifyOnOffers', 'Tell me as each offer arrives', 'In-app and by email, following your notification settings. Off: offers wait in Messages.'),
-        toggleRow('revealContactsOnAccept', 'Share my contacts when I accept an offer', 'Only with the provider you accept. Off: everything, including payment, stays in Twendezetu.'),
+        toggleRow('revealContactsOnAccept', 'Share my contacts when I accept an offer', 'Only with the vendor you accept. Off: everything, including payment, stays in Twendezetu.'),
         toggleRow('weeklyDigest', 'Weekly summary by email', 'Every Monday: the offers that came in, side by side.'),
       ];
 
@@ -265,17 +265,17 @@ export function values(state, set, ctx) {
         ? result.told
           ? `Your changes are live. ${result.told} ${result.told === 1 ? 'person going was' : 'people going were'} told about the new time or place, and their reminders moved with it.`
           : 'Your changes are live.'
-        : 'Your changes are live. Providers who already sent an offer see a note in their conversation.';
+        : 'Your changes are live. Vendors who already sent an offer see a note in their conversation.';
     } else if (isEvent) {
       doneTitle = result.status === 'PUBLISHED' ? 'Live. Sasa share it' : 'Saved as a draft';
       doneText = result.status === 'PUBLISHED'
-        ? 'Your event is on the guide. RSVPs and tickets show up in My Twende, and every guest gets reminders before it starts.'
+        ? 'Your event is live. RSVPs and tickets show up in My Twende, and every guest gets reminders before it starts.'
         : 'Nobody else can see it yet. Publish it from My Twende when you are ready.';
     } else {
       const categoryLabel = data.needCategories.find((item) => item.code === form.category)?.label || 'your category';
       doneText = result.notified
         ? `Your need is on the needs board, and ${result.notified} ${result.notified === 1 ? 'provider' : 'providers'} for ${categoryLabel.toLowerCase()} in ${trimmed(form.city)} ${result.notified === 1 ? 'was' : 'were'} told. Offers arrive in Messages.`
-        : `Your need is on the needs board. No provider for ${categoryLabel.toLowerCase()} is listed in ${trimmed(form.city)} yet, so it stays open for anyone who serves the area. Offers arrive in Messages.`;
+        : `Your need is on the needs board. No vendor for ${categoryLabel.toLowerCase()} is listed in ${trimmed(form.city)} yet, so it stays open for anyone who serves the area. Offers arrive in Messages.`;
     }
   }
 
@@ -324,7 +324,7 @@ export function values(state, set, ctx) {
     needCardShadow: !isEvent ? `6px 6px 0 ${COLORS.clay}` : 'none',
 
     detailsTitle: editing ? (isEvent ? 'Edit your event' : 'Edit your need') : 'The details',
-    detailsIntro: isEvent ? 'What people see on the guide and on the event page.' : 'Providers who serve this city and category are told when you post.',
+    detailsIntro: isEvent ? 'What people see on the event card and the event page.' : 'Vendors who serve this city and category are told when you post.',
     titlePlaceholder: isEvent ? 'e.g. Afrogroove Night' : 'e.g. Driver + 4x4 needed, Kampala → Jinja',
     form,
     set: setters,

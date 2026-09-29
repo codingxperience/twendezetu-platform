@@ -75,11 +75,11 @@ export function values(state, set, ctx) {
       release: async () => {
         const sure = await ctx.ask({
           title: `Release ${row.local} now?`,
-          body: 'The provider is paid straight away, less the booking commission. Only release early when the customer has confirmed the job some other way.',
+          body: 'The vendor is paid straight away, less the booking commission. Only release early when the customer has confirmed the job some other way.',
           input: false,
           confirmLabel: 'Release',
         });
-        if (sure) act(`e:${row.id}`, `/api/finance/escrow/${row.id}/release`, undefined, 'Released to the provider.');
+        if (sure) act(`e:${row.id}`, `/api/finance/escrow/${row.id}/release`, undefined, 'Released to the vendor.');
       },
     })),
     noEscrow: data.escrow.length === 0,

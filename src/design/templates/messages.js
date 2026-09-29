@@ -18,7 +18,7 @@ const template = `
     <aside class="tw-threads" style="border-right: 2px solid #1F3A38; background: #FFFDF8; overflow-y: auto;">
       <div style="padding: 16px 20px; border-bottom: 2px solid #1F3A38; font-family: var(--tz-mono); font-size: 12px; color: #A85A23; letter-spacing: 0.08em;">[Mazungumzo — threads]</div>
       <sc-if value="{{ noThreads }}">
-        <div style="padding: 24px 20px; font-size: 13.5px; color: #6E6155; line-height: 1.55;">No conversations yet. They start when you message an organizer, ask a provider for a quote, or get an offer on a need you posted.</div>
+        <div style="padding: 24px 20px; font-size: 13.5px; color: #6E6155; line-height: 1.55;">No conversations yet. They start when you message an organizer, ask a vendor for a quote, or get an offer on a need you posted.</div>
       </sc-if>
       <sc-for list="{{ threads }}" as="th">
         <button onClick="{{ th.open }}" aria-current="{{ th.current }}" style="display: block; width: 100%; text-align: left; padding: 16px 20px; border: 0; border-bottom: 1px solid #E3D9C6; background: {{ th.bg }}; cursor: pointer; font-family: inherit;">
@@ -38,7 +38,7 @@ const template = `
         <div style="margin: auto; max-width: 420px; text-align: center; padding: 40px 24px;">
           <div style="font-family: var(--tz-display); font-size: 26px; text-transform: uppercase;">Nothing open<span style="color: #D97A3B;">.</span></div>
           <p style="font-size: 14px; color: #6E6155; line-height: 1.55;">Every conversation on Twendezetu is masked: names, phones and emails stay hidden until an offer is accepted, and payments stay protected in escrow.</p>
-          <a href="/providers" style="display: inline-block; font-family: var(--tz-mono); font-size: 12px; border: 2px solid #1F3A38; background: #D97A3B; color: #1F3A38; padding: 10px 16px; text-decoration: none;">FIND A PROVIDER →</a>
+          <a href="/vendors" style="display: inline-block; font-family: var(--tz-mono); font-size: 12px; border: 2px solid #1F3A38; background: #D97A3B; color: #1F3A38; padding: 10px 16px; text-decoration: none;">FIND A VENDOR →</a>
         </div>
       </sc-if>
 

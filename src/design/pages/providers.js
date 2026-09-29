@@ -10,7 +10,7 @@ export function stateFrom(data) {
 
 function href({ category, city, q }) {
   const query = new URLSearchParams(Object.entries({ category, city, q }).filter(([, value]) => value)).toString();
-  return `/providers${query ? `?${query}` : ''}`;
+  return `/vendors${query ? `?${query}` : ''}`;
 }
 
 export function values(state, set) {
@@ -34,7 +34,7 @@ export function values(state, set) {
       return { ...item, current: current ? 'page' : 'false', href: href({ category: item.code, city: filters.city, q: filters.q }), bg: current ? COLORS.forest : COLORS.paper, fg: current ? COLORS.cream : COLORS.ink };
     }),
     filtered: Boolean(filters.category || filters.city || filters.q),
-    resultLine: `${count} ${count === 1 ? 'PROVIDER' : 'PROVIDERS'}${where ? ` ${where.toUpperCase()}` : ''}`,
+    resultLine: `${count} ${count === 1 ? 'VENDOR' : 'VENDORS'}${where ? ` ${where.toUpperCase()}` : ''}`,
     empty: count === 0,
     providers: data.providers.map((provider) => ({
       ...provider,

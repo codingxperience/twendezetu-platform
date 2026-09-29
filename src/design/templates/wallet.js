@@ -15,7 +15,7 @@ const template = `
   <div class="tw-pad" style="max-width: 1200px; margin: 0 auto; padding: 40px 24px 80px;">
     <div style="font-family: var(--tz-mono); font-size: 12px; color: #A85A23; letter-spacing: 0.08em;">[Pointi — one value, every border]</div>
     <h1 style="font-family: var(--tz-display); font-size: clamp(40px, 5.5vw, 72px); text-transform: uppercase; line-height: 0.95; margin: 10px 0 6px;">Money moves like family<span style="color: #D97A3B;">.</span></h1>
-    <p style="font-size: 15px; color: #3A2F25; max-width: 620px; line-height: 1.55; margin: 0 0 36px;">Top up in dollars, spend in shillings. Points pay for tickets, providers, fuel for the convoy — or pool together for one goal, <em style="font-family: var(--tz-serif);">harambee</em> style. 100 points = $1, everywhere. This is your <strong>personal wallet</strong> — providers keep business income in a separate <a href="/provider-wallet" style="color: #A85A23;">business wallet</a>.</p>
+    <p style="font-size: 15px; color: #3A2F25; max-width: 620px; line-height: 1.55; margin: 0 0 36px;">Top up in dollars, spend in shillings. Points pay for tickets, vendors, fuel for the convoy — or pool together for one goal, <em style="font-family: var(--tz-serif);">harambee</em> style. 100 points = $1, everywhere. This is your <strong>personal wallet</strong> — vendors keep business income in a separate <a href="/provider-wallet" style="color: #A85A23;">business wallet</a>.</p>
 
     <div class="tw-2col" style="display: grid; grid-template-columns: 0.9fr 1.3fr; gap: 40px; align-items: start;">
 
@@ -216,7 +216,7 @@ const template = `
   <!-- Footer strip -->
   <footer style="border-top: 2px solid #1F3A38; background: #1F3A38; color: #F7F1E6; padding: 20px 24px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; font-family: var(--tz-mono); font-size: 12px;">
     <span>TWENDEZETU · 1 POINT = 1 US CENT · EVERY MOVEMENT IS RECORDED IN A DOUBLE-ENTRY LEDGER</span>
-    <a href="/" style="color: #E8A472;">← BACK TO THE GUIDE</a>
+    <a href="/" style="color: #E8A472;">← BACK TO EVENTS</a>
   </footer>
 </div>
 `;

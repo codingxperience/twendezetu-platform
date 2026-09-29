@@ -28,7 +28,7 @@ export const LEDGER_FILTERS = Object.freeze({
 const STREAMS = {
   TICKET_SALE: `Ticket fees (${FEES.ticketServiceBps / 100}%)`,
   ESCROW_RELEASE: `Booking fees (${FEES.bookingCommissionBps / 100}%)`,
-  MEMBERSHIP: 'Provider memberships',
+  MEMBERSHIP: 'Vendor memberships',
   CASHOUT: 'Cash-out & withdrawal fees',
   PAYOUT: 'Cash-out & withdrawal fees',
   REFUND: 'Refunded fees',
@@ -85,7 +85,7 @@ export async function financeOverview({ range = '30d', filter = 'ALL' } = {}) {
     const label = STREAMS[line.entry.kind] || 'Other';
     streams[label] = (streams[label] || 0) + cents;
   }
-  const membership = streams['Provider memberships'] || 0;
+  const membership = streams['Vendor memberships'] || 0;
   const flowFees = revenue - membership;
 
   const currencies = Object.entries(byCurrency)
@@ -115,7 +115,7 @@ export async function financeOverview({ range = '30d', filter = 'ALL' } = {}) {
       { label: 'GROSS VOLUME (GMV)', big: usdLabel(gmv), sub: 'tickets + bookings + top-ups' },
       { label: 'PLATFORM REVENUE', big: usdLabel(revenue), sub: 'fees + memberships, net of refunds' },
       { label: 'FEES ON PAID FLOWS', big: usdLabel(flowFees), sub: `${FEES.ticketServiceBps / 100}% tickets · ${FEES.bookingCommissionBps / 100}% bookings · cash-out fees` },
-      { label: 'MEMBERSHIP REVENUE', big: usdLabel(membership), sub: `${activeMemberships.toLocaleString('en-US')} active provider memberships` },
+      { label: 'MEMBERSHIP REVENUE', big: usdLabel(membership), sub: `${activeMemberships.toLocaleString('en-US')} active vendor memberships` },
     ],
     streams: Object.entries(streams)
       .filter(([, cents]) => cents !== 0)
