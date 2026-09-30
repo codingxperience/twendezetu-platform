@@ -51,5 +51,9 @@ export async function eventsView(viewer, query) {
     categories: Object.keys(CATEGORY_SHELVES).map((key) => ({ key, title: CATEGORY_SHELVES[key].title })),
     organizer: organizer ? { name: organizer.name, verified: Boolean(organizer.verifiedAt), followers: organizer.followersCount } : null,
     vendors,
+    // Which of these the viewer has saved, so the hearts start filled in.
+    savedSlugs: viewer
+      ? (await prisma.savedEvent.findMany({ where: { userId: viewer.id, eventId: { in: found.events.map((event) => event.id) } }, select: { event: { select: { slug: true } } } })).map((row) => row.event.slug)
+      : [],
   };
 }

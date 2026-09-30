@@ -5,12 +5,12 @@ process.env.DATABASE_URL ||= 'postgresql://test@localhost:5432/unused';
 process.env.AUTH_SECRET ||= 'test-secret-that-is-long-enough-for-config';
 const { whenBadge } = await import('../../src/shared/format.js');
 const { whenWindow } = await import('../../src/server/services/events.js');
-const { publicShelves } = await import('../../src/server/views/home-shelves.js');
+const { isLive, publicShelves } = await import('../../src/server/views/home-shelves.js');
 
 const NOW = new Date('2026-09-29T10:00:00Z'); // a Tuesday
 
 let serial = 0;
-function event({ days, category = 'MUSIC', city = 'Nairobi, KE', going = 0, featured = false }) {
+function event({ days, category = 'MUSIC', city = 'Nairobi, KE', going = 0, featured = false, hours = null, isFree = false }) {
   serial += 1;
   return {
     id: `e${serial}`,
@@ -21,6 +21,8 @@ function event({ days, category = 'MUSIC', city = 'Nairobi, KE', going = 0, feat
     featured,
     timezone: 'Africa/Nairobi',
     startsAt: new Date(NOW.getTime() + days * 86_400_000).toISOString(),
+    endsAt: hours == null ? null : new Date(NOW.getTime() + days * 86_400_000 + hours * 3_600_000).toISOString(),
+    isFree,
     publishedAt: new Date(NOW.getTime() - serial * 60_000).toISOString(),
   };
 }
@@ -89,4 +91,25 @@ test('city charts need at least three events and number them', () => {
   assert.deepEqual(cityCharts.map((c) => c.city), ['Boston, MA']);
   assert.deepEqual(cityCharts[0].events.map((e) => e.rank), [1, 2, 3]);
   assert.equal(cityCharts[0].events[0].going, 30);
+});
+
+test('an event is live from its start to its end, or for six hours without an end', () => {
+  const started = (hoursAgo, hoursLong = null) => ({
+    startsAt: new Date(NOW.getTime() - hoursAgo * 3_600_000).toISOString(),
+    endsAt: hoursLong == null ? null : new Date(NOW.getTime() + (hoursLong - hoursAgo) * 3_600_000).toISOString(),
+  });
+  assert.equal(isLive(started(1, 4), NOW), true);
+  assert.equal(isLive(started(5, 4), NOW), false, 'over');
+  assert.equal(isLive(started(-1, 4), NOW), false, 'not started');
+  assert.equal(isLive(started(5), NOW), true, 'no end: six hours');
+  assert.equal(isLive(started(7), NOW), false);
+});
+
+test('happening now, the city picker and free events come from the same rows', () => {
+  const live = event({ days: -1 / 24, hours: 3, city: 'Brooklyn, NY', isFree: true });
+  const events = [live, event({ days: 2, city: 'Kampala, UG', isFree: true }), event({ days: 3, city: 'Kampala, UG' }), event({ days: 4, city: 'Brooklyn, NY' }), event({ days: 5, city: 'Kampala, UG' })];
+  const shelves = publicShelves({ events, interest: {}, vendors: [], needs: [] }, { now: NOW });
+  assert.deepEqual(shelves.live.map((e) => e.id), [live.id]);
+  assert.deepEqual(shelves.cities, [{ name: 'Kampala, UG', count: 3 }, { name: 'Brooklyn, NY', count: 2 }]);
+  assert.deepEqual(shelves.free.map((e) => e.city), ['Kampala, UG'], 'a free event already on is in Happening now, not here');
 });

@@ -26,17 +26,51 @@ async function recentInterest(since) {
   return Object.fromEntries(score);
 }
 
+// Organizers people follow most, with how many events each has coming up.
+async function popularOrganizers() {
+  const rows = await prisma.organizer.findMany({
+    orderBy: [{ followersCount: 'desc' }, { name: 'asc' }],
+    take: 12,
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      city: true,
+      verifiedAt: true,
+      followersCount: true,
+      _count: { select: { events: { where: { status: 'PUBLISHED', hiddenAt: null, startsAt: { gte: new Date() } } } } },
+    },
+  });
+  return rows.map((row) => ({
+    slug: row.slug,
+    name: row.name,
+    city: row.city,
+    initials: initials(row.name),
+    verified: Boolean(row.verifiedAt),
+    followers: row.followersCount,
+    upcoming: row._count.events,
+  }));
+}
+
+// How many people have been let in at each live event, from door scans.
+async function peopleHere(eventIds) {
+  if (!eventIds.length) return {};
+  const rows = await prisma.ticket.groupBy({ by: ['eventId'], where: { eventId: { in: eventIds }, checkedInAt: { not: null } }, _count: { _all: true } });
+  return Object.fromEntries(rows.map((row) => [row.eventId, row._count._all]));
+}
+
 // What is the same for every visitor, computed at most once a minute.
 const publicHome = unstable_cache(
   async () => {
-    const [events, interest, vendors, needs, rates] = await Promise.all([
+    const [events, interest, vendors, needs, rates, organizers] = await Promise.all([
       listGuideEvents({ limit: 200 }),
       recentInterest(new Date(Date.now() - TRENDING_WINDOW)),
-      listProviders({ limit: 6 }),
+      listProviders({ limit: 12 }),
       openNeeds({ limit: 8 }),
       getRates(),
+      popularOrganizers(),
     ]);
-    return { events, interest, vendors, needs, rates };
+    return { events, interest, vendors, needs, rates, organizers };
   },
   ['home-shelves'],
   { revalidate: 60, tags: ['guide'] },
@@ -46,7 +80,7 @@ const publicHome = unstable_cache(
 // this person, their saved events and their next event for the bottom bar.
 async function personal(viewer, now) {
   const since = new Date(now.getTime() - 6 * 60 * 60 * 1000);
-  const [follows, rsvps, tickets, saved] = await Promise.all([
+  const [follows, rsvps, tickets, saved, savedSlugs] = await Promise.all([
     prisma.follow.findMany({
       where: { followerId: viewer.id },
       include: {
@@ -73,6 +107,7 @@ async function personal(viewer, now) {
       orderBy: { createdAt: 'desc' },
       take: 18,
     }),
+    prisma.savedEvent.findMany({ where: { userId: viewer.id }, select: { event: { select: { slug: true } } } }),
   ]);
 
   const organizers = follows.filter((follow) => follow.organizer).map((follow) => follow.organizer);
@@ -125,17 +160,27 @@ async function personal(viewer, now) {
     moreFrom,
     saved: saved.map((row) => badge(row.event)),
     followsSomeone: follows.length > 0,
+    followingOrganizers: organizers.map((organizer) => organizer.slug),
+    // Every event this person has saved, so hearts anywhere on the page are right.
+    savedSlugs: savedSlugs.map((row) => row.event.slug),
   };
 }
 
-export async function homeView(viewer) {
+// `city` is the city picked in the header, if any; without one the page
+// leans on the city in the member's profile.
+export async function homeView(viewer, { city: picked } = {}) {
   const now = new Date();
   const [shared, person, mine] = await Promise.all([publicHome(), me(viewer), viewer ? personal(viewer, now) : null]);
+  const city = typeof picked === 'string' && picked ? picked : null;
+  const shelves = publicShelves(shared, { city: city || viewer?.city || null, now });
+  const here = await peopleHere(shelves.live.map((event) => event.id));
   return {
     me: person,
     rates: shared.rates,
-    city: viewer?.city || null,
-    ...publicShelves(shared, { city: viewer?.city || null, now }),
+    city,
+    ...shelves,
+    live: shelves.live.map((event) => ({ ...event, here: here[event.id] || 0 })),
+    organizers: shared.organizers,
     personal: mine,
   };
 }

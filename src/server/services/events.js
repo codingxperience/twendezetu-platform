@@ -42,6 +42,7 @@ export function toEventCard(event) {
     date: dayLabel(event.startsAt, event.timezone),
     time: timeLabel(event.startsAt, event.timezone),
     startsAt: event.startsAt.toISOString(),
+    endsAt: event.endsAt ? event.endsAt.toISOString() : null,
     price: priceLabel({ isFree: event.isFree, priceFromMinor: event.priceFromMinor, currency: event.currency, tierCount: paidTiers.length }),
     going: event.goingCount,
     badge: event.badge || false,
