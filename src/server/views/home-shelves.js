@@ -19,6 +19,14 @@ export function byStart(a, b) {
   return Date.parse(a.startsAt) - Date.parse(b.startsAt);
 }
 
+// On now: started, and not yet over. An event without an end time counts as
+// running for six hours, the same window the catalogue keeps it listed.
+export function isLive(event, now = new Date()) {
+  const start = Date.parse(event.startsAt);
+  const end = event.endsAt ? Date.parse(event.endsAt) : start + 6 * 60 * 60 * 1000;
+  return start <= now.getTime() && now.getTime() < end;
+}
+
 function byInterest(interest) {
   return (a, b) => (interest[b.id] || 0) - (interest[a.id] || 0) || b.going - a.going || byStart(a, b);
 }
@@ -65,6 +73,14 @@ export function publicShelves({ events, interest, vendors, needs }, { city = nul
         .map((event, index) => ({ ...event, rank: index + 1 })),
     }));
 
+  // The cities the city picker offers: every city with events, busiest first.
+  const cities = [...cityCounts.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .slice(0, 12)
+    .map(([name, count]) => ({ name, count }));
+
+  const live = withBadge.filter((event) => isLive(event, now)).sort(byInterest(interest)).slice(0, 12);
+
   const staffPicks = withBadge.filter((event) => event.featured).slice(0, 18);
   const fresh = withBadge
     .filter((event) => event.publishedAt)
@@ -76,8 +92,13 @@ export function publicShelves({ events, interest, vendors, needs }, { city = nul
     thisWeekTitle,
     trending,
     trendingTitle: trendingPool === inCity ? `Trending in ${inCity[0].city}` : 'Trending now',
+    trendingCity: trendingPool === inCity ? inCity[0].city : null,
+    thisWeekWide: thisWeekTitle !== 'Happening this week',
     categories,
     cityCharts,
+    cities,
+    live,
+    free: withBadge.filter((event) => event.isFree && !isLive(event, now)).sort(byStart).slice(0, 18),
     staffPicks,
     fresh,
     vendors,

@@ -1,7 +1,11 @@
 // The events page: filters are plain links, so every view has an address
 // people can share, and the back button works as expected.
 
-import { eventPrice, shellValues } from './shared';
+import { words } from '../i18n';
+import { eventCardValues, saveToggler, savedSet, shellValues } from './shared';
+
+// Hearts tapped on this page, laid over the server's savedSlugs.
+export const initialState = { saved: null, unsaved: null };
 
 const WHEN = [
   [undefined, 'Any time'],
@@ -41,6 +45,7 @@ export function values(state, set, ctx) {
   const { data } = state;
   const { query } = data;
   const currency = data.me.signedIn ? data.me.currency : null;
+  const t = words(data.me.locale);
   const categoryTitle = data.categories.find((category) => category.key === query.category)?.title;
 
   const heading = query.q ? `Results for “${query.q}”` : data.organizer ? data.organizer.name : categoryTitle || (query.city ? `Events in ${query.city}` : 'Events');
@@ -73,19 +78,7 @@ export function values(state, set, ctx) {
     })),
     hasVendors: data.vendors.length > 0,
     vendorsHref: query.q ? `/vendors?q=${encodeURIComponent(query.q)}` : '/vendors',
-    events: data.events.map((event) => ({
-      href: event.href,
-      img: event.img,
-      when: event.when || '',
-      price: eventPrice(event, currency, data.rates),
-      rank: '',
-      organizer: event.organizer,
-      organizerVerified: event.organizerVerified,
-      title: event.title,
-      meta: `${event.date} · ${event.city}`,
-      cat: event.cat,
-      goingLabel: event.going > 0 ? `${event.going} going` : '',
-    })),
+    events: data.events.map((event) => eventCardValues(event, { t, currency, rates: data.rates, saved: savedSet(state, data.savedSlugs), onSave: saveToggler(data.me, set, ctx, t), ctx })),
     hasEvents: data.events.length > 0,
     noEvents: data.events.length === 0,
     emptyText: data.organizer && !query.q ? `${data.organizer.name} has no upcoming events right now.` : 'No upcoming events match these filters.',
