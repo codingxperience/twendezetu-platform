@@ -288,6 +288,8 @@ export function values(state, set, ctx) {
       cities: data.cities,
       city: data.city,
       faces: mine ? mine.favourites.map((face) => ({ name: face.name, initials: face.initials, href: face.href })) : [],
+      // The bar for the member's next event sits along the bottom.
+      lift: Boolean(next),
     }),
     signedIn: me.signedIn,
     signedOut: !me.signedIn,

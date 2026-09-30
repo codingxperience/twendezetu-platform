@@ -48,7 +48,7 @@ export const schemas = {
     avatarUrl: imageUrl.optional().or(z.literal('')),
     city: optionalText(80),
     country: country.optional(),
-    locale: z.enum(['EN', 'SW']).optional(),
+    locale: z.enum(['EN', 'SW', 'FR', 'ES']).optional(),
     currency: currency.optional(),
     businessName: optionalText(80),
   }),

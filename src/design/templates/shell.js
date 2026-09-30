@@ -92,16 +92,6 @@ const VENDOR_CATEGORIES = [
   ['DECOR_MC', 'mic'],
 ];
 
-// The English / Kiswahili switch, in the account menu and the guest menu.
-const LANGUAGE = `
-            <div class="tz-lang">
-              <span class="tz-lang__label">${svg('globe', 18)}{{ shell.t.language }}</span>
-              <div class="tz-lang__pick" role="group" aria-label="{{ shell.t.language }}">
-                <button type="button" aria-pressed="{{ shell.langEn }}" onClick="{{ shell.setEnglish }}">EN</button>
-                <button type="button" aria-pressed="{{ shell.langSw }}" onClick="{{ shell.setSwahili }}">SW</button>
-              </div>
-            </div>`;
-
 export const SITE_HEADER = `
   <header class="tz-top">
     <a href="/" class="tz-logo-link tz-top__logo" aria-label="Twendezetu home"><img src="/brand/logo.png" alt="Twendezetu" width="1211" height="229" class="tz-logo tz-logo--md"></a>
@@ -171,7 +161,6 @@ export const SITE_HEADER = `
             <hr>
             ${item('/disputes', 'help', 'shell.t.help')}
             ${item('/mobile', 'phone', 'shell.t.app')}
-            <hr>${LANGUAGE}
           </div>
         </details>
       </sc-if>
@@ -200,7 +189,6 @@ export const SITE_HEADER = `
             <hr>
             ${item('/settings', 'gear', 'shell.t.settings')}
             ${item('/disputes', 'help', 'shell.t.help')}
-            <hr>${LANGUAGE}
             <hr>
             <button type="button" class="tz-menu__signout" onClick="{{ shell.signOut }}">${svg('signOut', 18)}<span>{{ shell.t.signOut }}</span></button>
           </div>
@@ -240,7 +228,22 @@ export const SITE_RAIL = `
   </nav>
 `;
 
-export const SITE_TABBAR = `
+// The language picker, pinned to the bottom-left of every browsing page. It
+// folds down to a globe and the current language, and stays folded (the
+// tz_langpill cookie) until opened again. Rendered with the tab bar, which
+// every frame page includes.
+const LANGUAGE_PICKER = `
+  <div class="tz-langpick" data-closed="{{ shell.langPillClosed }}" data-lift="{{ shell.langLift }}">
+    <div class="tz-langpick__open" role="group" aria-label="{{ shell.t.language }}">
+      <button type="button" class="tz-langpick__globe" aria-label="{{ shell.t.hideLanguages }}" onClick="{{ shell.foldLanguages }}">${svg('globe', 26)}</button>
+      <sc-for list="{{ shell.languages }}" as="l"><button type="button" class="tz-langpick__code" title="{{ l.name }}" lang="{{ l.lang }}" aria-pressed="{{ l.pressed }}" onClick="{{ l.pick }}">{{ l.code }}</button></sc-for>
+      <button type="button" class="tz-langpick__x" aria-label="{{ shell.t.hideLanguages }}" onClick="{{ shell.foldLanguages }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M5 5l14 14M19 5 5 19"/></svg></button>
+    </div>
+    <button type="button" class="tz-langpick__closed" aria-label="{{ shell.t.language }}" aria-expanded="false" onClick="{{ shell.unfoldLanguages }}">${svg('globe', 26)}<span>{{ shell.localeCode }}</span></button>
+  </div>
+`;
+
+export const SITE_TABBAR = LANGUAGE_PICKER + `
   <nav class="tz-tabbar" aria-label="Sections">
     ${TABS.map(([key, href, word, name]) => `<a href="${href}" class="tz-tabbar__item${key === 'post' ? ' tz-tabbar__item--post' : ''}" aria-current="{{ shell.current.${key} }}">${svg(name)}<span>{{ shell.t.${word} }}</span></a>`).join('\n    ')}
   </nav>

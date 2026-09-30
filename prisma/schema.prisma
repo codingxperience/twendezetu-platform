@@ -44,6 +44,8 @@ enum AccountStatus {
 enum Locale {
   EN
   SW
+  FR
+  ES
 }
 
 model User {
