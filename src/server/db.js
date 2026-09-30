@@ -4,12 +4,15 @@
 
 import { PrismaClient, Prisma } from '@prisma/client';
 import { fromDatabaseError } from './errors.js';
+import { databaseUrl } from './db-url.js';
 
 const globalForPrisma = globalThis;
 
 export const prisma =
   globalForPrisma.__twendezetuPrisma ??
   new PrismaClient({
+    // Adds pgbouncer=true when DATABASE_URL is a transaction pooler.
+    datasources: process.env.DATABASE_URL ? { db: { url: databaseUrl() } } : undefined,
     log: process.env.NODE_ENV === 'development' ? ['warn', 'error'] : ['error'],
   });
 

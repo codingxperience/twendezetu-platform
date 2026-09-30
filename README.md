@@ -129,6 +129,10 @@ protected.
    `npm run build:hosted` and output directory `.next`.
 2. Add the variables from `.env.example` under Environment Variables before
    the first build. `NEXT_PUBLIC_APP_URL` is baked in at build time.
+   `DATABASE_URL` is the Supabase transaction pooler (port 6543) and should
+   end in `?pgbouncer=true`; the app adds the flag itself if it is missing
+   (src/server/db-url.js), since without it pages fail at random with
+   `prepared statement "s1" does not exist`.
 3. With `MIGRATE_ON_BUILD=true` each build applies pending migrations.
    `SEED_ON_BUILD=demo` (with `SEED_DEMO_PASSWORD`) loads the demo data on
    the next build; set it back to `off` straight after.
