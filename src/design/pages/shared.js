@@ -114,8 +114,6 @@ export async function withStepUp(ctx, call) {
 
 // ── The shared frame (src/design/templates/shell.js) ─────────────────────
 
-const EVENT_MENU = ['NYAMA_CHOMA', 'MUSIC', 'COMMUNITY', 'WEDDINGS', 'FAITH', 'SPORTS'];
-
 const VENDOR_MENU = [
   ['MUSIC_DJS', 'Music & DJs', 'Muziki na ma-DJ'],
   ['CATERING', 'Catering & chefs', 'Wapishi'],
@@ -193,8 +191,7 @@ export function shellValues(me, ctx, { active = null, q = '', cities = null, cit
     langSw: me.locale === 'SW' ? 'true' : 'false',
     setEnglish: () => switchLanguage(me, ctx, 'EN'),
     setSwahili: () => switchLanguage(me, ctx, 'SW'),
-    categories: EVENT_MENU.map((key) => ({ href: `/events?category=${key}`, label: t.catTitle[key] })),
-    vendorCategories: VENDOR_MENU.map(([key, en, sw]) => ({ href: `/vendors?category=${key}`, label: me.locale === 'SW' ? sw : en })),
+    vendorLabels: Object.fromEntries(VENDOR_MENU.map(([key, en, sw]) => [key, me.locale === 'SW' ? sw : en])),
     search: (event) => {
       const value = event.target.querySelector('input[name="q"]')?.value.trim();
       window.location.assign(value ? `/events?q=${encodeURIComponent(value)}` : '/events');

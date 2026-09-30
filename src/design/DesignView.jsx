@@ -13,6 +13,7 @@ import { useRouter } from 'next/navigation';
 import { renderTemplate } from './render';
 import { hydrateFormValues, morphChildren } from './morph';
 import { api } from './api';
+import { watchMenus } from './menus';
 
 // When two-step verification is on, money moves need a texted code. This
 // sends one and asks for it; returns the code or null if dismissed.
@@ -162,10 +163,12 @@ export function DesignView({ template, logic, data, view, params, viewer }) {
     root.addEventListener('change', onInput);
     root.addEventListener('keydown', onKey);
     root.addEventListener('submit', onSubmit);
+    const unwatchMenus = watchMenus(root);
     // onMount may return a cleanup (timers, listeners) run when the page unmounts.
     const cleanup = logic.onMount?.(ctx, setState, root);
     return () => {
       if (typeof cleanup === 'function') cleanup();
+      unwatchMenus();
       root.removeEventListener('click', onClick);
       root.removeEventListener('input', onInput);
       root.removeEventListener('change', onInput);
