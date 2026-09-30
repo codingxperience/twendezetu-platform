@@ -73,7 +73,7 @@ export async function sendWeeklyDigests(now = new Date()) {
   for (const user of recipients) {
     const sections = await digestFor(user, now);
     if (!sections.length) continue;
-    const body = [`Habari ${user.name.split(' ')[0]}, here is your week on Twendezetu.`, ...sections.map(([title, lines]) => `${title}\n${lines.join('\n')}`)].join('\n\n');
+    const body = [`Hi ${user.name.split(' ')[0]}, here is your week on Twendezetu.`, ...sections.map(([title, lines]) => `${title}\n${lines.join('\n')}`)].join('\n\n');
     await transaction((tx) =>
       notifyGuest(tx, { userId: user.id, email: user.email, topic: 'NEWS', subject: 'Your week on Twendezetu', body, href: '/my-twende', dedupeKey: `digest:${user.id}:${week}` }),
     );

@@ -162,7 +162,7 @@ export function values(state, set, ctx) {
         give: () => {
           if (amount > data.balance) return ctx.toast(`You have ${points(data.balance)} points. Top up first.`, 'err');
           return ctx.run(`chip:${pool.slug}`, () => ctx.api.post(`/api/pools/${pool.slug}/contributions`, { points: amount }, { idempotent: true }), {
-            success: (result) => (result.raisedPoints >= result.goalPoints ? 'Asante! That filled the pool.' : `Asante! ${points(amount)} points in.`),
+            success: (result) => (result.raisedPoints >= result.goalPoints ? 'Thank you! That filled the pool.' : `Thank you! ${points(amount)} points in.`),
           });
         },
       })),

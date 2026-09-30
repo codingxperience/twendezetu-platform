@@ -89,7 +89,7 @@ export async function scanTicket(user, slug, input) {
 
   if (admitted.count) {
     await prisma.checkInScan.create({ data: { eventId: event.id, ticketId: ticket.id, scannedById: user.id, input: raw, result: 'ADMITTED' } });
-    return { result: 'ADMITTED', title: '✓ Karibu!', sub: `${ticket.code} · ${ticket.holderName} · ${ticket.tier.name}` };
+    return { result: 'ADMITTED', title: '✓ Welcome!', sub: `${ticket.code} · ${ticket.holderName} · ${ticket.tier.name}` };
   }
 
   if (ticket && ticket.eventId === event.id && ticket.status === 'CHECKED_IN') {

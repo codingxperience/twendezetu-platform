@@ -19,7 +19,7 @@ const template = `
 
   <!-- Title block -->
   <section style="max-width: 1200px; margin: 0 auto; padding: 18px 24px 28px;">
-    <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Tukio — event]</div>
+    <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Event]</div>
     <h1 style="font-family: var(--tz-display); font-size: clamp(40px, 6.5vw, 92px); text-transform: uppercase; line-height: 0.92; margin: 8px 0 0;">{{ title }}<span style="color: #820101;">.</span></h1>
     <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; font-family: var(--tz-mono); font-size: 13px;">
       <span style="background: #1F3A38; color: #F7F1E6; padding: 8px 14px;">{{ dateLine }}</span>
@@ -116,7 +116,7 @@ const template = `
 
             <!-- Share -->
             <div style="border-top: 2px solid #1F3A38; padding-top: 14px;">
-              <div style="font-family: var(--tz-mono); font-size: 11px; color: #820101; letter-spacing: 0.08em; margin-bottom: 8px;">[Sambaza — share this event]</div>
+              <div style="font-family: var(--tz-mono); font-size: 11px; color: #820101; letter-spacing: 0.08em; margin-bottom: 8px;">[Share this event]</div>
               <div style="display: flex; border: 2px solid #1F3A38; margin-bottom: 8px;">
                 <input value="{{ shareUrl }}" readOnly style="flex: 1; min-width: 0; border: 0; background: #EFE7D6; font-family: var(--tz-mono); font-size: 11.5px; padding: 10px 11px; outline: none;">
                 <button onClick="{{ copyLink }}" style="border: 0; border-left: 2px solid #1F3A38; background: #820101; font-family: var(--tz-mono); font-size: 11px; padding: 0 12px; cursor: pointer; color: #F7F1E6;">{{ copyLabel }}</button>

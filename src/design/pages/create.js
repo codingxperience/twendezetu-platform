@@ -4,6 +4,7 @@
 
 import { CURRENCIES, parseMoneyInput } from '@/shared/money';
 import { fromZonedInput } from '@/shared/time';
+import { defaultCover, isDefaultCover } from '@/shared/format';
 import { COLORS, copyText, shareLinks } from './shared';
 
 const MAX_TIERS = 8;
@@ -49,6 +50,7 @@ export function stateFrom(data, params = {}) {
     const form = {
       ...blankForm(data, values.kind),
       ...values,
+      coverUrl: isDefaultCover(values.coverUrl) ? '' : values.coverUrl || '',
       tiers: values.kind === 'event' && values.tiers?.length ? values.tiers.map((tier) => ({ ...blankTier(), ...tier })) : [blankTier('General')],
     };
     return { step: 2, form };
@@ -87,7 +89,6 @@ function problemIn(step, form, data) {
     const ends = fromZonedInput(form.endsAt, zone);
     if (!ends || ends <= starts) return 'The end time must be after the start.';
   }
-  if (!form.coverUrl) return 'Add a cover photo. It is the first thing people see on the event card.';
   if (form.isFree) {
     if (Number.isNaN(wholeNumber(form.capacity))) return 'Capacity must be a whole number, or blank for no limit.';
     return null;
@@ -255,7 +256,7 @@ export function values(state, set, ctx) {
   // Done
   const result = state.result;
   const shareUrl = result && isEvent ? `${data.appUrl}/events/${result.slug}?r=${data.me.handle}` : '';
-  const links = shareUrl ? shareLinks(shareUrl, `${trimmed(form.title)} — ${country.name}. Twende pamoja!`, trimmed(form.title)) : {};
+  const links = shareUrl ? shareLinks(shareUrl, `${trimmed(form.title)} — ${country.name}. Come along!`, trimmed(form.title)) : {};
   let doneTitle = 'Live';
   let doneText = '';
   if (result) {
@@ -338,8 +339,12 @@ export function values(state, set, ctx) {
       ? `Times are the venue's local time (${country.timezone.replace('_', ' ')}). The event page shows the time zone beside every time.`
       : `Dates are local to ${country.name}. Offers close at the end of the day you pick.`,
     hasCover: Boolean(form.coverUrl),
+    // Without a photo the event gets its category's cover; show which.
+    noCover: !form.coverUrl,
+    defaultCoverUrl: defaultCover(form.category),
     coverLabel: form.coverUrl ? '↺ REPLACE PHOTO' : '＋ UPLOAD A COVER PHOTO',
     uploadCover,
+    removeCover: () => update({ coverUrl: '' }),
 
     isPaid: !form.isFree,
     freeBg: form.isFree ? COLORS.forest : COLORS.paper,
@@ -376,7 +381,7 @@ export function values(state, set, ctx) {
     saving: Boolean(state.busy?.save),
     submitLabel: editing ? 'Save changes →' : isEvent && !form.publish ? 'Save draft →' : 'Publish →',
 
-    doneKicker: editing ? '[Imehifadhiwa — saved]' : '[Imechapishwa — published]',
+    doneKicker: editing ? '[Saved]' : '[Published]',
     doneTitle,
     doneText,
     hasShare: Boolean(shareUrl) && result?.status === 'PUBLISHED',

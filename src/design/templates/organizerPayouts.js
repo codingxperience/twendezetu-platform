@@ -15,7 +15,7 @@ const template = `
   </header>
 
   <section style="max-width: 1160px; margin: 0 auto; padding: 32px 24px 80px;">
-    <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Malipo — how ticket money reaches you]</div>
+    <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[How ticket money reaches you]</div>
     <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin: 8px 0 24px;">
       <h1 style="font-family: var(--tz-display); font-size: clamp(30px, 4.5vw, 52px); text-transform: uppercase; line-height: 0.95; margin: 0;">Payouts<span style="color: #820101;">.</span></h1>
       <sc-if value="{{ hasTabs }}" hint-placeholder-val="{{ false }}">

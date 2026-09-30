@@ -3,8 +3,9 @@
 
 import { formatCompact, formatMoney } from './money.js';
 
+// The database key stays NYAMA_CHOMA; people read "BBQ & cookouts".
 export const EVENT_CATEGORIES = Object.freeze({
-  NYAMA_CHOMA: 'Nyama choma',
+  NYAMA_CHOMA: 'BBQ & cookouts',
   MUSIC: 'Music + DJs',
   COMMUNITY: 'Community',
   WEDDINGS: 'Weddings',
@@ -13,6 +14,25 @@ export const EVENT_CATEGORIES = Object.freeze({
 });
 
 export const EVENT_CATEGORY_ORDER = ['NYAMA_CHOMA', 'MUSIC', 'COMMUNITY', 'WEDDINGS', 'FAITH', 'SPORTS'];
+
+// The cover an event gets when its organizer does not upload one, so every
+// card on the site has a picture in the same style (public/assets/covers).
+export const DEFAULT_COVERS = Object.freeze({
+  NYAMA_CHOMA: '/assets/covers/bbq-cookouts.svg',
+  MUSIC: '/assets/covers/music.svg',
+  COMMUNITY: '/assets/covers/community.svg',
+  WEDDINGS: '/assets/covers/weddings.svg',
+  FAITH: '/assets/covers/faith.svg',
+  SPORTS: '/assets/covers/sports.svg',
+});
+
+export function defaultCover(category) {
+  return DEFAULT_COVERS[category] || DEFAULT_COVERS.COMMUNITY;
+}
+
+export function isDefaultCover(url) {
+  return Object.values(DEFAULT_COVERS).includes(url);
+}
 
 export function eventCategoryFromLabel(label) {
   return Object.entries(EVENT_CATEGORIES).find(([, value]) => value === label)?.[0] || null;

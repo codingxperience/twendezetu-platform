@@ -12,7 +12,7 @@ const template = `
   </header>
 
   <section style="max-width: 1120px; margin: 0 auto; padding: 32px 24px 80px;">
-    <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Alika, pata zawadi — invite &amp; earn]</div>
+    <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Invite &amp; earn]</div>
     <h1 style="font-family: var(--tz-display); font-size: clamp(32px, 5vw, 60px); text-transform: uppercase; line-height: 0.94; margin: 8px 0 6px;">Share Twende<span style="color: #820101;">.</span> Earn points<span style="color: #820101;">.</span></h1>
     <p style="font-size: 15px; color: #3A2F25; line-height: 1.55; max-width: 580px; margin: 0 0 26px;">Friends who join from your link earn you Twende Points as they get going: points you can spend on tickets and vendors, or send to family. There is no cap.</p>
 

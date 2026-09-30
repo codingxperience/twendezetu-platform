@@ -158,7 +158,7 @@ function HomeFeedScreen() {
 
       <div className={styles.filterRow}>
         <span className={styles.filterActive}>All</span>
-        <span>Nyama choma</span>
+        <span>BBQ &amp; cookouts</span>
         <span>Music</span>
         <span>Needs</span>
       </div>
@@ -270,7 +270,7 @@ function NotificationsScreen() {
             <small>1 HR</small>
           </div>
           <p>
-            <strong>Nyama Choma Festival</strong> is in 7 days. Saa nane, Lincoln Park.
+            <strong>Nyama Choma Festival</strong> is in 7 days. 2 PM, Lincoln Park.
           </p>
         </article>
 

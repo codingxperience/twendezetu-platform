@@ -7,7 +7,7 @@ const template = `
   <div style="padding: 40px; display: flex; flex-direction: column; justify-content: space-between; border-right: 2px solid #F7F1E6;">
     <a href="/" class="tz-logo-link" aria-label="Twendezetu home"><img src="/brand/logo-light.png" alt="Twendezetu" width="1211" height="229" class="tz-logo tz-logo--lg"></a>
     <div>
-      <div style="font-family: var(--tz-mono); font-size: 12px; color: #E9B4AC; letter-spacing: 0.08em;">[Karibu tena]</div>
+      <div style="font-family: var(--tz-mono); font-size: 12px; color: #E9B4AC; letter-spacing: 0.08em;">[Welcome back]</div>
       <div style="font-family: var(--tz-display); font-size: clamp(44px, 5vw, 76px); text-transform: uppercase; line-height: 0.94; margin-top: 12px;">
         One portal<span style="color: #E9B4AC;">.</span><br>Every gathering<span style="color: #E9B4AC;">.</span><br><em style="font-family: var(--tz-serif); text-transform: none; color: #E9B4AC;">Popote ulipo.</em>
       </div>
@@ -34,7 +34,7 @@ const template = `
       <!-- Role picker (register only) -->
       <sc-if value="{{ isRegister }}" hint-placeholder-val="{{ false }}">
         <div style="margin-bottom: 24px;">
-          <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em; margin-bottom: 10px;">[Wewe ni nani? — pick your role]</div>
+          <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em; margin-bottom: 10px;">[Pick your role]</div>
           <div style="display: grid; gap: 10px;">
             <sc-for list="{{ roleCards }}" as="rc" hint-placeholder-count="3">
               <button onClick="{{ rc.pick }}" style="text-align: left; display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: center; border: 2px solid #1F3A38; background: {{ rc.bg }}; color: {{ rc.fg }}; padding: 16px 18px; cursor: pointer; box-shadow: {{ rc.shadow }};">
@@ -105,7 +105,7 @@ const template = `
       <sc-if value="{{ isForgot }}">
       <div style="display: grid; gap: 16px;" onKeyDown="{{ submitOnEnter }}">
         <div>
-          <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Umesahau? — forgot your password]</div>
+          <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Forgot your password]</div>
           <h1 style="font-family: var(--tz-display); font-size: 28px; text-transform: uppercase; line-height: 1; margin: 6px 0 0;">Reset your password</h1>
         </div>
         <div style="font-size: 14.5px; line-height: 1.55;">Enter your account email and we'll send a link to choose a new password. The link works once, for 30 minutes.</div>
@@ -124,7 +124,7 @@ const template = `
       <sc-if value="{{ isSent }}">
       <div style="display: grid; gap: 16px;" role="status">
         <div>
-          <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Angalia barua pepe — check your inbox]</div>
+          <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Check your inbox]</div>
           <h1 style="font-family: var(--tz-display); font-size: 28px; text-transform: uppercase; line-height: 1; margin: 6px 0 0;">Check your email</h1>
         </div>
         <div style="font-size: 14.5px; line-height: 1.6;">If <strong>{{ sentTo }}</strong> has a Twendezetu account, a link to choose a new password is on its way. It works once, for the next 30 minutes.</div>
@@ -141,7 +141,7 @@ const template = `
       <sc-if value="{{ isReset }}">
       <div style="display: grid; gap: 16px;" onKeyDown="{{ submitOnEnter }}">
         <div>
-          <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Nenosiri jipya — new password]</div>
+          <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[New password]</div>
           <h1 style="font-family: var(--tz-display); font-size: 28px; text-transform: uppercase; line-height: 1; margin: 6px 0 0;">Choose a new password</h1>
         </div>
         <div style="font-size: 14.5px; line-height: 1.55;">For <strong>{{ resetFor }}</strong>. A short phrase you will remember works well. Every device signed in to this account will be signed out.</div>
@@ -168,7 +168,7 @@ const template = `
       <sc-if value="{{ isResetDead }}">
       <div style="display: grid; gap: 16px;">
         <div>
-          <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Kiungo kimekwisha — link no longer works]</div>
+          <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Link no longer works]</div>
           <h1 style="font-family: var(--tz-display); font-size: 28px; text-transform: uppercase; line-height: 1; margin: 6px 0 0;">Ask for a new link</h1>
         </div>
         <div role="alert" style="font-size: 14.5px; line-height: 1.55;">{{ linkProblem }}</div>

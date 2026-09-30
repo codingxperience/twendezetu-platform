@@ -9,7 +9,7 @@ import { config } from '../config.js';
 import { notify, notifyGuest } from '../notify/index.js';
 import { awardReferral } from './referrals.js';
 import { rescheduleEventReminders } from './rsvps.js';
-import { COUNTRIES, EVENT_CATEGORIES, dayLabel, priceLabel, slugify, timeLabel } from '../../shared/format.js';
+import { COUNTRIES, EVENT_CATEGORIES, dayLabel, defaultCover, isDefaultCover, priceLabel, slugify, timeLabel } from '../../shared/format.js';
 import { isCurrency } from '../../shared/money.js';
 import { fold, icsDate, icsEscape } from '../ics.js';
 
@@ -20,6 +20,12 @@ const PUBLIC_EVENT = { status: 'PUBLISHED', hiddenAt: null };
 function stillOn(now = new Date()) {
   const cutoff = new Date(now.getTime() - 6 * 3600 * 1000);
   return { OR: [{ endsAt: { gte: now } }, { endsAt: null, startsAt: { gte: cutoff } }] };
+}
+
+// The uploaded cover, or the category's default when there is none (or when
+// the event had a default and its category changed).
+function coverFor(input) {
+  return input.coverUrl && !isDefaultCover(input.coverUrl) ? input.coverUrl : defaultCover(input.category);
 }
 
 export const CARD_INCLUDE = {
@@ -229,7 +235,7 @@ export async function createEvent(user, input) {
         category: input.category,
         blurb: input.blurb.trim(),
         description: input.description.trim(),
-        coverUrl: input.coverUrl,
+        coverUrl: coverFor(input),
         venue: input.venue.trim(),
         city: input.city.trim(),
         country: input.country,
@@ -333,7 +339,8 @@ export async function updateEvent(user, eventId, input) {
         category: input.category,
         blurb: input.blurb.trim(),
         description: input.description.trim(),
-        coverUrl: input.coverUrl,
+        // Left out, the cover stays (a default one follows the category).
+        coverUrl: input.coverUrl === undefined ? coverFor({ category: input.category, coverUrl: current.coverUrl }) : coverFor(input),
         venue: input.venue.trim(),
         city: input.city.trim(),
         startsAt,

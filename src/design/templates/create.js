@@ -18,7 +18,7 @@ const template = `
 
     <!-- Stepper rail -->
     <aside class="tw-sticky" style="position: sticky; top: 96px;">
-      <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em; margin-bottom: 16px;">[Hatua — steps]</div>
+      <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em; margin-bottom: 16px;">[Steps]</div>
       <nav aria-label="Steps">
       <sc-for list="{{ steps }}" as="s">
         <button onClick="{{ s.go }}" aria-current="{{ s.current }}" style="display: grid; grid-template-columns: 34px 1fr; gap: 12px; align-items: center; width: 100%; text-align: left; background: none; border: 0; padding: 10px 0; cursor: {{ s.cursor }}; font-family: inherit;">
@@ -43,7 +43,7 @@ const template = `
             <button onClick="{{ pickEvent }}" aria-pressed="{{ isEventKind }}" style="text-align: left; background: {{ eventCardBg }}; color: {{ eventCardFg }}; border: 2px solid #1F3A38; padding: 28px; cursor: pointer; box-shadow: {{ eventCardShadow }}; font-family: inherit;">
               <div style="font-family: var(--tz-mono); font-size: 12px; opacity: 0.7;">(01)</div>
               <div style="font-family: var(--tz-display); font-size: 28px; text-transform: uppercase; margin: 28px 0 10px;">An event</div>
-              <div style="font-size: 14px; line-height: 1.55; opacity: 0.85;">A festival, cookout, harusi, fundraiser or show. Free RSVP or ticket tiers. It goes live on Twendezetu with a link to share.</div>
+              <div style="font-size: 14px; line-height: 1.55; opacity: 0.85;">A festival, cookout, wedding, fundraiser or show. Free RSVP or ticket tiers. It goes live on Twendezetu with a link to share.</div>
             </button>
             <button onClick="{{ pickNeed }}" aria-pressed="{{ isNeedKind }}" style="text-align: left; background: {{ needCardBg }}; color: {{ needCardFg }}; border: 2px solid #1F3A38; padding: 28px; cursor: pointer; box-shadow: {{ needCardShadow }}; font-family: inherit;">
               <div style="font-family: var(--tz-mono); font-size: 12px; opacity: 0.7;">(02)</div>
@@ -140,24 +140,28 @@ const template = `
             <!-- Cover (events) -->
             <sc-if value="{{ isEventKind }}">
               <div style="display: grid; gap: 6px;">
-                <span style="${label}">COVER PHOTO *</span>
+                <span style="${label}">COVER PHOTO (OPTIONAL)</span>
                 <div style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap;">
                   <sc-if value="{{ hasCover }}">
                     <img src="{{ form.coverUrl }}" alt="Cover preview" style="width: 160px; height: 100px; object-fit: cover; border: 2px solid #1F3A38; display: block;">
+                  </sc-if>
+                  <sc-if value="{{ noCover }}">
+                    <img src="{{ defaultCoverUrl }}" alt="The cover your event gets without a photo" style="width: 100px; height: 100px; object-fit: cover; border: 2px solid #1F3A38; display: block;">
                   </sc-if>
                   <label style="border: 2px dashed #820101; background: #FBEED8; color: #5C0000; font-family: var(--tz-mono); font-size: 12px; padding: 14px 18px; cursor: pointer;">
                     {{ coverLabel }}
                     <input type="file" accept="image/jpeg,image/png,image/webp" onChange="{{ uploadCover }}" aria-label="Upload a cover photo" style="position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none;">
                   </label>
                 </div>
-                <div style="${hint}">JPG, PNG or WebP up to 4 MB. Landscape works best; location data is removed from photos.</div>
+                <sc-if value="{{ hasCover }}"><button type="button" onClick="{{ removeCover }}" style="justify-self: start; border: 0; background: none; padding: 0; color: #820101; font-family: var(--tz-mono); font-size: 12px; text-decoration: underline; cursor: pointer;">Remove photo and use the standard cover</button></sc-if>
+                <div style="${hint}">No photo? Your event gets the standard cover for its category, shown here, so every card on Twendezetu looks the same. To use your own: JPG, PNG or WebP up to 4 MB. Landscape works best; location data is removed from photos.</div>
               </div>
             </sc-if>
 
             <!-- Ticketing (events) -->
             <sc-if value="{{ isEventKind }}">
               <div style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 20px 22px;">
-                <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em; margin-bottom: 12px;">[Tiketi — how do people get in?]</div>
+                <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em; margin-bottom: 12px;">[How do people get in?]</div>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                   <button onClick="{{ pickFree }}" aria-pressed="{{ form.isFree }}" style="flex: 1; min-width: 160px; text-align: left; border: 2px solid #1F3A38; background: {{ freeBg }}; color: {{ freeFg }}; padding: 14px 16px; cursor: pointer; font-family: inherit;">
                     <div style="font-family: var(--tz-display); font-size: 17px; text-transform: uppercase;">Free RSVP</div>

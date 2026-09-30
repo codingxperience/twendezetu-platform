@@ -13,16 +13,16 @@ const template = `
   </header>
 
   <div class="tw-pad" style="max-width: 1200px; margin: 0 auto; padding: 40px 24px 80px;">
-    <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Pointi — one value, every border]</div>
+    <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[One value, every border]</div>
     <h1 style="font-family: var(--tz-display); font-size: clamp(40px, 5.5vw, 72px); text-transform: uppercase; line-height: 0.95; margin: 10px 0 6px;">Money moves like family<span style="color: #820101;">.</span></h1>
-    <p style="font-size: 15px; color: #3A2F25; max-width: 620px; line-height: 1.55; margin: 0 0 36px;">Top up in dollars, spend in shillings. Points pay for tickets, vendors, fuel for the convoy — or pool together for one goal, <em style="font-family: var(--tz-serif);">harambee</em> style. 100 points = $1, everywhere. This is your <strong>personal wallet</strong> — vendors keep business income in a separate <a href="/provider-wallet" style="color: #820101;">business wallet</a>.</p>
+    <p style="font-size: 15px; color: #3A2F25; max-width: 620px; line-height: 1.55; margin: 0 0 36px;">Top up in dollars, spend in shillings. Points pay for tickets, vendors, fuel for the convoy — or pool together for one goal, <em style="font-family: var(--tz-serif);">group</em> style. 100 points = $1, everywhere. This is your <strong>personal wallet</strong> — vendors keep business income in a separate <a href="/provider-wallet" style="color: #820101;">business wallet</a>.</p>
 
     <div class="tw-2col" style="display: grid; grid-template-columns: 0.9fr 1.3fr; gap: 40px; align-items: start;">
 
       <!-- Left: balance + actions -->
       <div style="display: grid; gap: 18px;">
         <div style="border: 2px solid #1F3A38; background: #1F3A38; color: #F7F1E6; padding: 28px; box-shadow: 6px 6px 0 #E9B4AC;">
-          <div style="font-family: var(--tz-mono); font-size: 11px; color: #E9B4AC; letter-spacing: 0.08em;">[Salio — balance]</div>
+          <div style="font-family: var(--tz-mono); font-size: 11px; color: #E9B4AC; letter-spacing: 0.08em;">[Balance]</div>
           <div style="font-family: var(--tz-display); font-size: 58px; line-height: 1; margin: 12px 0 4px;">{{ balanceFmt }} <span style="font-size: 22px; color: #E9B4AC;">PTS</span></div>
           <div style="font-family: var(--tz-mono); font-size: 12px; color: rgba(247,241,230,0.7);">{{ equivalents }}</div>
           <div style="display: flex; gap: 10px; margin-top: 20px;">
@@ -34,7 +34,7 @@ const template = `
           <!-- Top-up panel -->
           <sc-if value="{{ topUpOpen }}" hint-placeholder-val="{{ false }}">
             <div style="margin-top: 18px; border-top: 1px solid rgba(247,241,230,0.25); padding-top: 16px;">
-              <div style="font-family: var(--tz-mono); font-size: 11px; color: #E9B4AC; letter-spacing: 0.08em; margin-bottom: 10px;">[Ongeza — top up by card]</div>
+              <div style="font-family: var(--tz-mono); font-size: 11px; color: #E9B4AC; letter-spacing: 0.08em; margin-bottom: 10px;">[Top up by card]</div>
               <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                 <sc-for list="{{ topUpOpts }}" as="o" hint-placeholder-count="4">
                   <button onClick="{{ o.buy }}" style="flex: 1; min-width: 90px; font-family: var(--tz-mono); font-size: 12px; border: 2px solid rgba(247,241,230,0.4); background: rgba(247,241,230,0.08); color: #F7F1E6; padding: 12px 8px; cursor: pointer; line-height: 1.5;">{{ o.label }}<br><span style="color: #E9B4AC;">{{ o.pts }}</span></button>
@@ -42,7 +42,7 @@ const template = `
               </div>
               <sc-if value="{{ topUpPending }}" hint-placeholder-val="{{ false }}">
                 <div style="margin-top: 12px; border: 2px solid #E9B4AC; background: rgba(217,122,59,0.12); padding: 14px; display: grid; gap: 8px;">
-                  <div style="font-family: var(--tz-mono); font-size: 11px; color: #E9B4AC; letter-spacing: 0.08em;">[Thibitisha — confirm top-up]</div>
+                  <div style="font-family: var(--tz-mono); font-size: 11px; color: #E9B4AC; letter-spacing: 0.08em;">[Confirm top-up]</div>
                   <div style="font-size: 13.5px; line-height: 1.55;">{{ topUpSummary }}</div>
                   <div style="display: flex; gap: 8px;">
                     <button onClick="{{ confirmTopUp }}" style="flex: 1; font-family: var(--tz-display); font-size: 13px; text-transform: uppercase; background: #820101; color: #F7F1E6; border: 0; padding: 11px; cursor: pointer;">Confirm payment →</button>
@@ -57,7 +57,7 @@ const template = `
           <!-- Cash-out panel -->
           <sc-if value="{{ cashOpen }}" hint-placeholder-val="{{ false }}">
             <div style="margin-top: 18px; border-top: 1px solid rgba(247,241,230,0.25); padding-top: 16px; display: grid; gap: 10px;">
-              <div style="font-family: var(--tz-mono); font-size: 11px; color: #E9B4AC; letter-spacing: 0.08em;">[Toa pesa — withdraw to mobile money or bank]</div>
+              <div style="font-family: var(--tz-mono); font-size: 11px; color: #E9B4AC; letter-spacing: 0.08em;">[Withdraw to mobile money or bank]</div>
               <sc-if value="{{ noMethods }}">
                 <div style="font-size: 13px; line-height: 1.55;">Add an M-Pesa, MTN MoMo, Airtel Money or bank account first. <a href="/settings?tab=payments" style="color: #E9B4AC;">Add one in settings →</a></div>
               </sc-if>
@@ -80,7 +80,7 @@ const template = `
           <!-- Send panel -->
           <sc-if value="{{ sendOpen }}" hint-placeholder-val="{{ false }}">
             <div style="margin-top: 18px; border-top: 1px solid rgba(247,241,230,0.25); padding-top: 16px; display: grid; gap: 10px;">
-              <div style="font-family: var(--tz-mono); font-size: 11px; color: #E9B4AC; letter-spacing: 0.08em;">[Tuma pointi — send points]</div>
+              <div style="font-family: var(--tz-mono); font-size: 11px; color: #E9B4AC; letter-spacing: 0.08em;">[Send points]</div>
               <input placeholder="To: @handle or email" aria-label="Send to" autocomplete="off" value="{{ recipient }}" onChange="{{ setRecipient }}" style="border: 2px solid rgba(247,241,230,0.4); background: rgba(247,241,230,0.08); color: #F7F1E6; padding: 12px 14px; font-family: var(--tz-sans); font-size: 14px; outline: none;">
               <input placeholder="Note e.g. 'kwa mafuta ya safari'" aria-label="Note" maxlength="140" value="{{ sendNoteVal }}" onChange="{{ setSendNote }}" style="border: 2px solid rgba(247,241,230,0.4); background: rgba(247,241,230,0.08); color: #F7F1E6; padding: 12px 14px; font-family: var(--tz-sans); font-size: 14px; outline: none;">
               <div style="display: flex; gap: 10px;">
@@ -134,16 +134,16 @@ const template = `
       <!-- Right: harambee pools -->
       <div>
         <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
-          <h2 style="font-family: var(--tz-display); font-size: 28px; text-transform: uppercase; margin: 0;">Harambee pools<span style="color: #820101;">.</span></h2>
+          <h2 style="font-family: var(--tz-display); font-size: 28px; text-transform: uppercase; margin: 0;">Group pools<span style="color: #820101;">.</span></h2>
           <button onClick="{{ toggleNewPool }}" aria-expanded="{{ newPoolOpen }}" style="font-family: var(--tz-mono); font-size: 12px; border: 2px solid #1F3A38; background: {{ newPoolBg }}; color: {{ newPoolFg }}; padding: 9px 14px; cursor: pointer;">+ START A POOL</button>
         </div>
 
         <!-- New pool form -->
         <sc-if value="{{ newPoolOpen }}" hint-placeholder-val="{{ false }}">
           <div style="border: 2px solid #1F3A38; background: #1F3A38; color: #F7F1E6; padding: 20px 22px; margin-bottom: 16px;">
-            <div style="font-family: var(--tz-mono); font-size: 11px; color: #E9B4AC; letter-spacing: 0.08em; margin-bottom: 10px;">[Anzisha mchango — start a pool]</div>
+            <div style="font-family: var(--tz-mono); font-size: 11px; color: #E9B4AC; letter-spacing: 0.08em; margin-bottom: 10px;">[Start a pool]</div>
             <div style="display: grid; gap: 10px;">
-              <input placeholder="What is it for? e.g. 'Sound system for the harambee'" aria-label="Pool name" maxlength="80" value="{{ poolName }}" onChange="{{ setPoolName }}" style="border: 2px solid rgba(247,241,230,0.4); background: rgba(247,241,230,0.08); color: #F7F1E6; padding: 12px 14px; font-family: var(--tz-sans); font-size: 14px; outline: none;">
+              <input placeholder="What is it for? e.g. 'Sound system for the fundraiser'" aria-label="Pool name" maxlength="80" value="{{ poolName }}" onChange="{{ setPoolName }}" style="border: 2px solid rgba(247,241,230,0.4); background: rgba(247,241,230,0.08); color: #F7F1E6; padding: 12px 14px; font-family: var(--tz-sans); font-size: 14px; outline: none;">
               <div style="display: flex; gap: 10px;">
                 <input type="number" inputmode="numeric" min="100" placeholder="Goal in points (10,000 = $100)" aria-label="Goal in points" value="{{ poolGoal }}" onChange="{{ setPoolGoal }}" style="flex: 1; min-width: 0; border: 2px solid rgba(247,241,230,0.4); background: rgba(247,241,230,0.08); color: #F7F1E6; padding: 12px 14px; font-family: var(--tz-mono); font-size: 14px; outline: none;">
                 <button onClick="{{ createPool }}" style="font-family: var(--tz-display); font-size: 14px; text-transform: uppercase; background: #820101; color: #F7F1E6; border: 0; padding: 0 22px; cursor: pointer;">Create →</button>

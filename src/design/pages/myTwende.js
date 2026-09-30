@@ -136,7 +136,7 @@ export function values(state, set, ctx) {
   // ── Upcoming ──────────────────────────────────────────────────────────
   const upcoming = data.upcoming.map((ev) => {
     const [bg, fg] = STATUS_TONES[ev.status] || STATUS_TONES.GOING;
-    const links = shareLinks(ev.link, `${ev.title} — ${ev.date}, ${cityOnly(ev.city)}. Twende pamoja!`, ev.title);
+    const links = shareLinks(ev.link, `${ev.title} — ${ev.date}, ${cityOnly(ev.city)}. ${t.shareCta}`, ev.title);
     const copyKey = `refer:${ev.rsvpId}`;
     const editOpen = Boolean(state.open[`remind:${ev.rsvpId}`]);
     return {

@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 export const metadata = {
   title: 'Events — Twendezetu',
-  description: 'Every upcoming event on Twendezetu: concerts, harambees, weddings, cookouts, church and sports events across East Africa and the diaspora.',
+  description: 'Every upcoming event on Twendezetu: concerts, fundraisers, weddings, cookouts, church and sports events across East Africa and the diaspora.',
   alternates: { canonical: '/events' },
 };
 

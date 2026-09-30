@@ -19,7 +19,7 @@ const template = `
       NYTC Nyama Choma<br>Festival <span style="color: #820101;">Nanenane 2026</span>
     </h1>
     <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; font-family: var(--tz-mono); font-size: 13px;">
-      <span style="background: #1F3A38; color: #F7F1E6; padding: 8px 14px;">SAT · 8 AUG 2026 · 2:00 PM EDT (SAA NANE)</span>
+      <span style="background: #1F3A38; color: #F7F1E6; padding: 8px 14px;">SAT · 8 AUG 2026 · 2:00 PM EDT</span>
       <span style="border: 2px solid #1F3A38; color: #820101; padding: 6px 14px;">= 9:00 PM EAT · NAIROBI/DAR · YOUR TIME AUTO-DETECTED</span>
       <span style="border: 2px solid #1F3A38; padding: 6px 14px;">LINCOLN PARK · COMMUNIPAW AVE SIDE</span>
       <span style="border: 2px solid #1F3A38; padding: 6px 14px;">JERSEY CITY, NJ 07304</span>
@@ -38,16 +38,16 @@ const template = `
 
     <!-- Left column -->
     <div>
-      <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Kuhusu tukio — about]</div>
+      <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[About]</div>
       <p style="font-size: 18px; line-height: 1.6; margin: 14px 0 0;">
-        <em style="font-family: var(--tz-serif);">Ayawi ayawi, sasa yamekua!</em> The leadership of the Tanzanian Community of NY, NJ, CT &amp; PA (NYTC) welcomes all wanajumuiya to the Nyama Choma Festival. A gathering of ndugu, marafiki, familia, washikaji na majirani — coming together as one NYTC family.
+        <em style="font-family: var(--tz-serif);">It is finally here!</em> The leadership of the Tanzanian Community of NY, NJ, CT &amp; PA (NYTC) welcomes every member of the community to the Nyama Choma Festival. A gathering of family, friends, neighbours and everyone in between — coming together as one NYTC family.
       </p>
       <p style="font-size: 16px; line-height: 1.6; color: #3A2F25;">
-        Expect uchomaji wa nyama (the grill masters at work), live entertainment, games for every age — michezo ya kila rika — connection, and community services on site. The park has many areas; look for NYTC on the <strong>Communipaw Ave</strong> side.
+        Expect the grill masters at work, live entertainment, games for every age, connection, and community services on site. The park has many areas; look for NYTC on the <strong>Communipaw Ave</strong> side.
       </p>
 
       <!-- What's happening grid -->
-      <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em; margin-top: 40px;">[Ratiba — program]</div>
+      <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em; margin-top: 40px;">[Program]</div>
       <div style="border: 2px solid #1F3A38; margin-top: 14px;">
         <sc-for list="{{ schedule }}" as="row" hint-placeholder-count="5">
           <div style="display: grid; grid-template-columns: 130px 1fr auto; gap: 18px; padding: 16px 18px; border-bottom: 1px solid #E3D9C6; align-items: baseline; background: #FFFDF8;">
@@ -62,10 +62,10 @@ const template = `
       </div>
 
       <!-- Sponsor: NALA -->
-      <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em; margin-top: 40px;">[Mdhamini — event sponsor]</div>
+      <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em; margin-top: 40px;">[Event sponsor]</div>
       <div style="border: 2px solid #1F3A38; background: #1F3A38; color: #F7F1E6; padding: 28px; margin-top: 14px; display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: center;">
         <div>
-          <div style="font-family: var(--tz-display); font-size: 32px; text-transform: uppercase;">NALA <span style="color: #E9B4AC;">— tuma pesa nyumbani</span></div>
+          <div style="font-family: var(--tz-display); font-size: 32px; text-transform: uppercase;">NALA <span style="color: #E9B4AC;">— send money home</span></div>
           <p style="font-size: 14.5px; line-height: 1.55; color: rgba(247,241,230,0.8); margin: 10px 0 14px; max-width: 480px;">Download NALA, send money home with amazing rates and 24/7 support. New users: send $50+ with promo code <strong style="color:#E9B4AC;">NANE20</strong> and get <strong style="color:#E9B4AC;">$20</strong>.</p>
           <div style="display: flex; gap: 10px; font-family: var(--tz-mono); font-size: 12px;">
             <span style="border: 1px solid rgba(247,241,230,0.35); padding: 6px 12px;">① AMAZING RATES</span>
@@ -77,11 +77,11 @@ const template = `
       </div>
 
       <!-- Donations -->
-      <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em; margin-top: 40px;">[Michango — support the festival]</div>
+      <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em; margin-top: 40px;">[Support the festival]</div>
       <div class="tw-2col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px;">
         <div style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 22px;">
           <div style="font-family: var(--tz-display); font-size: 20px; text-transform: uppercase;">Zelle a donation</div>
-          <p style="font-size: 13.5px; color: #3A2F25; line-height: 1.5; margin: 8px 0 12px;">Donations from wanajumuiya and wadau make the festival shine.</p>
+          <p style="font-size: 13.5px; color: #3A2F25; line-height: 1.5; margin: 8px 0 12px;">Donations from community members and supporters make the festival shine.</p>
           <div style="font-family: var(--tz-mono); font-size: 12.5px; background: #EFE7D6; border: 1px dashed #820101; padding: 10px 12px;">$Zelle → info@nytanzaniancommunity.org</div>
         </div>
         <div style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 22px;">
@@ -92,11 +92,11 @@ const template = `
       </div>
 
       <!-- Real photos drop-zone -->
-      <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em; margin-top: 40px;">[Picha — drop real NYTC photos here]</div>
+      <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em; margin-top: 40px;">[Drop real NYTC photos here]</div>
       <div class="tw-3col" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 14px;">
         <figure style="margin: 0;">
           <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=700&q=80" alt="Nyama choma skewers on the grill" style="width: 100%; height: 180px; object-fit: cover; display: block; border: 2px solid #1F3A38;">
-          <figcaption style="font-family: var(--tz-mono); font-size: 10.5px; color: #6E6155; margin-top: 6px;">UCHOMAJI WA NYAMA — THE GRILL MASTERS</figcaption>
+          <figcaption style="font-family: var(--tz-mono); font-size: 10.5px; color: #6E6155; margin-top: 6px;">THE GRILL MASTERS</figcaption>
         </figure>
         <figure style="margin: 0;">
           <img src="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=700&q=80" alt="Festival crowd celebrating" style="width: 100%; height: 180px; object-fit: cover; display: block; border: 2px solid #1F3A38;">
@@ -111,7 +111,7 @@ const template = `
       <!-- Vendors call -->
       <div style="border: 2px solid #1F3A38; background: #820101; padding: 24px 26px; margin-top: 40px; display: flex; justify-content: space-between; align-items: center; gap: 20px; color: #F7F1E6;">
         <div>
-          <div style="font-family: var(--tz-display); font-size: 24px; text-transform: uppercase; color: #1F3A38;">Vendors, sponsors &amp; donors — karibuni!</div>
+          <div style="font-family: var(--tz-display); font-size: 24px; text-transform: uppercase; color: #1F3A38;">Vendors, sponsors &amp; donors — welcome!</div>
           <div style="font-size: 14px; color: #1F3A38; margin-top: 6px;">Companies and organizations are welcome to help make the Nyama Choma shine. Apply through the platform — organizer contacts stay masked.</div>
         </div>
         <a href="/create-event" style="font-family: var(--tz-display); font-size: 15px; text-transform: uppercase; background: #1F3A38; color: #F7F1E6; text-decoration: none; padding: 14px 22px; white-space: nowrap;">Apply →</a>
@@ -160,7 +160,7 @@ const template = `
           <!-- Guest RSVP confirmed -->
           <sc-if value="{{ rsvped }}" hint-placeholder-val="{{ false }}">
             <div style="margin-top: 12px; border: 1px dashed #820101; background: #FBEED8; padding: 12px 14px; font-size: 13px; line-height: 1.55;">
-              ✓ <strong>Karibu, {{ gNameShown }}!</strong> You're on the list ({{ gPartyShown }}). {{ rsvpNote }}
+              ✓ <strong>Welcome, {{ gNameShown }}!</strong> You're on the list ({{ gPartyShown }}). {{ rsvpNote }}
               <div style="display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap;">
                 <a href="{{ afterRsvpHref }}" style="font-family: var(--tz-mono); font-size: 11px; background: #820101; border: 1px solid #1F3A38; color: #F7F1E6; padding: 6px 10px; text-decoration: none;">{{ afterRsvpLabel }}</a>
                 <sc-if value="{{ canCancelRsvp }}">
@@ -211,7 +211,7 @@ const template = `
 
       <!-- Organizer (masked) -->
       <div style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 20px 22px;">
-        <div style="font-family: var(--tz-mono); font-size: 11px; color: #820101; letter-spacing: 0.08em;">[Mratibu — organizer]</div>
+        <div style="font-family: var(--tz-mono); font-size: 11px; color: #820101; letter-spacing: 0.08em;">[Organizer]</div>
         <div style="display: flex; gap: 14px; align-items: center; margin-top: 12px;">
           <div style="width: 48px; height: 48px; background: #1F3A38; color: #F7F1E6; font-family: var(--tz-display); font-size: 20px; display: flex; align-items: center; justify-content: center;">{{ organizerInitials }}</div>
           <div>
@@ -225,7 +225,7 @@ const template = `
 
       <!-- Location -->
       <div style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 20px 22px;">
-        <div style="font-family: var(--tz-mono); font-size: 11px; color: #820101; letter-spacing: 0.08em;">[Mahali — location]</div>
+        <div style="font-family: var(--tz-mono); font-size: 11px; color: #820101; letter-spacing: 0.08em;">[Location]</div>
         <div style="font-family: var(--tz-display); font-size: 18px; text-transform: uppercase; margin-top: 10px;">Lincoln Park</div>
         <div style="font-size: 13.5px; color: #3A2F25; line-height: 1.5;">1 Country Road 605, Jersey City, NJ 07304<br>NYTC side: <strong>Communipaw Ave</strong></div>
         <a href="https://www.google.com/maps/search/?api=1&query=Lincoln+Park+1+Country+Road+605+Jersey+City+NJ+07304" target="_blank" style="margin-top: 12px; height: 120px; text-decoration: none; background: repeating-linear-gradient(45deg, #1F3A38, #1F3A38 12px, #26454238 12px, #264542 24px); background-color: #1F3A38; border: 2px solid #1F3A38; display: flex; align-items: center; justify-content: center;">
@@ -260,7 +260,7 @@ const template = `
       <span style="color: rgba(247,241,230,0.75);">IMETOLEWA NA UONGOZI-NYTC · JULY 3, 2026</span>
       <a href="/events" style="color: #F7F1E6;">← Back to events</a>
     </div>
-    <div style="font-family: var(--tz-display); font-size: clamp(64px, 12vw, 200px); text-transform: uppercase; line-height: 0.78; text-align: center; transform: translateY(12%);">HII SI YA KUKOSA</div>
+    <div style="font-family: var(--tz-display); font-size: clamp(64px, 12vw, 200px); text-transform: uppercase; line-height: 0.78; text-align: center; transform: translateY(12%);">NOT TO BE MISSED</div>
   </footer>
   ${SITE_TABBAR}
 </div>

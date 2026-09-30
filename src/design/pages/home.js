@@ -294,7 +294,7 @@ export function values(state, set, ctx) {
     signedIn: me.signedIn,
     signedOut: !me.signedIn,
     hero: {
-      kicker: `KARIBU — ${(place ? cityOnly(place) : t.everywhere).toUpperCase()}`,
+      kicker: `${t.welcome} — ${(place ? cityOnly(place) : t.everywhere).toUpperCase()}`,
       a: t.heroA,
       b: t.heroB,
       // Shown one at a time by a CSS cycle (tz-words in globals.css).

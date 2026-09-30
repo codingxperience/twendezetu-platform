@@ -13,7 +13,7 @@ const template = `
   </header>
 
   <div style="max-width: 1200px; margin: 0 auto; padding: 40px 24px 80px;">
-    <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Mapato ya biashara — business money]</div>
+    <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Business money]</div>
     <h1 style="font-family: var(--tz-display); font-size: clamp(38px, 5vw, 64px); text-transform: uppercase; line-height: 0.95; margin: 10px 0 6px;">Earnings, escrow, payouts<span style="color: #820101;">.</span></h1>
     <p style="font-size: 15px; color: #3A2F25; max-width: 680px; line-height: 1.55; margin: 0 0 12px;">This is your <strong>business ledger</strong> — money earned from jobs, held in escrow, and withdrawn to your bank or mobile money. It is separate from a personal <a href="/points-wallet" style="color: #820101;">Points wallet</a> (spending money), so your books stay clean and fees are only ever charged on business income.</p>
 
@@ -38,7 +38,7 @@ const template = `
           <!-- Move to points -->
           <sc-if value="{{ pointsOpen }}">
             <div style="margin-top: 18px; border-top: 1px solid rgba(247,241,230,0.25); padding-top: 16px; display: grid; gap: 10px;">
-              <div style="font-family: var(--tz-mono); font-size: 11px; color: #E9B4AC; letter-spacing: 0.08em;">[Hamisha — move to your points wallet]</div>
+              <div style="font-family: var(--tz-mono); font-size: 11px; color: #E9B4AC; letter-spacing: 0.08em;">[Move to your points wallet]</div>
               <div style="display: flex; gap: 10px;">
                 <input value="{{ pAmount }}" onChange="{{ setPAmount }}" inputmode="decimal" aria-label="Amount to move" placeholder="Amount" style="flex: 1; min-width: 0; border: 2px solid rgba(247,241,230,0.4); background: rgba(247,241,230,0.08); color: #F7F1E6; padding: 12px 14px; font-family: var(--tz-mono); font-size: 14px; outline: none;">
                 <span style="align-self: center; font-family: var(--tz-mono); font-size: 12px; color: rgba(247,241,230,0.6);">{{ currency }}</span>
@@ -51,7 +51,7 @@ const template = `
           <!-- Withdraw flow with confirmation -->
           <sc-if value="{{ withdrawOpen }}" hint-placeholder-val="{{ false }}">
             <div style="margin-top: 18px; border-top: 1px solid rgba(247,241,230,0.25); padding-top: 16px; display: grid; gap: 10px;">
-              <div style="font-family: var(--tz-mono); font-size: 11px; color: #E9B4AC; letter-spacing: 0.08em;">[Toa pesa — withdraw]</div>
+              <div style="font-family: var(--tz-mono); font-size: 11px; color: #E9B4AC; letter-spacing: 0.08em;">[Withdraw]</div>
               <div style="display: flex; gap: 10px;">
                 <input value="{{ wAmount }}" onChange="{{ setWAmount }}" inputmode="decimal" aria-label="Amount to withdraw" placeholder="Amount" style="flex: 1; min-width: 0; border: 2px solid rgba(247,241,230,0.4); background: rgba(247,241,230,0.08); color: #F7F1E6; padding: 12px 14px; font-family: var(--tz-mono); font-size: 14px; outline: none;">
                 <span style="align-self: center; font-family: var(--tz-mono); font-size: 12px; color: rgba(247,241,230,0.6);">{{ currency }}</span>
@@ -69,7 +69,7 @@ const template = `
           <!-- Confirmation step -->
           <sc-if value="{{ confirmOpen }}" hint-placeholder-val="{{ false }}">
             <div style="margin-top: 18px; border: 2px solid #E9B4AC; background: rgba(217,122,59,0.12); padding: 16px; display: grid; gap: 8px;">
-              <div style="font-family: var(--tz-mono); font-size: 11px; color: #E9B4AC; letter-spacing: 0.08em;">[Thibitisha — confirm withdrawal]</div>
+              <div style="font-family: var(--tz-mono); font-size: 11px; color: #E9B4AC; letter-spacing: 0.08em;">[Confirm withdrawal]</div>
               <div style="font-size: 14px; line-height: 1.6;">{{ confirmSummary }}</div>
               <div style="font-family: var(--tz-mono); font-size: 11px; color: rgba(247,241,230,0.6);">{{ confirmNote }}</div>
               <div style="display: flex; gap: 8px;">

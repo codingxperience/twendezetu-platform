@@ -10,7 +10,7 @@ const template = `
 
   <!-- Title + search -->
   <section style="max-width: 1200px; margin: 0 auto; padding: 40px 24px 20px;">
-    <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Watoa huduma — the directory]</div>
+    <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[The directory]</div>
     <h1 style="font-family: var(--tz-display); font-size: clamp(44px, 7vw, 92px); text-transform: uppercase; line-height: 0.92; margin: 10px 0 12px;">{{ title }}<span style="color: #820101;">.</span></h1>
     <p style="font-size: 15px; color: #3A2F25; max-width: 640px; line-height: 1.55; margin: 0 0 24px;">DJs, caterers, tents, drivers, photographers and MCs across East Africa and the diaspora. Ask any of them for a quote without an account; your phone and email stay masked.</p>
     <form onSubmit="{{ search }}" role="search" style="display: flex; gap: 10px; flex-wrap: wrap; max-width: 760px;">

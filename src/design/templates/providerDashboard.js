@@ -96,8 +96,8 @@ const template = `
   </nav>
 
   <div style="max-width: 1320px; margin: 0 auto; padding: 40px 24px 80px;">
-    <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Dashibodi ya mtoa huduma]</div>
-    <h1 style="font-family: var(--tz-display); font-size: clamp(40px, 5.5vw, 72px); text-transform: uppercase; line-height: 0.95; margin: 10px 0 32px;">Karibu, {{ me.firstName }}<span style="color: #820101;">.</span> {{ headlineTail }}<span style="color: #820101;">.</span></h1>
+    <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Vendor dashboard]</div>
+    <h1 style="font-family: var(--tz-display); font-size: clamp(40px, 5.5vw, 72px); text-transform: uppercase; line-height: 0.95; margin: 10px 0 32px;">Welcome, {{ me.firstName }}<span style="color: #820101;">.</span> {{ headlineTail }}<span style="color: #820101;">.</span></h1>
 
     <!-- Draft listing: waiting for its membership -->
     <sc-if value="{{ isDraft }}">
@@ -301,7 +301,7 @@ const template = `
       <aside style="display: grid; gap: 18px;">
         <!-- Membership -->
         <div style="border: 2px solid #1F3A38; background: #1F3A38; color: #F7F1E6; padding: 24px;">
-          <div style="font-family: var(--tz-mono); font-size: 11px; color: #E9B4AC; letter-spacing: 0.08em;">[Uanachama — membership]</div>
+          <div style="font-family: var(--tz-mono); font-size: 11px; color: #E9B4AC; letter-spacing: 0.08em;">[Membership]</div>
           <div style="font-family: var(--tz-display); font-size: 26px; text-transform: uppercase; margin: 10px 0 4px;">{{ membershipStatus }}</div>
           <div style="font-size: 13px; color: rgba(247,241,230,0.75); line-height: 1.5;">12-month listing · {{ membership.price }} / yr. Profile, gallery and reviews stay live and matchable.</div>
           <div style="font-family: var(--tz-mono); font-size: 10.5px; color: #E9B4AC; margin-top: 8px; line-height: 1.6;">{{ billingNote }}</div>
@@ -312,7 +312,7 @@ const template = `
 
         <!-- Earnings (business ledger — separate from personal wallet) -->
         <div style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 24px;">
-          <div style="font-family: var(--tz-mono); font-size: 11px; color: #820101; letter-spacing: 0.08em;">[Mapato — business earnings]</div>
+          <div style="font-family: var(--tz-mono); font-size: 11px; color: #820101; letter-spacing: 0.08em;">[Business earnings]</div>
           <div style="font-family: var(--tz-display); font-size: 34px; margin: 10px 0 2px;">{{ earningsTotal }}</div>
           <div style="font-size: 12.5px; color: #6E6155;">{{ earningsNote }}</div>
           <div style="display: flex; align-items: flex-end; gap: 6px; height: 64px; margin-top: 16px;">
@@ -329,7 +329,7 @@ const template = `
 
         <!-- Notification prefs -->
         <div style="border: 2px solid #1F3A38; background: #FFFDF8; padding: 24px;">
-          <div style="font-family: var(--tz-mono); font-size: 11px; color: #820101; letter-spacing: 0.08em;">[Arifa — notification controls]</div>
+          <div style="font-family: var(--tz-mono); font-size: 11px; color: #820101; letter-spacing: 0.08em;">[Notification controls]</div>
           <div style="display: grid; gap: 12px; margin-top: 14px;">
             <sc-for list="{{ prefs }}" as="p" hint-placeholder-count="4">
               <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">

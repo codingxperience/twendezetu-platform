@@ -14,7 +14,7 @@ const template = `
   <!-- Your splits -->
   <sc-if value="{{ listing }}" hint-placeholder-val="{{ false }}">
     <section style="max-width: 760px; margin: 0 auto; padding: 40px 24px 80px;">
-      <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Lipa pamoja]</div>
+      <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Split the bill]</div>
       <h1 style="font-family: var(--tz-display); font-size: clamp(30px, 4.5vw, 48px); text-transform: uppercase; line-height: 0.95; margin: 8px 0 18px;">Your group splits<span style="color: #820101;">.</span></h1>
       <sc-if value="{{ noSplits }}" hint-placeholder-val="{{ false }}">
         <div style="border: 2px dashed #820101; background: #FFFDF8; padding: 20px 22px; font-size: 14px; color: #3A2F25; line-height: 1.6;">No splits yet. At checkout on any ticketed event, turn on <strong>Buying for a group</strong>, name your guests and choose <strong>Split-pay link</strong>: seats are held and everyone pays their own share.</div>
@@ -35,7 +35,7 @@ const template = `
   <div class="tw-2col" style="max-width: 1140px; margin: 0 auto; padding: 32px 24px 80px; display: grid; grid-template-columns: 1.4fr 0.85fr; gap: 44px; align-items: start;">
 
     <section>
-      <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Lipa pamoja — one group, split the bill]</div>
+      <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[One group, split the bill]</div>
       <h1 style="font-family: var(--tz-display); font-size: clamp(30px, 4.5vw, 52px); text-transform: uppercase; line-height: 0.95; margin: 8px 0 6px;">{{ title }}<span style="color: #820101;">.</span></h1>
       <p style="font-size: 14px; color: #6E6155; line-height: 1.55; max-width: 560px; margin: 0 0 22px;">{{ intro }} {{ holdNote }} <a href="{{ eventHref }}" style="color: #820101;">Event details</a></p>
 

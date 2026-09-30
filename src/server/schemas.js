@@ -72,7 +72,7 @@ export const schemas = {
     category: eventCategory,
     blurb: text(240, 10),
     description: text(4000, 20),
-    coverUrl: imageUrl,
+    coverUrl: imageUrl.optional().or(z.literal('')),
     venue: text(200, 3),
     city: text(80, 2),
     country,
