@@ -1,7 +1,7 @@
 // Small helpers shared by the page logic modules.
 
 import { convert, formatMoney, DISPLAY_CURRENCIES } from '@/shared/money';
-import { words } from '../i18n';
+import { LANGUAGES, words } from '../i18n';
 
 export const COLORS = Object.freeze({
   ink: '#14201F',
@@ -114,14 +114,21 @@ export async function withStepUp(ctx, call) {
 
 // ── The shared frame (src/design/templates/shell.js) ─────────────────────
 
+// Vendor trades in each language: [key, EN, SW, FR, ES].
 const VENDOR_MENU = [
-  ['MUSIC_DJS', 'Music & DJs', 'Muziki na ma-DJ'],
-  ['CATERING', 'Catering & chefs', 'Wapishi'],
-  ['TENTS_EQUIPMENT', 'Tents & equipment', 'Mahema na vifaa'],
-  ['TRANSPORT', 'Transport & drivers', 'Usafiri na madereva'],
-  ['PHOTOGRAPHY', 'Photography', 'Picha'],
-  ['DECOR_MC', 'Décor & MC', 'Mapambo na MC'],
+  ['MUSIC_DJS', 'Music & DJs', 'Muziki na ma-DJ', 'Musique et DJ', 'Música y DJ'],
+  ['CATERING', 'Catering & chefs', 'Wapishi', 'Traiteurs et chefs', 'Catering y chefs'],
+  ['TENTS_EQUIPMENT', 'Tents & equipment', 'Mahema na vifaa', 'Tentes et matériel', 'Carpas y equipos'],
+  ['TRANSPORT', 'Transport & drivers', 'Usafiri na madereva', 'Transport et chauffeurs', 'Transporte y conductores'],
+  ['PHOTOGRAPHY', 'Photography', 'Picha', 'Photographie', 'Fotografía'],
+  ['DECOR_MC', 'Décor & MC', 'Mapambo na MC', 'Décoration et MC', 'Decoración y MC'],
 ];
+
+const LANG_COLUMN = { EN: 1, SW: 2, FR: 3, ES: 4 };
+
+function vendorLabel(entry, locale) {
+  return entry[LANG_COLUMN[locale] || 1];
+}
 
 const SECTIONS = ['home', 'now', 'week', 'events', 'trending', 'vendors', 'saved', 'tickets', 'organizers', 'post', 'me'];
 
@@ -131,26 +138,38 @@ function setCookie(name, value, maxAge = YEAR) {
   document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAge}; samesite=lax`;
 }
 
-// Switches the site's language: remembered on the account when signed in,
-// in a cookie otherwise, then the page is drawn again in the new words.
+// Switches the site's language. The choice is kept on this device (a
+// cookie, so the server draws the next page in it too) and saved to the
+// account when signed in; then the page is drawn again in the new words.
 async function switchLanguage(me, ctx, locale) {
   if (me.locale === locale) return;
   setCookie('tz_lang', locale);
   if (me.signedIn) {
-    try {
-      await ctx.api.patch('/api/account/profile', { locale });
-    } catch (error) {
-      ctx.toast(error.message, 'err');
-      return;
-    }
+    // The device choice already applies; the account copy is a convenience
+    // for other devices, so a failure here does not stop the switch.
+    await ctx.api.patch('/api/account/profile', { locale }).catch(() => {});
   }
   ctx.router.refresh();
+}
+
+// Folds the language picker down to a globe, or opens it again. The cookie
+// lets the server draw it the same way on the next page.
+function foldLanguages(closed) {
+  setCookie('tz_langpill', closed ? 'closed' : 'open');
+  document.querySelector('.tz-langpick')?.setAttribute('data-closed', closed ? 'true' : 'false');
+}
+
+function langPillClosed(me) {
+  if (typeof document === 'undefined') return Boolean(me.langPillClosed);
+  const match = document.cookie.match(/(?:^|; )tz_langpill=(\w+)/);
+  return match ? match[1] === 'closed' : Boolean(me.langPillClosed);
 }
 
 // `active` names the section the page belongs to; `q` refills the search box.
 // The home page also passes the city picker's `cities`, the picked `city`
 // and the people someone follows (`faces`) for the rail.
-export function shellValues(me, ctx, { active = null, q = '', cities = null, city = null, faces = [] } = {}) {
+// `lift` raises the language picker above a bar pinned to the bottom.
+export function shellValues(me, ctx, { active = null, q = '', cities = null, city = null, faces = [], lift = false } = {}) {
   const t = words(me.locale);
   const current = Object.fromEntries(SECTIONS.map((key) => [key, key === active ? 'page' : 'false']));
   const unread = me.unread > 0 ? (me.unread > 9 ? '9+' : String(me.unread)) : '';
@@ -187,11 +206,19 @@ export function shellValues(me, ctx, { active = null, q = '', cities = null, cit
         ]
       : [],
     railFaces: faces.slice(0, 4),
-    langEn: me.locale === 'SW' ? 'false' : 'true',
-    langSw: me.locale === 'SW' ? 'true' : 'false',
-    setEnglish: () => switchLanguage(me, ctx, 'EN'),
-    setSwahili: () => switchLanguage(me, ctx, 'SW'),
-    vendorLabels: Object.fromEntries(VENDOR_MENU.map(([key, en, sw]) => [key, me.locale === 'SW' ? sw : en])),
+    localeCode: me.locale || 'EN',
+    languages: LANGUAGES.map(([code, name]) => ({
+      code,
+      name,
+      lang: code.toLowerCase(),
+      pressed: (me.locale || 'EN') === code ? 'true' : 'false',
+      pick: () => switchLanguage(me, ctx, code),
+    })),
+    langPillClosed: langPillClosed(me) ? 'true' : 'false',
+    langLift: lift ? 'true' : 'false',
+    foldLanguages: () => foldLanguages(true),
+    unfoldLanguages: () => foldLanguages(false),
+    vendorLabels: Object.fromEntries(VENDOR_MENU.map((entry) => [entry[0], vendorLabel(entry, me.locale)])),
     search: (event) => {
       const value = event.target.querySelector('input[name="q"]')?.value.trim();
       window.location.assign(value ? `/events?q=${encodeURIComponent(value)}` : '/events');
@@ -312,7 +339,7 @@ const VENDOR_CATEGORY_KEYS = { 'MUSIC & DJS': 'MUSIC_DJS', 'CATERING & CHEFS': '
 export function vendorCardValues(vendor, { t, locale }) {
   const key = vendor.category || VENDOR_CATEGORY_KEYS[vendor.cat];
   const menu = VENDOR_MENU.find(([k]) => k === key);
-  const catLabel = menu ? (locale === 'SW' ? menu[2] : menu[1]) : titleCase(vendor.cat);
+  const catLabel = menu ? vendorLabel(menu, locale) : titleCase(vendor.cat);
   const city = titleCase(vendor.city).split(', ')[0];
   return {
     href: vendor.href || `/vendors/${vendor.slug}`,

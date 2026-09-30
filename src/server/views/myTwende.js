@@ -6,12 +6,12 @@ import { prisma } from '../db.js';
 import { config } from '../config.js';
 import { accounts, balanceOf } from '../ledger.js';
 import { getRates } from '../fx.js';
-import { ESCROW } from '../fees.js';
+import { ESCROW, REFERRAL_POINTS } from '../fees.js';
 import { toEventCard } from '../services/events.js';
-import { dateRange, needCard } from '../services/marketplace.js';
+import { dateRange } from '../services/marketplace.js';
 import { REMINDER_PLANS } from '../services/rsvps.js';
 import { preferencesFor } from '../notify/preferences.js';
-import { COUNTRIES, PROVIDER_CATEGORIES, dayKey, dayLabel, initials, ratingLabel, relativeTime, shortDate, timeLabel } from '../../shared/format.js';
+import { COUNTRIES, dayKey, dayLabel, initials, ratingLabel, relativeTime, shortDate, timeLabel } from '../../shared/format.js';
 import { convert, formatMoney } from '../../shared/money.js';
 import { unauthorized } from '../errors.js';
 import { me } from './common.js';
@@ -31,7 +31,7 @@ function plural(count, word) {
 
 // A calendar cell has room for a word or two: "Afrogroove Night", "Driver".
 function shortTitle(title) {
-  return title.split(/\s+/).filter((word) => /[\p{L}\p{N}]/u.test(word)).slice(0, 2).join(' ');
+  return title.split(/\s+/).filter((word) => /[\p{L}\p{N}]/u.test(word)).slice(0, 2).join(' ').replace(/[,.;:]+$/, '');
 }
 
 function needZone(need) {
@@ -122,7 +122,7 @@ export async function myTwendeView(viewer) {
       take: 16,
     }),
     prisma.follow.findMany({ where: { followerId: viewer.id }, include: { organizer: { select: { id: true, name: true, slug: true } } } }),
-    prisma.notification.findMany({ where: { userId: viewer.id }, orderBy: { createdAt: 'desc' }, take: 8 }),
+    prisma.notification.findMany({ where: { userId: viewer.id }, orderBy: { createdAt: 'desc' }, take: 30 }),
     prisma.waitlistEntry.findMany({
       where: { userId: viewer.id, event: { startsAt: { gte: now } } },
       include: { event: { select: { title: true, slug: true } }, tier: { select: { name: true } } },
@@ -141,41 +141,8 @@ export async function myTwendeView(viewer) {
   ]);
 
   const followedOrganizers = follows.filter((follow) => follow.organizer).map((follow) => follow.organizer);
-  const followedProviderIds = new Set(follows.filter((follow) => follow.providerId).map((follow) => follow.providerId));
 
-  const [fromFollowed, featured, providers, nearbyNeeds, positions] = await Promise.all([
-    followedOrganizers.length
-      ? prisma.event.findMany({
-          where: { organizerId: { in: followedOrganizers.map((organizer) => organizer.id) }, status: 'PUBLISHED', hiddenAt: null, startsAt: { gte: now } },
-          include: CARD_INCLUDE,
-          orderBy: { startsAt: 'asc' },
-          take: 10,
-        })
-      : [],
-    prisma.event.findMany({
-      where: { status: 'PUBLISHED', hiddenAt: null, startsAt: { gte: now } },
-      include: CARD_INCLUDE,
-      orderBy: [{ featuredRank: { sort: 'asc', nulls: 'last' } }, { goingCount: 'desc' }],
-      take: 5,
-    }),
-    prisma.provider.findMany({
-      where: { status: 'ACTIVE', ownerId: { not: viewer.id } },
-      orderBy: [{ verifiedAt: { sort: 'desc', nulls: 'last' } }, { ratingCount: 'desc' }],
-      take: 6,
-    }),
-    prisma.need.findMany({
-      where: {
-        status: 'OPEN',
-        hiddenAt: null,
-        posterId: { not: viewer.id },
-        OR: [{ closesAt: null }, { closesAt: { gt: now } }],
-        ...(user.country ? { country: user.country } : {}),
-      },
-      orderBy: [{ closesAt: { sort: 'asc', nulls: 'last' } }, { offerCount: 'desc' }],
-      take: 4,
-    }),
-    waitlistPositions(waitlist),
-  ]);
+  const positions = await waitlistPositions(waitlist);
 
   // Tickets grouped by event, for the door QR codes.
   const ticketsByEvent = new Map();
@@ -196,8 +163,18 @@ export async function myTwendeView(viewer) {
   const upcoming = rsvps.map((rsvp) => {
     const card = toEventCard(rsvp.event);
     const eventTickets = ticketsByEvent.get(rsvp.eventId) || [];
+    // dayLabel() gives "SAT · 8 AUG".
+    const [dow = '', dayMonth = ''] = card.date.split(' · ');
+    const [day = '', mon = ''] = dayMonth.split(' ');
     return {
       rsvpId: rsvp.id,
+      dow,
+      day,
+      mon,
+      venue: card.venue,
+      by: card.organizer,
+      isFree: card.isFree,
+      ticketsHref: card.isFree ? card.href : `/checkout?event=${card.slug}`,
       slug: card.slug,
       href: card.href,
       img: card.img,
@@ -324,57 +301,27 @@ export async function myTwendeView(viewer) {
     })),
   ];
 
-  const liveNeeds = needs.filter((need) => need.status === 'OPEN');
-  const offersIn = liveNeeds.reduce((sum, need) => sum + need.offerCount, 0);
-  const summary = [
-    plural(upcoming.length, 'upcoming event'),
-    liveNeeds.length ? `${plural(liveNeeds.length, 'need')} live with ${plural(offersIn, 'offer')}` : null,
-    referralCount ? `${plural(referralCount, 'friend')} joined from your links` : null,
-  ]
-    .filter(Boolean)
-    .join(' · ');
-
-  const featuredEvent = fromFollowed[0] || featured[0] || null;
   const place = [user.city, COUNTRIES[user.country]?.name].filter(Boolean).join(', ');
-  const posted = events.length > 0 || needs.length > 0;
   // One point is one US cent, so the dollar value is exact; other currencies
   // are an estimate at today's rate.
   const currency = viewer.currency || 'USD';
   const walletValue = currency === 'USD' || !rates[currency] ? formatMoney(points, 'USD') : `≈ ${formatMoney(convert(points, 'PTS', currency, rates), currency, { cents: false })}`;
+  const offersByNeed = new Map(activeNeeds.map((need) => [need.id, need.offers]));
 
   return {
     me: person,
-    summary: `${summary}.`,
-    roleLine: [viewer.provider ? 'PROVIDER' : posted ? 'MEMBER + ORGANIZER' : 'MEMBER', place.toUpperCase()].filter(Boolean).join(' · '),
+    place,
     notices: notices.map((notice) => ({
       id: notice.id,
+      topic: notice.topic,
       title: notice.title,
       detail: notice.body,
       time: relativeTime(notice.createdAt),
       href: notice.href || '/my-twende',
       unread: !notice.readAt,
     })),
-    featured: featuredEvent
-      ? { ...toEventCard(featuredEvent), by: fromFollowed[0] ? `FROM ${featuredEvent.organizer.name.toUpperCase()}, WHO YOU FOLLOW` : 'STAFF PICK' }
-      : null,
-    explore: featured
-      .filter((event) => event.id !== featuredEvent?.id)
-      .slice(0, 4)
-      .map((event) => ({ ...toEventCard(event), by: event.organizer.name })),
+    // The organizers this person follows, for the rail.
     organizers: followedOrganizers.map((organizer) => ({ init: initials(organizer.name), name: organizer.name, slug: organizer.slug })),
-    followedEvents: fromFollowed.map((event) => ({ ...toEventCard(event), by: event.organizer.name })),
-    nearbyNeeds: nearbyNeeds.map((need) => ({
-      title: need.title,
-      meta: `${needCard(need).meta} · ${plural(need.offerCount, 'offer')}`.toUpperCase(),
-      chip: need.closesAt && need.closesAt - now < 3 * 86_400_000 ? 'CLOSING SOON' : PROVIDER_CATEGORIES[need.category].upper,
-    })),
-    providers: providers.map((provider) => ({
-      slug: provider.slug,
-      init: initials(provider.name),
-      name: provider.name,
-      meta: `★ ${ratingLabel(provider)} · ${provider.city.toUpperCase()}`,
-      following: followedProviderIds.has(provider.id),
-    })),
     upcoming,
     activeNeeds,
     waitlist: waitlist.map((entry, index) => ({
@@ -385,11 +332,18 @@ export async function myTwendeView(viewer) {
       notified: Boolean(entry.notifiedAt),
       position: positions[index],
     })),
-    posts,
+    // A need's offers ride along with its post, for "View offers".
+    posts: posts.map((post) => (post.kind === 'NEED' ? { ...post, offerList: offersByNeed.get(post.id) || [] } : post)),
     saved: saved.map((row) => toEventCard(row.event)),
     calendar,
     wallet: { points, value: walletValue },
-    referral: { link: `${base}/r/${viewer.handle}`, friends: referralCount, points: referralPoints._sum.points || 0 },
+    referral: {
+      link: `${base}/r/${viewer.handle}`,
+      friends: referralCount,
+      points: referralPoints._sum.points || 0,
+      joinPoints: REFERRAL_POINTS.JOINED,
+      ticketPoints: REFERRAL_POINTS.FIRST_TICKET,
+    },
     prefs: { reminders: prefs.REMINDERS.email, offers: prefs.OFFERS.email, social: prefs.SOCIAL.email, digest: user.weeklyDigest },
     today: dayKey(now, COUNTRIES[user.country]?.timezone || 'UTC'),
   };
