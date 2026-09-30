@@ -44,7 +44,7 @@ export const REFERRAL_POINTS = Object.freeze({
 });
 
 export const REFERRAL_TIERS = Object.freeze([
-  { name: 'Rafiki', friends: 1, perk: 'Points on every milestone', multiplier: 1 },
+  { name: 'Friend', friends: 1, perk: 'Points on every milestone', multiplier: 1 },
   { name: 'Connector', friends: 10, perk: '2× points from here on', multiplier: 2 },
   { name: 'Champion', friends: 25, perk: '3× points from here on', multiplier: 3 },
 ]);

@@ -74,7 +74,7 @@ export function values(state, set, ctx) {
     return ctx.run('review', async () => {
       await ctx.api.post(`/api/providers/${data.slug}/reviews`, { rating: state.rating, body, bookingId: state.jobId || undefined });
       set((current) => ({ ...current, writeOpen: false, draft: '' }));
-    }, { success: 'Asante! Your review is live.' });
+    }, { success: 'Thank you! Your review is live.' });
   };
 
   const gallery = data.gallery;

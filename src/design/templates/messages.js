@@ -16,7 +16,7 @@ const template = `
 
     <!-- Thread list -->
     <aside class="tw-threads" style="border-right: 2px solid #1F3A38; background: #FFFDF8; overflow-y: auto;">
-      <div style="padding: 16px 20px; border-bottom: 2px solid #1F3A38; font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Mazungumzo — threads]</div>
+      <div style="padding: 16px 20px; border-bottom: 2px solid #1F3A38; font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Threads]</div>
       <sc-if value="{{ noThreads }}">
         <div style="padding: 24px 20px; font-size: 13.5px; color: #6E6155; line-height: 1.55;">No conversations yet. They start when you message an organizer, ask a vendor for a quote, or get an offer on a need you posted.</div>
       </sc-if>

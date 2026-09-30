@@ -163,7 +163,7 @@ export function values(state, set, ctx) {
 
   const result = state.result;
   const paid = Boolean(result && ['PAID', 'RESERVED'].includes(result.status));
-  const firstName = String(result?.name || state.buyerName || 'rafiki').split(' ')[0];
+  const firstName = String(result?.name || state.buyerName || 'friend').split(' ')[0];
 
   return {
     me: data.me,
@@ -226,10 +226,10 @@ export function values(state, set, ctx) {
     setBuyerEmail: (e) => set((current) => ({ ...current, buyerEmail: e.target.value, payError: null })),
     guestNote: data.me.signedIn
       ? `Signed in as ${data.me.name}. Tickets land in My Twende and your email.`
-      : 'Karibu! No account needed — your QR tickets go to the email below.',
+      : 'Welcome! No account needed — your QR tickets go to the email below.',
     buyerHint: data.me.signedIn ? 'Your tickets, QR codes and reminders sync to My Twende.' : 'We only use your email for the tickets and event updates.',
     payError: state.payError,
-    paidTitle: result?.status === 'RESERVED' ? `✓ Reserved — Karibu, ${firstName}!` : `✓ Paid — Karibu, ${firstName}!`,
+    paidTitle: result?.status === 'RESERVED' ? `✓ Reserved — Welcome, ${firstName}!` : `✓ Paid — Welcome, ${firstName}!`,
     ticketLine: result
       ? `ORDER ${result.reference}${result.tickets?.length ? ` · ${result.tickets.map((ticket) => ticket.code).join(' · ')}` : ''} · SENT TO ${String(result.email || '').toUpperCase()}`
       : '',

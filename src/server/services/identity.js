@@ -90,7 +90,7 @@ export async function signUp({ name, email, password, city, country, referralHan
     await notify(tx, {
       userId: created.id,
       topic: 'NEWS',
-      title: 'Karibu Twendezetu',
+      title: 'Welcome to Twendezetu',
       body: 'Your account is ready. Post an event or a need for free, RSVP to what is on, and keep your contacts private until you choose to share them.',
       href: '/my-twende',
     });

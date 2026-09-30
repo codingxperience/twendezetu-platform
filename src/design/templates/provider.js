@@ -58,11 +58,11 @@ const template = `
 
     <!-- Left -->
     <div>
-      <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Kuhusu — about]</div>
+      <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[About]</div>
       <p style="font-size: 17px; line-height: 1.6; margin: 12px 0 0; white-space: pre-line;">{{ description }}</p>
 
       <!-- Services -->
-      <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em; margin-top: 36px;">[Huduma — services &amp; guide rates]</div>
+      <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em; margin-top: 36px;">[Services &amp; guide rates]</div>
       <div style="border: 2px solid #1F3A38; margin-top: 12px;">
         <sc-for list="{{ services }}" as="sv" hint-placeholder-count="4">
           <div style="display: grid; grid-template-columns: 40px 1fr auto; gap: 16px; padding: 16px 18px; border-bottom: 1px solid #E3D9C6; align-items: center; background: #FFFDF8;">
@@ -79,7 +79,7 @@ const template = `
 
       <!-- Reviews -->
       <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-top: 36px; flex-wrap: wrap;">
-        <span style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Maoni — reviews]</span>
+        <span style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Reviews]</span>
         <sc-if value="{{ canReview }}"><button onClick="{{ toggleWrite }}" aria-expanded="{{ writeOpen }}" style="font-family: var(--tz-mono); font-size: 12px; border: 2px solid #1F3A38; background: {{ writeBg }}; color: {{ writeFg }}; padding: 9px 14px; cursor: pointer;">{{ writeLabel }}</button></sc-if>
       </div>
 
@@ -104,7 +104,7 @@ const template = `
       <!-- Write review form (gated) -->
       <sc-if value="{{ writeOpen }}" hint-placeholder-val="{{ false }}">
         <div style="border: 2px solid #1F3A38; background: #1F3A38; color: #F7F1E6; padding: 20px 22px; margin-top: 12px;">
-          <div style="font-family: var(--tz-mono); font-size: 11px; color: #E9B4AC; letter-spacing: 0.08em;">[Andika maoni — {{ reviewBecause }}]</div>
+          <div style="font-family: var(--tz-mono); font-size: 11px; color: #E9B4AC; letter-spacing: 0.08em;">[{{ reviewBecause }}]</div>
           <div style="display: flex; gap: 6px; margin: 14px 0;">
             <sc-for list="{{ starPicker }}" as="st" hint-placeholder-count="5">
               <button onClick="{{ st.pick }}" aria-label="{{ st.label }}" style="background: none; border: 0; cursor: pointer; font-size: 30px; line-height: 1; color: {{ st.color }};">★</button>
@@ -150,7 +150,7 @@ const template = `
     <!-- Right: request card -->
     <aside class="tw-sticky" style="position: sticky; top: 100px; display: grid; gap: 16px;">
       <div style="border: 2px solid #1F3A38; background: #FFFDF8; box-shadow: 6px 6px 0 #1F3A38; padding: 22px;">
-        <div style="font-family: var(--tz-mono); font-size: 11px; color: #820101; letter-spacing: 0.08em;">[Omba huduma — request]</div>
+        <div style="font-family: var(--tz-mono); font-size: 11px; color: #820101; letter-spacing: 0.08em;">[Request]</div>
         <div style="font-family: var(--tz-display); font-size: 24px; text-transform: uppercase; margin: 8px 0 4px;">Ask {{ name }} for a quote</div>
         <p style="font-size: 13px; color: #6E6155; line-height: 1.5; margin: 0 0 14px;">Your contacts stay masked. {{ name }} sees the job, not your phone number or email.</p>
         <sc-if value="{{ reqDone }}">
@@ -217,7 +217,7 @@ const template = `
     <div style="max-width: 1200px; margin: 0 auto; padding: 0 24px;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
         <div>
-          <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Watoa huduma wengine — more vendors]</div>
+          <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[More vendors]</div>
           <h2 style="font-family: var(--tz-display); font-size: 32px; text-transform: uppercase; margin: 6px 0 0;"><a href="{{ categoryHref }}" style="color: inherit; text-decoration: none;">More {{ category }}<span style="color: #820101;">.</span></a></h2>
         </div>
         <div style="display: flex; gap: 8px;">

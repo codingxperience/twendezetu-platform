@@ -1,6 +1,8 @@
-// Words for the browsing frame and the home page, in English and Kiswahili.
-// The language comes from the member's profile (User.locale) or, without an
-// account, the `tz_lang` cookie; see me() in src/server/views/common.js.
+// Words for the browsing frame, the home page and My Twende in English (the
+// default), Kiswahili, French and Spanish. Each language uses only its own
+// words. The language comes from the `tz_lang` cookie set by the language
+// picker, else the member's profile (User.locale); see me() in
+// src/server/views/common.js.
 
 const EN = {
   // The frame
@@ -55,11 +57,12 @@ const EN = {
   // Home
   heroA: 'Find your community’s',
   heroB: 'next',
-  heroWords: ['nyama choma.', 'wedding.', 'gospel night.', 'amapiano party.', 'harambee.', 'football cup.'],
+  heroWords: ['cookout.', 'wedding.', 'gospel night.', 'amapiano party.', 'fundraiser.', 'football cup.'],
   heroSub: 'Discover, post and manage East African events at home and across the diaspora. Book the vendors who make them happen.',
   heroCta: 'Join Twendezetu free',
   heroAlt: 'Or post an event',
-  greeting: (name) => `Karibu, ${name}`,
+  welcome: 'WELCOME',
+  greeting: (name) => `Welcome, ${name}`,
   tabForYou: 'For You',
   tabFollowing: 'Following',
   tabNew: 'Just posted',
@@ -138,20 +141,20 @@ const EN = {
   nowFollowing: (name) => `You follow ${name}.`,
   unfollowed: (name) => `You no longer follow ${name}.`,
   kick: {
-    now: 'SASA HIVI', week: 'WIKI HII', trending: 'MAARUFU', organizers: 'WAANDAAJI', vendors: 'WATOA HUDUMA', picks: 'CHAGUO LETU',
-    free: 'BURE', faces: 'UNAOWAFUATA', followed: 'KUTOKA KWAO', coming: 'YANAYOKUJA', more: 'ZAIDI', saved: 'ULIVYOHIFADHI',
-    fresh: 'MAPYA', needs: 'MAHITAJI', city: 'MJINI', none: 'BADO',
+    now: 'HAPPENING NOW', week: 'THIS WEEK', trending: 'TRENDING', organizers: 'ORGANIZERS', vendors: 'VENDORS', picks: 'OUR PICKS',
+    free: 'FREE', faces: 'FOLLOWING', followed: 'FROM THEM', coming: 'COMING UP', more: 'MORE', saved: 'SAVED',
+    fresh: 'NEW', needs: 'NEEDS', city: 'IN TOWN', none: 'NOT YET',
   },
-  catKick: { NYAMA_CHOMA: 'NYAMA CHOMA', MUSIC: 'MUZIKI', COMMUNITY: 'JAMII', WEDDINGS: 'HARUSI', FAITH: 'IMANI', SPORTS: 'MICHEZO' },
+  catKick: { NYAMA_CHOMA: 'BBQ & COOKOUTS', MUSIC: 'MUSIC', COMMUNITY: 'COMMUNITY', WEDDINGS: 'WEDDINGS', FAITH: 'FAITH', SPORTS: 'SPORTS' },
   catTitle: {
-    NYAMA_CHOMA: 'Nyama choma & cookouts', MUSIC: 'Music & DJ nights', COMMUNITY: 'Community gatherings',
-    WEDDINGS: 'Weddings & ruracio', FAITH: 'Faith & worship', SPORTS: 'Sports & fitness',
+    NYAMA_CHOMA: 'BBQ & cookouts', MUSIC: 'Music & DJ nights', COMMUNITY: 'Community gatherings',
+    WEDDINGS: 'Weddings & celebrations', FAITH: 'Faith & worship', SPORTS: 'Sports & fitness',
   },
   catNote: {
-    NYAMA_CHOMA: 'Grills, picnics and food festivals', MUSIC: 'Concerts, club nights and live sets', COMMUNITY: 'Harambees, meet-ups and association events',
+    NYAMA_CHOMA: 'Grills, picnics and food festivals', MUSIC: 'Concerts, club nights and live sets', COMMUNITY: 'Fundraisers, meet-ups and association events',
     WEDDINGS: 'Celebrations open to guests', FAITH: 'Services, crusades and choir events', SPORTS: 'Tournaments, runs and watch parties',
   },
-  catChip: { NYAMA_CHOMA: 'Nyama choma', MUSIC: 'Music & DJs', COMMUNITY: 'Community', WEDDINGS: 'Weddings', FAITH: 'Faith', SPORTS: 'Sports' },
+  catChip: { NYAMA_CHOMA: 'BBQ & cookouts', MUSIC: 'Music & DJs', COMMUNITY: 'Community', WEDDINGS: 'Weddings', FAITH: 'Faith', SPORTS: 'Sports' },
 };
 
 const SW = {
@@ -209,6 +212,7 @@ const SW = {
   heroSub: 'Gundua, tangaza na simamia matukio ya Afrika Mashariki nyumbani na ughaibuni. Kodi watoa huduma wanaoyafanikisha.',
   heroCta: 'Jiunge na Twendezetu bure',
   heroAlt: 'Au tangaza tukio',
+  welcome: 'KARIBU',
   greeting: (name) => `Karibu, ${name}`,
   tabForYou: 'Kwa ajili yako',
   tabFollowing: 'Unaowafuata',
@@ -288,11 +292,11 @@ const SW = {
   nowFollowing: (name) => `Unamfuata ${name}.`,
   unfollowed: (name) => `Umeacha kumfuata ${name}.`,
   kick: {
-    now: 'HAPPENING NOW', week: 'THIS WEEK', trending: 'TRENDING', organizers: 'ORGANIZERS', vendors: 'VENDORS', picks: 'OUR PICKS',
-    free: 'FREE', faces: 'FOLLOWING', followed: 'FROM THEM', coming: 'COMING UP', more: 'MORE', saved: 'SAVED',
-    fresh: 'NEW', needs: 'NEEDS', city: 'IN TOWN', none: 'NOT YET',
+    now: 'SASA HIVI', week: 'WIKI HII', trending: 'MAARUFU', organizers: 'WAANDAAJI', vendors: 'WATOA HUDUMA', picks: 'CHAGUO LETU',
+    free: 'BURE', faces: 'UNAOWAFUATA', followed: 'KUTOKA KWAO', coming: 'YANAYOKUJA', more: 'ZAIDI', saved: 'ULIVYOHIFADHI',
+    fresh: 'MAPYA', needs: 'MAHITAJI', city: 'MJINI', none: 'BADO',
   },
-  catKick: { NYAMA_CHOMA: 'NYAMA CHOMA', MUSIC: 'MUSIC', COMMUNITY: 'COMMUNITY', WEDDINGS: 'WEDDINGS', FAITH: 'FAITH', SPORTS: 'SPORTS' },
+  catKick: { NYAMA_CHOMA: 'NYAMA CHOMA', MUSIC: 'MUZIKI', COMMUNITY: 'JAMII', WEDDINGS: 'HARUSI', FAITH: 'IMANI', SPORTS: 'MICHEZO' },
   catTitle: {
     NYAMA_CHOMA: 'Nyama choma na mapishi', MUSIC: 'Muziki na ma-DJ', COMMUNITY: 'Mikusanyiko ya jamii',
     WEDDINGS: 'Harusi na ruracio', FAITH: 'Imani na ibada', SPORTS: 'Michezo na mazoezi',
@@ -306,7 +310,7 @@ const SW = {
 
 
 // French and Spanish. The frame's words follow the design's own
-// translations; section kickers keep the Kiswahili, as in English.
+// translations. Every language uses only its own words, labels included.
 const FR = {
   ...EN,
   search: 'Rechercher des événements, prestataires, villes',
@@ -357,9 +361,11 @@ const FR = {
 
   heroA: 'Le prochain rendez-vous',
   heroB: 'de votre communauté :',
-  heroWords: ['nyama choma.', 'mariage.', 'soirée gospel.', 'soirée amapiano.', 'harambee.', 'coupe de foot.'],
+  heroWords: ['barbecue.', 'mariage.', 'soirée gospel.', 'soirée amapiano.', 'collecte.', 'coupe de foot.'],
   heroSub: 'Découvrez, publiez et gérez des événements est-africains, au pays et dans la diaspora. Réservez les prestataires qui les font vivre.',
   heroCta: 'Rejoindre Twendezetu gratuitement',
+  welcome: 'BIENVENUE',
+  greeting: (name) => `Bienvenue, ${name}`,
   heroAlt: 'Ou publier un événement',
   tabForYou: 'Pour vous',
   tabFollowing: 'Abonnements',
@@ -443,10 +449,16 @@ const FR = {
     WEDDINGS: 'Mariages et dots', FAITH: 'Foi et culte', SPORTS: 'Sport et fitness',
   },
   catNote: {
-    NYAMA_CHOMA: 'Grillades, pique-niques et festivals gourmands', MUSIC: 'Concerts, soirées club et sets live', COMMUNITY: 'Harambees, rencontres et associations',
+    NYAMA_CHOMA: 'Grillades, pique-niques et festivals gourmands', MUSIC: 'Concerts, soirées club et sets live', COMMUNITY: 'Collectes, rencontres et associations',
     WEDDINGS: 'Des fêtes ouvertes aux invités', FAITH: 'Cultes, veillées et chorales', SPORTS: 'Tournois, courses et matchs en plein air',
   },
-  catChip: { NYAMA_CHOMA: 'Nyama choma', MUSIC: 'Musique et DJ', COMMUNITY: 'Communauté', WEDDINGS: 'Mariages', FAITH: 'Foi', SPORTS: 'Sport' },
+  kick: {
+    now: 'EN CE MOMENT', week: 'CETTE SEMAINE', trending: 'TENDANCES', organizers: 'ORGANISATEURS', vendors: 'PRESTATAIRES', picks: 'NOTRE SÉLECTION',
+    free: 'GRATUIT', faces: 'ABONNEMENTS', followed: 'DE LEUR PART', coming: 'À VENIR', more: 'PLUS', saved: 'ENREGISTRÉS',
+    fresh: 'NOUVEAU', needs: 'BESOINS', city: 'EN VILLE', none: 'PAS ENCORE',
+  },
+  catKick: { NYAMA_CHOMA: 'BARBECUES', MUSIC: 'MUSIQUE', COMMUNITY: 'COMMUNAUTÉ', WEDDINGS: 'MARIAGES', FAITH: 'FOI', SPORTS: 'SPORT' },
+  catChip: { NYAMA_CHOMA: 'Barbecues', MUSIC: 'Musique et DJ', COMMUNITY: 'Communauté', WEDDINGS: 'Mariages', FAITH: 'Foi', SPORTS: 'Sport' },
 };
 
 const ES = {
@@ -499,9 +511,11 @@ const ES = {
 
   heroA: 'El próximo plan',
   heroB: 'de tu comunidad:',
-  heroWords: ['nyama choma.', 'boda.', 'noche de gospel.', 'fiesta amapiano.', 'harambee.', 'copa de fútbol.'],
+  heroWords: ['parrillada.', 'boda.', 'noche de gospel.', 'fiesta amapiano.', 'colecta.', 'copa de fútbol.'],
   heroSub: 'Descubre, publica y gestiona eventos de África Oriental, en casa y en la diáspora. Reserva a los proveedores que los hacen posibles.',
   heroCta: 'Únete gratis a Twendezetu',
+  welcome: 'HOLA',
+  greeting: (name) => `Hola, ${name}`,
   heroAlt: 'O publica un evento',
   tabForYou: 'Para ti',
   tabFollowing: 'Siguiendo',
@@ -585,10 +599,16 @@ const ES = {
     WEDDINGS: 'Bodas y dotes', FAITH: 'Fe y culto', SPORTS: 'Deporte y fitness',
   },
   catNote: {
-    NYAMA_CHOMA: 'Parrilladas, pícnics y festivales de comida', MUSIC: 'Conciertos, noches de club y sets en vivo', COMMUNITY: 'Harambees, encuentros y asociaciones',
+    NYAMA_CHOMA: 'Parrilladas, pícnics y festivales de comida', MUSIC: 'Conciertos, noches de club y sets en vivo', COMMUNITY: 'Colectas, encuentros y asociaciones',
     WEDDINGS: 'Celebraciones abiertas a invitados', FAITH: 'Cultos, vigilias y coros', SPORTS: 'Torneos, carreras y partidos juntos',
   },
-  catChip: { NYAMA_CHOMA: 'Nyama choma', MUSIC: 'Música y DJ', COMMUNITY: 'Comunidad', WEDDINGS: 'Bodas', FAITH: 'Fe', SPORTS: 'Deporte' },
+  kick: {
+    now: 'AHORA MISMO', week: 'ESTA SEMANA', trending: 'TENDENCIAS', organizers: 'ORGANIZADORES', vendors: 'PROVEEDORES', picks: 'NUESTRA SELECCIÓN',
+    free: 'GRATIS', faces: 'SIGUIENDO', followed: 'DE ELLOS', coming: 'PRÓXIMAMENTE', more: 'MÁS', saved: 'GUARDADOS',
+    fresh: 'NUEVO', needs: 'NECESIDADES', city: 'EN LA CIUDAD', none: 'TODAVÍA NO',
+  },
+  catKick: { NYAMA_CHOMA: 'BARBACOAS', MUSIC: 'MÚSICA', COMMUNITY: 'COMUNIDAD', WEDDINGS: 'BODAS', FAITH: 'FE', SPORTS: 'DEPORTE' },
+  catChip: { NYAMA_CHOMA: 'Barbacoas', MUSIC: 'Música y DJ', COMMUNITY: 'Comunidad', WEDDINGS: 'Bodas', FAITH: 'Fe', SPORTS: 'Deporte' },
 };
 
 export const STRINGS = Object.freeze({ EN, SW, FR, ES });
@@ -608,6 +628,7 @@ export function words(locale) {
 
 const MY_EN = {
   kicker: 'Your space',
+  shareCta: 'Come along!',
   sub: 'Your tickets, posts, saved events and plans.',
   show: 'Show',
   tabs: { upcoming: 'Upcoming', notifications: 'Notifications', posts: 'My posts', saved: 'Saved', calendar: 'Calendar' },
@@ -744,6 +765,7 @@ const MY_EN = {
 const MY_SW = {
   ...MY_EN,
   kicker: 'Ukurasa wako',
+  shareCta: 'Twende pamoja!',
   sub: 'Tiketi zako, machapisho, matukio uliyohifadhi na mipango.',
   show: 'Onyesha',
   tabs: { upcoming: 'Yanayokuja', notifications: 'Arifa', posts: 'Machapisho yangu', saved: 'Nilivyohifadhi', calendar: 'Kalenda' },
@@ -881,6 +903,7 @@ const MY_SW = {
 const MY_FR = {
   ...MY_EN,
   kicker: 'Votre espace',
+  shareCta: 'Venez avec moi !',
   sub: 'Vos billets, publications, événements enregistrés et projets.',
   show: 'Afficher',
   tabs: { upcoming: 'À venir', notifications: 'Notifications', posts: 'Mes publications', saved: 'Enregistrés', calendar: 'Calendrier' },
@@ -1017,6 +1040,7 @@ const MY_FR = {
 const MY_ES = {
   ...MY_EN,
   kicker: 'Tu espacio',
+  shareCta: '¡Vente conmigo!',
   sub: 'Tus entradas, publicaciones, eventos guardados y planes.',
   show: 'Mostrar',
   tabs: { upcoming: 'Próximos', notifications: 'Notificaciones', posts: 'Mis publicaciones', saved: 'Guardados', calendar: 'Calendario' },

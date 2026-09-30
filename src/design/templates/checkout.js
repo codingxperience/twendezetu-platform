@@ -11,7 +11,7 @@ const template = `
   </header>
 
   <div style="max-width: 1200px; margin: 0 auto; padding: 40px 24px 80px;">
-    <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Tiketi — get tickets]</div>
+    <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Get tickets]</div>
     <h1 style="font-family: var(--tz-display); font-size: clamp(38px, 5.5vw, 68px); text-transform: uppercase; line-height: 0.95; margin: 10px 0 6px;">{{ eventTitle }}<span style="color: #820101;">.</span></h1>
     <div style="display: flex; gap: 10px; flex-wrap: wrap; font-family: var(--tz-mono); font-size: 12.5px; margin-bottom: 36px;">
       <span style="background: #1F3A38; color: #F7F1E6; padding: 6px 12px;">{{ dateLine }}</span>
@@ -88,7 +88,7 @@ const template = `
         </div>
 
         <!-- Pay method -->
-        <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em; margin: 32px 0 12px;">[Njia ya malipo — how will you pay?]</div>
+        <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em; margin: 32px 0 12px;">[How will you pay?]</div>
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;" class="tw-3col">
           <sc-for list="{{ methods }}" as="m" hint-placeholder-count="3">
             <button onClick="{{ m.pick }}" style="text-align: left; border: 2px solid #1F3A38; background: {{ m.bg }}; color: {{ m.fg }}; padding: 16px 18px; cursor: pointer; box-shadow: {{ m.shadow }};">

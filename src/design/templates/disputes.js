@@ -17,7 +17,7 @@ const template = `
       <!-- New case -->
       <sc-if value="{{ creating }}" hint-placeholder-val="{{ true }}">
         <div>
-          <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Rejesho — open a case]</div>
+          <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Open a case]</div>
           <h1 style="font-family: var(--tz-display); font-size: clamp(32px, 4.5vw, 52px); text-transform: uppercase; line-height: 0.95; margin: 10px 0 8px;">Request a refund or open a dispute<span style="color: #820101;">.</span></h1>
           <p style="font-size: 14px; color: #6E6155; line-height: 1.55; max-width: 560px; margin: 0 0 24px;">Opening a case <strong>freezes the money</strong>: an organizer's ticket payout waits and a booking's escrow stops releasing until the case closes.</p>
 
@@ -78,7 +78,7 @@ const template = `
       <!-- One case -->
       <sc-if value="{{ viewing }}" hint-placeholder-val="{{ false }}">
         <div>
-          <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Kesi — case {{ caseRef }} · {{ caseStatus }}]</div>
+          <div style="font-family: var(--tz-mono); font-size: 12px; color: #820101; letter-spacing: 0.08em;">[Case {{ caseRef }} · {{ caseStatus }}]</div>
           <h1 style="font-family: var(--tz-display); font-size: clamp(32px, 4.5vw, 52px); text-transform: uppercase; line-height: 0.95; margin: 10px 0 18px;">{{ heading }}<span style="color: #820101;">.</span></h1>
 
           <div style="border: 2px solid #1F3A38; background: #FFFDF8; max-width: 620px;">

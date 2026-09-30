@@ -8,9 +8,9 @@ const DAY = 24 * 60 * 60 * 1000;
 // Section titles for each category, in the words people use for them.
 export const CATEGORY_SHELVES = Object.freeze({
   MUSIC: { title: 'Music & DJ nights', note: 'Concerts, club nights and live sets' },
-  NYAMA_CHOMA: { title: 'Nyama choma & cookouts', note: 'Grills, picnics and food festivals' },
-  COMMUNITY: { title: 'Community gatherings', note: 'Harambees, meet-ups and association events' },
-  WEDDINGS: { title: 'Weddings & ruracio', note: 'Celebrations open to guests' },
+  NYAMA_CHOMA: { title: 'BBQ & cookouts', note: 'Grills, picnics and food festivals' },
+  COMMUNITY: { title: 'Community gatherings', note: 'Fundraisers, meet-ups and association events' },
+  WEDDINGS: { title: 'Weddings & celebrations', note: 'Celebrations open to guests' },
   FAITH: { title: 'Faith & worship', note: 'Services, crusades and choir events' },
   SPORTS: { title: 'Sports & fitness', note: 'Tournaments, runs and watch parties' },
 });

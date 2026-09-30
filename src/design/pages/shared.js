@@ -235,7 +235,7 @@ export function shellValues(me, ctx, { active = null, q = '', cities = null, cit
 
 // ── Cards (eventCard, liveCard and vendorCard in templates/shell.js) ─────
 
-const EVENT_CATEGORY_KEYS = { 'Nyama choma': 'NYAMA_CHOMA', 'Music + DJs': 'MUSIC', Community: 'COMMUNITY', Weddings: 'WEDDINGS', Faith: 'FAITH', Sports: 'SPORTS' };
+const EVENT_CATEGORY_KEYS = { 'BBQ & cookouts': 'NYAMA_CHOMA', 'Music + DJs': 'MUSIC', Community: 'COMMUNITY', Weddings: 'WEDDINGS', Faith: 'FAITH', Sports: 'SPORTS' };
 
 // Shares a link: the phone's share sheet where there is one, else the
 // clipboard.

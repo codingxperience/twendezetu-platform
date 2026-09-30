@@ -32,7 +32,7 @@ export function values(state, set, ctx) {
   const rsvped = Boolean(rsvp);
   const party = state.gParty || 1;
   const signedIn = data.me.signedIn;
-  const shareText = `${event.title} — ${event.date}, ${event.city}. Hii si ya kukosa!`;
+  const shareText = `${event.title} — ${event.date}, ${event.city}. Not to be missed!`;
   const shareUrl = data.shareUrl + (data.me.handle ? `?r=${data.me.handle}` : '');
   const links = shareLinks(shareUrl, shareText, event.title);
   const ticketsHref = `/checkout?event=${event.slug}${ctx.params.r ? `&r=${ctx.params.r}` : ''}${ctx.params.src ? `&src=${ctx.params.src}` : ''}`;
@@ -71,8 +71,8 @@ export function values(state, set, ctx) {
     me: data.me,
     signInHref: `/sign-in?next=${encodeURIComponent(`/events/${event.slug}`)}`,
     bannerText: signedIn
-      ? `Karibu, ${data.me.firstName}! RSVPs and tickets you get here show up in My Twende with reminders.`
-      : 'Karibu! No account needed to explore, RSVP or buy a ticket. A free account keeps your reminders and tickets in one place.',
+      ? `Welcome, ${data.me.firstName}! RSVPs and tickets you get here show up in My Twende with reminders.`
+      : 'Welcome! No account needed to explore, RSVP or buy a ticket. A free account keeps your reminders and tickets in one place.',
     title: event.title,
     category: event.category,
     dateLine: event.dateLine,
@@ -127,7 +127,7 @@ export function values(state, set, ctx) {
     cancelRsvp: () => set((current) => ({ ...current, rsvpStep: 'idle', gError: null })),
     withdrawRsvp,
     canCancelRsvp: canCancel,
-    gNameShown: String(rsvp?.name || state.gName || '').split(' ')[0] || 'rafiki',
+    gNameShown: String(rsvp?.name || state.gName || '').split(' ')[0] || 'friend',
     gEmailShown: rsvp?.email || state.gEmail,
     gPartyShown: (() => {
       const size = rsvp?.partySize || party;

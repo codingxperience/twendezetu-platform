@@ -48,7 +48,7 @@ function describe(line) {
     case 'POOL_CONTRIBUTION':
       return { icon: 'P', title: `Pool: ${meta.poolTitle}`, meta: `${when}${meta.note ? ` · ${meta.note}` : ''}` };
     case 'POOL_RELEASE':
-      return { icon: 'P', title: `Pool released: ${meta.poolTitle}`, meta: `${when} · harambee payout` };
+      return { icon: 'P', title: `Pool released: ${meta.poolTitle}`, meta: `${when} · group pool payout` };
     case 'TICKET_SALE':
       return { icon: 'T', title: entry.memo, meta: `${when} · ORDER ${meta.orderReference}` };
     case 'BOOKING_ESCROW':
